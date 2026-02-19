@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --theme-page-bg-light: 250 250 250;
+  --theme-page-bg-dark: 15 23 42;
+
+  --theme-card-bg-light: 255 255 255;
+  --theme-card-bg-dark: 30 41 59;
+
+  --theme-card-border-light: 243 244 246;
+  --theme-card-border-dark: 51 65 85;
+
+  --theme-text-primary-light: 17 24 39;
+  --theme-text-primary-dark: 241 245 249;
+
+  --theme-text-secondary-light: 107 114 128;
+  --theme-text-secondary-dark: 148 163 184;
+
+  --theme-text-tertiary-light: 156 163 175;
+  --theme-text-tertiary-dark: 100 116 139;
+
+  --theme-button-accept-light: 16 185 129;
+  --theme-button-accept-dark: 16 185 129;
+
+  --theme-button-decline-light: 220 38 38;
+  --theme-button-decline-dark: 248 113 113;
+
+  --theme-button-primary-light: 124 58 237;
+  --theme-button-primary-dark: 109 40 217;
+
+  --theme-tab-active-light: 124 58 237;
+  --theme-tab-active-dark: 109 40 217;
+
+  --theme-tab-inactive-bg-light: 243 244 246;
+  --theme-tab-inactive-bg-dark: 30 41 59;
+
+  --theme-tab-inactive-text-light: 107 114 128;
+  --theme-tab-inactive-text-dark: 148 163 184;
+
+  --theme-avatar-primary-light: 237 233 254;
+  --theme-avatar-primary-dark: 67 56 202;
+
+  --theme-avatar-warning-light: 254 243 199;
+  --theme-avatar-warning-dark: 120 53 15;
+
+  --theme-badge-success-light: 209 250 229;
+  --theme-badge-success-dark: 6 78 59;
+
+  --theme-badge-error-light: 254 226 226;
+  --theme-badge-error-dark: 127 29 29;
+
+  --theme-badge-warning-light: 254 243 199;
+  --theme-badge-warning-dark: 120 53 15;
+
+  --theme-badge-info-light: 239 246 255;
+  --theme-badge-info-dark: 30 58 138;
+
+  --theme-empty-bg-light: 243 244 246;
+  --theme-empty-bg-dark: 30 41 59;
+
+  --theme-message-bg-light: 249 250 251;
+  --theme-message-bg-dark: 15 23 42;
+}
+
+.dark {
+  --theme-page-bg-light: 15 23 42;
+  --theme-page-bg-dark: 15 23 42;
+
+  --theme-card-bg-light: 30 41 59;
+  --theme-card-bg-dark: 30 41 59;
+
+  --theme-card-border-light: 51 65 85;
+  --theme-card-border-dark: 51 65 85;
+
+  --theme-text-primary-light: 241 245 249;
+  --theme-text-primary-dark: 241 245 249;
+
+  --theme-text-secondary-light: 148 163 184;
+  --theme-text-secondary-dark: 148 163 184;
+
+  --theme-text-tertiary-light: 100 116 139;
+  --theme-text-tertiary-dark: 100 116 139;
+
+  --theme-button-accept-light: 16 185 129;
+  --theme-button-accept-dark: 16 185 129;
+
+  --theme-button-decline-light: 248 113 113;
+  --theme-button-decline-dark: 248 113 113;
+
+  --theme-button-primary-light: 109 40 217;
+  --theme-button-primary-dark: 109 40 217;
+
+  --theme-tab-active-light: 109 40 217;
+  --theme-tab-active-dark: 109 40 217;
+
+  --theme-tab-inactive-bg-light: 30 41 59;
+  --theme-tab-inactive-bg-dark: 30 41 59;
+
+  --theme-tab-inactive-text-light: 148 163 184;
+  --theme-tab-inactive-text-dark: 148 163 184;
+
+  --theme-avatar-primary-light: 67 56 202;
+  --theme-avatar-primary-dark: 67 56 202;
+
+  --theme-avatar-warning-light: 120 53 15;
+  --theme-avatar-warning-dark: 120 53 15;
+
+  --theme-badge-success-light: 6 78 59;
+  --theme-badge-success-dark: 6 78 59;
+
+  --theme-badge-error-light: 127 29 29;
+  --theme-badge-error-dark: 127 29 29;
+
+  --theme-badge-warning-light: 120 53 15;
+  --theme-badge-warning-dark: 120 53 15;
+
+  --theme-badge-info-light: 30 58 138;
+  --theme-badge-info-dark: 30 58 138;
+
+  --theme-empty-bg-light: 30 41 59;
+  --theme-empty-bg-dark: 30 41 59;
+
+  --theme-message-bg-light: 15 23 42;
+  --theme-message-bg-dark: 15 23 42;
+}

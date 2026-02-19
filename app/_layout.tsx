@@ -1,24 +1,32 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import "@/global.css";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import "react-native-reanimated";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { ThemeLayout } from "@/components/ThemeLayout";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { QueryProvider } from "@/providers/QueryProvider";
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: "(main)",
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <KeyboardProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <LanguageProvider>
+                <ThemeLayout />
+              </LanguageProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </QueryProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
   );
 }

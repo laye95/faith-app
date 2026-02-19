@@ -1,0 +1,172 @@
+---
+description: "Apply when creating or editing UI components, screens, layouts, styling, theme usage, forms, or any visual/design-related code. Covers useTheme hook, card/button/typography patterns, color system, spacing, and Faith Generation design patterns."
+globs:
+  - "app/**/*.tsx"
+  - "components/**/*.tsx"
+  - "**/_components/**/*.tsx"
+  - "hooks/useTheme.ts"
+alwaysApply: false
+---
+
+# Design Patterns - Faith Generation App
+
+## Design Philosophy
+
+The Faith Generation App follows the **faithgeneration.com** website design: a **minimal black, white, and grey** palette. The design should feel:
+
+- **Minimal**: Black, white, and grey only – no colored accents (except error red)
+- **Clean**: High contrast, clear typography hierarchy
+- **Professional**: Aligned with the ministry’s website aesthetic
+- **Readable**: Neutral backgrounds with proper text contrast
+
+## Faith Generation Color Palette
+
+Colors match [faithgeneration.com](https://faithgeneration.com/).
+
+### Light Mode
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `pageBg` | `#FFFFFF` | Page background |
+| `cardBg` | `#FAFAFA` | Card background |
+| `cardBorder` | `#E5E5E5` | Borders, dividers |
+| `textPrimary` | `#000000` | Headings, primary text |
+| `textSecondary` | `#525252` | Body, labels |
+| `textTertiary` | `#737373` | Placeholders, muted text |
+| `buttonPrimary` | `#171717` | Primary CTAs |
+| `buttonPrimaryContrast` | `#FFFFFF` | Text on primary buttons |
+| `avatarPrimary` | `#E5E5E5` | Icon/avatar backgrounds |
+
+### Dark Mode
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `pageBg` | `#0a0a0a` | Page background |
+| `cardBg` | `#171717` | Card background |
+| `cardBorder` | `#262626` | Borders, dividers |
+| `textPrimary` | `#FAFAFA` | Headings, primary text |
+| `textSecondary` | `#a3a3a3` | Body, labels |
+| `textTertiary` | `#737373` | Placeholders, muted text |
+| `buttonPrimary` | `#FAFAFA` | Primary CTAs |
+| `buttonPrimaryContrast` | `#171717` | Text on primary buttons |
+| `avatarPrimary` | `#262626` | Icon/avatar backgrounds |
+
+### Semantic (both modes)
+
+- `buttonDecline` / `badgeError`: Red for errors
+- `badgeSuccess`: Green for success
+- `badgeWarning`: Amber for warnings
+
+## Theme System
+
+### useTheme Hook
+
+Always use the centralized `useTheme` hook instead of hardcoded colors:
+
+```typescript
+import { useTheme } from "@/hooks/useTheme";
+
+function MyComponent() {
+  const theme = useTheme();
+
+  return (
+    <Box style={{ backgroundColor: theme.pageBg }}>
+      <Text style={{ color: theme.textPrimary }}>Hello</Text>
+      <Button style={{ backgroundColor: theme.buttonPrimary }}>
+        <ButtonText style={{ color: theme.buttonPrimaryContrast }}>Submit</ButtonText>
+      </Button>
+    </Box>
+  );
+}
+```
+
+### Theme Interface
+
+- `pageBg`, `cardBg`, `cardBorder` – backgrounds and borders
+- `textPrimary`, `textSecondary`, `textTertiary` – typography
+- `buttonPrimary`, `buttonPrimaryContrast` – primary CTAs (use `buttonPrimaryContrast` for text on primary buttons)
+- `buttonAccept`, `buttonDecline` – semantic actions
+- `avatarPrimary`, `badgeSuccess`, `badgeError`, `badgeWarning`, `badgeInfo` – component backgrounds
+- `isDark` – boolean for dark mode logic
+
+### Gluestack Config
+
+`components/ui/gluestack-ui-provider/config.ts` uses a greyscale primary palette (black in light, white in dark). GluestackUIProvider follows system color scheme: `mode={colorScheme ?? 'light'}`.
+
+## Typography
+
+### Brand Label
+
+- "Faith Generation" / "Faith Generation Bijbelschool": `text-xs font-semibold uppercase tracking-widest`, `theme.textSecondary`
+
+### Headings
+
+- Primary: `text-2xl` or `text-3xl`, `font-bold`, `theme.textPrimary`
+- Secondary: `text-base`, `theme.textSecondary`, `lineHeight: 22–24`
+
+### Body
+
+- `text-base`, `theme.textPrimary` or `theme.textSecondary`
+- `lineHeight: 24` for readability
+
+## Cards & Surfaces
+
+- Background: `theme.cardBg`
+- Border: `theme.cardBorder`
+- Shadow (light): `shadowOpacity: 0.06`, `shadowRadius: 16`
+- Shadow (dark): `shadowOpacity: 0.25`, `shadowRadius: 16`
+- Corners: `rounded-2xl` for large cards, `rounded-xl` for smaller
+- Use `theme.isDark` when shadow/border behavior differs by mode
+
+## Buttons
+
+### Primary
+
+- Background: `theme.buttonPrimary`
+- Text: `theme.buttonPrimaryContrast` (never hardcode white/black)
+- Size: `h-14` for main CTAs
+- Corners: `rounded-2xl`
+
+### Secondary / Ghost
+
+- Background: `transparent`
+- Border: `theme.textTertiary` or `theme.textSecondary`
+- Text: `theme.textSecondary`
+
+### Touch Feedback
+
+- `TouchableOpacity` with `activeOpacity={0.7}`
+
+## Form Inputs
+
+- Background: `theme.cardBg` (dark) or `#ffffff` (light)
+- Border: `theme.cardBorder` or `#e5e7eb` (light)
+- Focus/error: `theme.buttonPrimary` (focus), `theme.buttonDecline` (error)
+- Labels: `theme.textSecondary`
+- Placeholders: `theme.textTertiary`
+
+## Spacing & Layout
+
+- Page padding: `px-6`, `pt-6`, `pb-8`
+- Between sections: `gap-6`
+- Between related items: `gap-3` or `gap-4`
+- Card internal: `p-5` or `p-8`
+
+## LoadingScreen
+
+- Use `LoadingScreen` from `@/components/ui/LoadingScreen` for full-screen loading
+- Component uses `theme.pageBg`, `theme.buttonPrimary`, `theme.textSecondary` – no hardcoded colors
+
+## Don'ts
+
+- Don’t add purple, gold, blue, or other accent colors – stick to black/white/grey (plus red for errors)
+- Don’t hardcode hex values – use `theme.*` tokens
+- Don’t use `#ffffff` or `#000000` directly where theme tokens exist
+- Don’t assume button text color – use `buttonPrimaryContrast` on primary buttons
+
+## Do's
+
+- Use `useTheme()` in all UI components
+- Use `theme.isDark` instead of comparing `pageBg` to hex values
+- Follow system color scheme (light/dark)
+- Keep Faith Generation branding consistent with faithgeneration.com

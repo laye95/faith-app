@@ -1,0 +1,129 @@
+---
+description: "Project vision, roadmap, and scope for Faith Generation Bible school app. Use when making architectural decisions, planning new features, understanding content structure and phases, or when context about the product direction and development priorities is needed."
+alwaysApply: false
+---
+
+# Faith Generation - Christian Bible School & Content App
+
+## Project Overview
+
+Faith Generation is a Christian mobile application that helps users build a strong spiritual foundation through a structured Bible school, podcasts, sermons, and more. The app offers 100 practical lessons across 20 unique modules, covering topics like healing, deliverance, the difference between praise and worship, heaven and hell, spiritual gifts, and discovering your calling. Whether users are starting their faith journey or have been walking with Christ for years, the Bible school can transform their spiritual life. All content is free.
+
+## Core Concept
+
+A mobile-first Christian education platform where users learn at their own pace through video lessons, handouts, and module exams (tentamenvragen). The app combines a structured curriculum with additional content such as podcasts and sermons to support continuous spiritual growth.
+
+## Content Pillars
+
+### 1. Bijbelschool (Bible School)
+
+- **20 unique modules** with approximately 100 practical lessons
+- **Video lessons** with structured content (Inhoud van deze les, Doel van deze les)
+- **Handouts** per lesson and per module (PDF + rich text)
+- **Module exams** (tentamenvragen) after each module
+- Topics: healing, deliverance, praise vs worship, heaven and hell, spiritual gifts, calling, and more
+
+### 2. Podcasts
+
+- Audio content for continued learning and encouragement
+
+### 3. Sermons (Preken)
+
+- Video and audio sermons
+
+### 4. Additional Content
+
+- Future content types to expand the app
+
+## User Model
+
+- **Authentication required** – users must create an account to access content and track progress
+- **Progress synced across devices** via cloud backend
+- **Progress tracking:** lesson completion, video position, module progress, quiz scores, attempts
+
+## Phase 1: Foundation & Bible School Core
+
+### 1.1 Authentication
+
+- Email/password registration and login
+- Secure session management and token refresh
+- Password recovery
+
+### 1.2 Overview & Navigation
+
+- "Jouw Overzicht" (Your Overview) – see where you left off and continue
+- Overall progress indicator (e.g. 15%)
+- Introduction video section
+- Module cards with progress (horizontal scroll)
+
+### 1.3 Modules
+
+- Module list with dark gradient cards
+- Status: completed (Geslaagd), in progress, or locked
+- Progress indicators: percentage, stars, attempts
+
+### 1.4 Lessons
+
+- Lesson detail with video player
+- Lesson content: "Inhoud van deze les", "Doel van deze les"
+- Handout buttons: Lesson handout, Module handout
+- Next lesson preview
+
+### 1.5 Handouts
+
+- PDF handouts (stored or linked)
+- Rich text handouts rendered in-app
+- Page indicator (e.g. 3/38)
+
+## Phase 2: Module Quizzes
+
+- "Test jezelf" (Test Yourself) – exam questions after each module
+- Quiz flow: questions with multiple choice
+- Results: circular progress, score percentage, "Gefeliciteerd!" message
+- Question review: show selected answer and correctness (green checkmark)
+- Module pass/fail status
+
+## Phase 3: Podcasts & Sermons
+
+- Podcast listing and playback
+- Sermon listing and playback
+- Integration with existing content structure
+
+## Phase 4: Enhancements & Scale
+
+- Offline support for videos and handouts
+- Additional content types
+- Performance and UX improvements
+
+## Technical Architecture Considerations
+
+### Data Sources
+
+- **Storyblok CMS:** Modules, lessons, handouts (rich text), podcasts, sermons; video IDs; PDF handout URLs
+- **Supabase:** Auth, user profiles, progress (lessons, modules, quizzes)
+- **Vimeo:** Video hosting; playback URLs stored in content
+
+### Content Management
+
+- Content authored in Storyblok
+- Existing Faith app uses Storyblok – ensure compatibility and avoid recreating content
+
+### Scalability
+
+- Content-driven architecture – new modules and lessons added via CMS
+- Efficient caching and TanStack Query for data
+
+## Design Philosophy
+
+- **Modern & clean:** Contemporary UI with clear typography and visual hierarchy
+- **Faith-focused:** Design that honors the spiritual purpose
+- **Readable:** Light content areas for lessons and handouts
+- **Engaging:** Dark gradient module cards with vibrant accents (green for success, purple for brand)
+- **Dutch primary:** Content and UI in Dutch
+
+## Development Priorities
+
+1. **Phase 1:** Auth, overview, modules list, lesson video + handouts
+2. **Phase 2:** Module quizzes (tentamenvragen)
+3. **Phase 3:** Podcasts and sermons
+4. **Phase 4:** Offline, additional content, polish
