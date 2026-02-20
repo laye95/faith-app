@@ -13,6 +13,8 @@ class QuizAttemptService extends BaseService {
       score_percentage: number;
       passed: boolean;
       answers?: Record<string, string> | null;
+      correct_count?: number;
+      total_count?: number;
     },
   ): Promise<QuizAttempt> {
     return this.create<QuizAttempt, CreateQuizAttemptInput>({
@@ -22,6 +24,8 @@ class QuizAttemptService extends BaseService {
       score_percentage: data.score_percentage,
       passed: data.passed,
       answers: data.answers ?? null,
+      correct_count: data.correct_count,
+      total_count: data.total_count,
       completed_at: new Date().toISOString(),
     });
   }

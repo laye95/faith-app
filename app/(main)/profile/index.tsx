@@ -2,13 +2,15 @@ import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { Text } from '@/components/ui/text';
-import { MainTopBar } from '../_components/MainTopBar';
+import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
+import { routes } from '@/constants/routes';
+import { getProfileReturnHref } from '@/hooks/useLastSectionRestore';
 import { router } from 'expo-router';
 import { bzzt } from '@/utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +22,16 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { data: profile, isLoading: profileLoading } = useUserProfile(user?.id);
+
+  const handleBack = () => {
+    getProfileReturnHref().then((href) => {
+      if (href && !href.includes('profile')) {
+        router.replace(href as never);
+      } else {
+        router.replace(routes.main() as never);
+      }
+    });
+  };
 
   if (profileLoading && user?.id) {
     return <LoadingScreen message={t('loading.section.profile')} />;
@@ -37,6 +49,8 @@ export default function ProfileScreen() {
       <MainTopBar
         title={t('navbar.profile')}
         currentSection="profile"
+        showBackButton
+        onBack={handleBack}
       />
       <ScrollView
         className="flex-1"
@@ -70,7 +84,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             onPress={() => {
               bzzt();
-              router.push('/(main)/profile/information');
+              router.push(routes.profile('information'));
             }}
             activeOpacity={0.7}
             className="rounded-2xl py-4 px-6 cursor-pointer"
@@ -97,7 +111,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             onPress={() => {
               bzzt();
-              router.push('/(main)/settings');
+              router.push(routes.settings());
             }}
             activeOpacity={0.7}
             className="rounded-2xl py-4 px-6 cursor-pointer"

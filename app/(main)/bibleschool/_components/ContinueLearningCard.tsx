@@ -1,53 +1,77 @@
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
-import { useAuth } from '@/contexts/AuthContext';
-import { getNextLessonForUser } from '@/constants/modules';
+import { routes } from '@/constants/routes';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import { lessonProgressService } from '@/services/api/lessonProgressService';
-import { queryKeys } from '@/services/queryKeys';
+import { useModules } from '@/hooks/useBibleschoolContent';
+import { useLessonUnlocks } from '@/hooks/useLessonUnlocks';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
-import { router, type Href } from 'expo-router';
+import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { bzzt } from '@/utils/haptics';
 import { OverviewCard } from './OverviewCard';
 
 export function ContinueLearningCard() {
   const theme = useTheme();
-  const { t } = useTranslation();
-  const { user } = useAuth();
+  const { t, locale } = useTranslation();
+  const { data: modules } = useModules(locale);
+  const { nextUnlockedTarget, isLoading } = useLessonUnlocks();
 
-  const { data: completedLessons, isLoading } = useQuery({
-    queryKey: queryKeys.progress.lessonProgress.completedByUser(user?.id ?? ''),
-    queryFn: () => lessonProgressService.listCompletedByUser(user!.id),
-    enabled: !!user?.id,
-  });
+  const target = !isLoading ? nextUnlockedTarget : null;
 
-  const completedIds = new Set(completedLessons?.map((p) => p.lesson_id) ?? []);
-  const nextInfo = !isLoading ? getNextLessonForUser(completedIds) : null;
+  const { moduleLabel, lessonName } = useMemo(() => {
+    const baseModuleLabel = (order: number, title: string) => {
+      const redundant = title && new RegExp(`^Module\\s*${order}\\s*$`, 'i').test(title.trim());
+      return redundant
+        ? t('overview.moduleWithNumber', { number: order })
+        : t('overview.moduleWithNumber', { number: order }) + (title ? ` ${title}` : '');
+    };
+    if (!target || !modules?.length) {
+      const modTitle = target ? t(target.module.titleKey as never) : '';
+      return {
+        moduleLabel: target ? baseModuleLabel(target.module.order, modTitle) : '',
+        lessonName: target?.type === 'lesson' ? t(target.lesson.titleKey as never) : '',
+      };
+    }
+    const mod = modules.find((m) => m.id === target.module.id);
+    const modTitle = mod?.title ?? t(target.module.titleKey as never);
+    const lesTitle =
+      target.type === 'lesson'
+        ? (mod?.lessons.find((l) => l.id === target.lesson.id)?.title ??
+          t(target.lesson.titleKey as never))
+        : '';
+    return {
+      moduleLabel: baseModuleLabel(target.module.order, modTitle),
+      lessonName: lesTitle,
+    };
+  }, [target, modules, t]);
 
   const subtitle = isLoading
     ? t('overview.continueLearningPlaceholder')
-    : nextInfo
+    : target?.type === 'lesson'
       ? t('overview.continueLearningNext', {
-          moduleNumber: nextInfo.module.order,
-          moduleName: t(nextInfo.module.titleKey),
-          lessonNumber: nextInfo.lesson.order,
-          lessonName: t(nextInfo.lesson.titleKey),
+          moduleLabel,
+          lessonName,
         })
-      : t('overview.continueLearningAllDone');
+      : target?.type === 'exam'
+        ? t('overview.continueLearningExamNext', {
+            moduleLabel,
+          })
+        : t('overview.continueLearningAllDone');
 
   const handlePress = () => {
     if (isLoading) return;
     bzzt();
-    if (nextInfo) {
+    if (target?.type === 'lesson') {
       router.push(
-        `/(main)/bibleschool/lesson/${nextInfo.module.id}/${nextInfo.lesson.id}`,
+        routes.bibleschoolModuleLesson(target.module.id, target.lesson.id),
       );
+    } else if (target?.type === 'exam') {
+      router.push(routes.bibleschoolModuleExam(target.module.id));
     } else {
-      router.push('/(main)/bibleschool/modules' as Href);
+      router.push(routes.bibleschoolModules());
     }
   };
 
@@ -64,9 +88,9 @@ export function ContinueLearningCard() {
           <HStack className="items-center gap-4 flex-1">
             <Box
               className="rounded-xl p-3"
-              style={{ backgroundColor: theme.avatarPrimary }}
+              style={{ backgroundColor: theme.brandAccentMuted }}
             >
-              <Ionicons name="book" size={28} color={theme.textPrimary} />
+              <Ionicons name="book" size={28} color={theme.brandAccent} />
             </Box>
             <Box className="flex-1">
               <Text

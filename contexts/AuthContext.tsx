@@ -35,10 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
-        queryClient.clear();
         setSession(null);
         setUser(null);
         setIsLoading(false);
+        await queryClient.cancelQueries();
+        queryClient.clear();
       } else if (event === 'SIGNED_IN') {
         queryClient.clear();
         setSession(session);
@@ -61,10 +62,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   const signOut = async () => {
-    queryClient.clear();
-    await supabase.auth.signOut();
     setSession(null);
     setUser(null);
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
   };
 
   return (

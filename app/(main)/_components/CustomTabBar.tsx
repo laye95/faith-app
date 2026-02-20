@@ -1,11 +1,13 @@
 import { Text } from '@/components/ui/text';
+import { routes } from '@/constants/routes';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useRef, useMemo } from 'react';
+import { router } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import { Animated, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -119,9 +121,16 @@ export function CustomTabBar({ state, descriptors, navigation, section }: Custom
               target: route.key,
               canPreventDefault: true,
             });
-            if (!isFocused && !event.defaultPrevented) {
+            if (!event.defaultPrevented) {
               bzzt();
-              navigation.navigate(route.name as never);
+              if (section === 'bibleschool') {
+                const href = routeName === 'modules' ? routes.bibleschoolModules() : routes.bibleschool();
+                router.navigate(href);
+              } else {
+                if (!isFocused) {
+                  navigation.navigate(route.name as never);
+                }
+              }
             }
           };
 

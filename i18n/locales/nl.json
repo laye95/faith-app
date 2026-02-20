@@ -1,4 +1,7 @@
 {
+  "app": {
+    "versionLabel": "Appversie {{version}}"
+  },
   "auth": {
     "back": "Terug",
     "welcomeBack": "Welkom terug",
@@ -32,6 +35,12 @@
     "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
     "registrationFailed": "Registreren mislukt. Probeer het opnieuw."
   },
+  "streak": {
+    "days": "{{count}} dagen"
+  },
+  "notifications": {
+    "empty": "Geen meldingen"
+  },
   "home": {
     "welcome": "Welkom",
     "subtitle": "Je bent ingelogd bij de Faith Generation Bijbelschool.",
@@ -46,25 +55,100 @@
     "faithGeneration": "Faith Generation",
     "faithGenerationBibleSchool": "Faith Generation Bijbelschool",
     "bibleSchoolDescription": "Volg de gratis online bijbelschool met 100 lessen om je geloofsfundament te versterken.",
-    "back": "Terug"
+    "back": "Terug",
+    "yesterday": "Gisteren",
+    "daysAgo": "{{count}}d geleden",
+    "weeksAgo": "{{count}}w geleden"
   },
   "comingSoon": {
     "badge": "Binnenkort",
     "podcastsDescription": "We bereiden inspirerende podcasts voor om je geloof te versterken. Luister naar onderwijs, getuigenissen en bemoediging waar je ook bent.",
-    "sermonsDescription": "Bekijk en luister naar krachtige preken van Faith Generation. Onze video- en audiobibliotheek is binnenkort hier beschikbaar."
+    "sermonsDescription": "Bekijk en luister naar krachtige preken van Faith Generation. Onze video- en audiobibliotheek is binnenkort hier beschikbaar.",
+    "faithBusinessSchoolDescription": "Faith Business School komt binnenkort. Ontdek hoe je een bedrijf opbouwt op basis van bijbelse principes."
   },
   "hub": {
     "title": "Wat wil je vandaag doen?",
     "bibleschool": "Bijbelschool",
     "bibleschoolSubtitle": "100 lessen, 20 modules",
-    "podcasts": "Podcasts",
-    "podcastsSubtitle": "Luister naar onderwijs en bemoediging",
+    "faithBusinessSchool": "Faith Business School",
+    "faithBusinessSchoolSubtitle": "Business en ondernemerschap",
+    "healingSchool": "Healing School",
+    "healingSchoolSubtitle": "Binnenkort beschikbaar",
     "sermons": "Preken",
     "sermonsSubtitle": "Bekijk en luister naar preken",
+    "podcasts": "Podcast",
+    "podcastsSubtitle": "Luister naar onderwijs en bemoediging",
+    "bibleVersesLearn": "Bijbelteksten leren",
+    "bibleVersesLearnSubtitle": "Binnenkort beschikbaar",
+    "audiobooks": "Luisterboeken",
+    "audiobooksSubtitle": "Binnenkort beschikbaar",
+    "giving": "Geven",
+    "givingSubtitle": "Binnenkort beschikbaar",
+    "miracles": "Wonderen",
+    "miraclesSubtitle": "Binnenkort beschikbaar",
+    "bibleReadingSchedule": "Bijbelleesrooster",
+    "bibleReadingScheduleSubtitle": "Binnenkort beschikbaar",
     "comingSoon": "Binnenkort beschikbaar"
+  },
+  "admin": {
+    "overview": "Admin overzicht",
+    "welcome": "Admin dashboard",
+    "analytics": "Bijbelschool Analytics",
+    "users": "Gebruikers",
+    "quickLinks": "Snelle links",
+    "totalModuleCompletions": "Totaal modulevoltooiingen",
+    "usersComingSoon": "Gebruikerslijst binnenkort beschikbaar",
+    "bibleschoolAnalytics": "Bijbelschool Analytics",
+    "totalUsers": "Totaal aantal gebruikers",
+    "moduleCompletion": "Module-afronding",
+    "completed": "Voltooid",
+    "inProgress": "Bezig",
+    "mostCompleted": "Meest voltooide modules",
+    "completionRate": "Voltooiingspercentage",
+    "analyticsComingSoon": "Analytics binnenkort beschikbaar",
+    "quizPerformance": "Quizprestaties",
+    "avgScore": "gem",
+    "passed": "geslaagd",
+    "activeUsers": "Actieve gebruikers",
+    "last7Days": "Laatste 7 dagen",
+    "last30Days": "Laatste 30 dagen",
+    "newUsersLast30Days": "Nieuwe aanmeldingen (laatste 14 dagen)",
+    "newSignupsInPeriod": "Nieuwe aanmeldingen",
+    "lessonCompletionsInPeriod": "Les-voltooiingen",
+    "moduleCompletionsInPeriod": "Module-voltooiingen",
+    "activeUsersNote": "Gebruikers met voortgang (lopend)",
+    "totalInPeriod": "Totaal",
+    "noDataInPeriod": "Geen gegevens in geselecteerde periode",
+    "showingLastDays": "Toont laatste {{count}} dagen",
+    "showMore": "Meer tonen",
+    "showLess": "Minder tonen",
+    "engagementFunnel": "Betrokkenheidsfunnel",
+    "loadingUsers": "Gebruikers laden...",
+    "searchUsers": "Zoek op e-mail of naam",
+    "lastActivity": "Laatste activiteit",
+    "noUsersFound": "Geen gebruikers gevonden",
+    "noUsers": "Nog geen gebruikers",
+    "joined": "Geregistreerd",
+    "progressSummary": "Voortgangsoverzicht",
+    "lessonsCompleted": "Lessen voltooid",
+    "modulesCompleted": "Modules voltooid",
+    "quizAttempts": "Quizpogingen",
+    "moduleProgress": "Modulevoortgang",
+    "dateRange": "Periode",
+    "allTime": "Alles",
+    "daysShort": "d",
+    "export": "Exporteer CSV",
+    "exporting": "Exporteren...",
+    "exportSuccess": "Export voltooid",
+    "exportFailed": "Export mislukt",
+    "exportUnavailable": "Delen is niet beschikbaar",
+    "exportAnalytics": "Exporteer Bijbelschool Analytics",
+    "customizeGraphs": "Aanpassen",
+    "selectGraphs": "Selecteer welke analyses te tonen"
   },
   "navbar": {
     "home": "Home",
+    "account": "Account",
     "bibleschool": "Bijbelschool",
     "podcasts": "Podcasts",
     "sermons": "Preken",
@@ -81,11 +165,15 @@
     "progressPlaceholder": "0 van 100 lessen voltooid","progressCount": "{{completed}} van {{total}} lessen voltooid",
     "currentVideoTitle": "Huidige video",
     "currentVideoPlaceholder": "Je laatst bekeken les verschijnt hier",
+    "currentVideoContext": "{{moduleName}}",
+    "moduleWithNumber": "Module {{number}}",
     "continueWatching": "Verder kijken",
     "continueLearningTitle": "Verder leren",
     "continueLearningPlaceholder": "Bekijk modules en ga verder waar je was gebleven",
     "continueLearningAllDone": "Je hebt alle lessen voltooid",
-    "continueLearningNext": "Module {{moduleNumber}}: {{moduleName}} · Les {{lessonNumber}}: {{lessonName}}"
+    "continueLearningNext": "{{moduleLabel}} · {{lessonName}}",
+    "continueLearningExamNext": "{{moduleLabel}} · Ga verder met examen",
+    "startFirstLesson": "Begin je eerste les"
   },
   "profile": {
     "information": "Profielgegevens",
@@ -100,9 +188,16 @@
     "themeLight": "Licht",
     "themeDark": "Donker",
     "themeSystem": "Systeem",
-    "preferences": "Voorkeuren"
+    "preferences": "Voorkeuren",
+    "notifications": "Meldingen",
+    "notificationsPush": "Pushmeldingen",
+    "notificationsLessonReminders": "Lesherinneringen",
+    "notificationsStreakReminders": "Reeksherinneringen",
+    "notificationsExamReminders": "Examenherinneringen",
+    "notificationsNewContent": "Nieuwe inhoud"
   },
   "loading": {
+    "video": "Video laden...",
     "section": {
       "index": "Laden...",
       "bibleschool": "Bijbelschool laden...",
@@ -118,6 +213,9 @@
     "attemptSingular": "1 poging",
     "attemptPlural": "{{count}} pogingen",
     "attemptZero": "0 pogingen",
+    "currentModule": "Huidige module",
+    "completedModules": "Afgeronde modules",
+    "allModules": "Alle modules",
     "1": {"title": "Fundamenten van het geloof", "description": "Bouwen aan een sterk geestelijk fundament"},
     "2": {"title": "Genezing", "description": "Goddelijke genezing en heelheid begrijpen"},
     "3": {"title": "Bevrijding", "description": "Vrijheid door Christus"},
@@ -139,7 +237,9 @@
     "19": {"title": "Koninkrijkleven", "description": "Leven als burgers van de hemel"},
     "20": {"title": "Afsluiting", "description": "Verdergaan in je reis"}
   },
-  "lessons": {"lessonNumber": "Les {{number}}","content": "Inhoud van deze les","goal": "Doel van deze les","nextLesson": "Volgende: Les {{number}}","backToModule": "Terug naar module","completed": "Voltooid","modules":{"1":{"1":"Wat is geloof?","2":"Het voorwerp van geloof","3":"Groeien in geloof","4":"Geloof en werken","5":"Leven door geloof"},"2":{"1":"Gods hart voor genezing","2":"Bijbelse fundamenten van genezing","3":"Genezing ontvangen","4":"Genezing bedienen","5":"Getuigenissen van genezing"},"3":{"1":"Slavernij begrijpen","2":"De autoriteit van Christus","3":"Stappen naar vrijheid","4":"Wandelen in bevrijding","5":"Anderen helpen vrijheid vinden"},"4":{"1":"De kracht van lofprijs","2":"Lofprijs vs. aanbidding","3":"Zijn tegenwoordigheid binnengaan","4":"Aanbidden in geest en waarheid","5":"Een levensstijl van lofprijs"},"5":{"1":"De hemel: ons eeuwige thuis","2":"De hel begrijpen","3":"Het laatste oordeel","4":"Leven met eeuwig perspectief","5":"Voorbereiden op de eeuwigheid"},"6":{"1":"Je gaven ontdekken","2":"De gave van profetie","3":"Woorden van kennis en wijsheid","4":"Gaven van geloof en genezing","5":"Geestelijke gaven beheren"},"7":{"1":"Geschapen voor een doel","2":"Je roeping ontdekken","3":"Obstakels voor je roeping","4":"Wandelen in je bestemming","5":"Goed afronden"},"8":{"1":"De kracht van gebed","2":"Bidden met Gods Woord","3":"Basissen van voorbede","4":"Bidden voor je stad","5":"Een gebedsleven ontwikkelen"},"9":{"1":"Wie is de Heilige Geest?","2":"Doop in de Geest","3":"De vrucht van de Geest","4":"De Geest horen","5":"Dagelijks in de Geest wandelen"},"10":{"1":"Geloof voorbij woorden","2":"Geloof dat bergen verzet","3":"Twijfel overwinnen","4":"Geloof in beproevingen","5":"Erfenis van geloof"},"11":{"1":"Het levende Woord","2":"Schrift bestuderen","3":"Mediteren over Gods Woord","4":"Schrift toepassen","5":"Het Woord in je leven"},"12":{"1":"Gods ontwerp voor relaties","2":"Huwelijk en gezin","3":"Vriendschap en gemeenschap","4":"Conflictoplossing","5":"Verbroken relaties herstellen"},"13":{"1":"Dienend leiderschap","2":"Leiden door voorbeeld","3":"Anderen empoweren","4":"Verantwoordelijkheid dragen","5":"Leiderschap onder druk"},"14":{"1":"De Grote Opdracht","2":"Je persoonlijke getuigenis","3":"Met moed delen","4":"Je wereld bereiken","5":"Discipelen maken"},"15":{"1":"Wie je bent in Christus","2":"Valse identiteiten doorbreken","3":"Zonen en dochters","4":"Leven vanuit identiteit","5":"Je koninklijke erfenis"},"16":{"1":"Angst begrijpen","2":"Angst vs. geloof","3":"Gods volmaakte liefde","4":"Veelvoorkomende angsten overwinnen","5":"Vrijheid van angst"},"17":{"1":"De vreugde van geven","2":"Bijbelse principes van geven","3":"Tienden en offers","4":"Vrijgevigheid als aanbidding","5":"Oogsten wat je zaait"},"18":{"1":"Het sabbatprincipe","2":"Rust in God","3":"Je tijd beheren","4":"Herstel door rust","5":"Een ritme van rust"},"19":{"1":"Burgers van de hemel","2":"Koninkrijkswaarden","3":"Eerst het koninkrijk zoeken","4":"Koninkrijksinvloed","5":"Leven voor de Koning"},"20":{"1":"Overzicht: je reis","2":"Kernlessen samenvatting","3":"Volgende stappen","4":"Afsluitingsviering","5":"De reis vervolgen"}}},
+  "lessons": {"lessonNumber": "Les {{number}}","content": "Inhoud van deze les","goal": "Doel van deze les","nextLesson": "Volgende: Les {{number}}","backToModule": "Terug naar module","completed": "Voltooid","locked": "Vergrendeld","unlockHint": "Voltooi les {{number}} om te ontgrendelen","videoLoadError": "Video kon niet worden geladen. Tik om opnieuw te proberen.","lockedModalTitle": "Les vergrendeld","lockedModalMessage": "Voltooi eerst les {{number}} om verder te gaan.","lockedModalMessageWithModule": "Voltooi eerst les {{number}} van {{module}} om verder te gaan.","lockedModalMessageModuleLesson": "Voltooi eerst module {{moduleNumber}} les {{number}} om verder te gaan.","lockedModalMessageExamModule": "Behaal eerst het examen van module {{moduleNumber}} om deze les te ontgrendelen.","lockedModalMessageExamWithModule": "Behaal eerst het examen van {{module}} om deze les te ontgrendelen.","lockedModalMessageFirstLesson": "Behaal eerst het examen van de vorige module om deze les te ontgrendelen.","lockedModalOk": "Sluiten","lockedModalGoToLesson": "Ga naar les {{number}}","lockedModalGoToLessonModule": "Ga naar module {{moduleNumber}} les {{number}}","lockedModalGoToExam": "Ga naar examen","lockedModalGoToExamModule": "Ga naar examen van module {{moduleNumber}}","modules":{"1":{"1":"Wat is geloof?","2":"Het voorwerp van geloof","3":"Groeien in geloof","4":"Geloof en werken","5":"Leven door geloof"},"2":{"1":"Gods hart voor genezing","2":"Bijbelse fundamenten van genezing","3":"Genezing ontvangen","4":"Genezing bedienen","5":"Getuigenissen van genezing"},"3":{"1":"Slavernij begrijpen","2":"De autoriteit van Christus","3":"Stappen naar vrijheid","4":"Wandelen in bevrijding","5":"Anderen helpen vrijheid vinden"},"4":{"1":"De kracht van lofprijs","2":"Lofprijs vs. aanbidding","3":"Zijn tegenwoordigheid binnengaan","4":"Aanbidden in geest en waarheid","5":"Een levensstijl van lofprijs"},"5":{"1":"De hemel: ons eeuwige thuis","2":"De hel begrijpen","3":"Het laatste oordeel","4":"Leven met eeuwig perspectief","5":"Voorbereiden op de eeuwigheid"},"6":{"1":"Je gaven ontdekken","2":"De gave van profetie","3":"Woorden van kennis en wijsheid","4":"Gaven van geloof en genezing","5":"Geestelijke gaven beheren"},"7":{"1":"Geschapen voor een doel","2":"Je roeping ontdekken","3":"Obstakels voor je roeping","4":"Wandelen in je bestemming","5":"Goed afronden"},"8":{"1":"De kracht van gebed","2":"Bidden met Gods Woord","3":"Basissen van voorbede","4":"Bidden voor je stad","5":"Een gebedsleven ontwikkelen"},"9":{"1":"Wie is de Heilige Geest?","2":"Doop in de Geest","3":"De vrucht van de Geest","4":"De Geest horen","5":"Dagelijks in de Geest wandelen"},"10":{"1":"Geloof voorbij woorden","2":"Geloof dat bergen verzet","3":"Twijfel overwinnen","4":"Geloof in beproevingen","5":"Erfenis van geloof"},"11":{"1":"Het levende Woord","2":"Schrift bestuderen","3":"Mediteren over Gods Woord","4":"Schrift toepassen","5":"Het Woord in je leven"},"12":{"1":"Gods ontwerp voor relaties","2":"Huwelijk en gezin","3":"Vriendschap en gemeenschap","4":"Conflictoplossing","5":"Verbroken relaties herstellen"},"13":{"1":"Dienend leiderschap","2":"Leiden door voorbeeld","3":"Anderen empoweren","4":"Verantwoordelijkheid dragen","5":"Leiderschap onder druk"},"14":{"1":"De Grote Opdracht","2":"Je persoonlijke getuigenis","3":"Met moed delen","4":"Je wereld bereiken","5":"Discipelen maken"},"15":{"1":"Wie je bent in Christus","2":"Valse identiteiten doorbreken","3":"Zonen en dochters","4":"Leven vanuit identiteit","5":"Je koninklijke erfenis"},"16":{"1":"Angst begrijpen","2":"Angst vs. geloof","3":"Gods volmaakte liefde","4":"Veelvoorkomende angsten overwinnen","5":"Vrijheid van angst"},"17":{"1":"De vreugde van geven","2":"Bijbelse principes van geven","3":"Tienden en offers","4":"Vrijgevigheid als aanbidding","5":"Oogsten wat je zaait"},"18":{"1":"Het sabbatprincipe","2":"Rust in God","3":"Je tijd beheren","4":"Herstel door rust","5":"Een ritme van rust"},"19":{"1":"Burgers van de hemel","2":"Koninkrijkswaarden","3":"Eerst het koninkrijk zoeken","4":"Koninkrijksinvloed","5":"Leven voor de Koning"},"20":{"1":"Overzicht: je reis","2":"Kernlessen samenvatting","3":"Volgende stappen","4":"Afsluitingsviering","5":"De reis vervolgen"}}},
   "lessonsPage": {"title": "Lessen", "empty": "Geen lessen in deze module", "lessonsCount": "{{count}} lessen"},
-  "handouts": {"title": "Handouts","lesson": "Leshandout","module": "Modulehandout"}
+  "handouts": {"title": "Handouts","lesson": "Leshandout","module": "Modulehandout"},
+  "quiz": {"title": "Module-examen","loading": "Examen laden...","intro": "Beantwoord alle vragen. Je hebt minstens {{minCorrect}} van {{total}} goed nodig om te slagen.","submit": "Versturen","pass": "Gefeliciteerd! Je bent geslaagd.","fail": "Nog niet. Je hebt minstens {{minCorrect}} van {{total}} goed nodig om te slagen.","retry": "Opnieuw proberen","answerAll": "Beantwoord alle vragen","correct": "Correct","incorrect": "Incorrect","scoreSummary": "{{score}}% - {{correct}}/{{total}} goed","questionProgress": "{{current}} van {{total}} beantwoord","questionOf": "Vraag {{current}} van {{total}}","submitConfirmTitle": "Antwoorden versturen?","submitConfirmMessage": "Je kunt je antwoorden niet meer wijzigen na het versturen.","cancel": "Annuleren","leaveConfirmTitle": "Examen verlaten?","leaveConfirmMessage": "Je voortgang is opgeslagen.","attemptNumber": "Poging {{number}}","continue": "Doorgaan","backToModule": "Terug naar module","modules":{"1":{"questions":{"1":{"question":"Wat is geloof?","a":"Vertrouwen in wat we verwachten","b":"Een gevoel","c":"Een religie","d":"Een emotie"},"2":{"question":"Geloof komt van:","a":"Onze ouders","b":"Het Woord van God horen","c":"Opleiding","d":"Ervaring"},"3":{"question":"Zonder geloof is het onmogelijk te:","a":"Werken","b":"Rusten","c":"God behagen","d":"Eten"}}}}},
+  "exam": {"takeExam": "Examen maken","unlockHint": "Voltooi alle lessen om te ontgrendelen","readyHint": "Alle lessen voltooid","passed": "Examen behaald","passedHint": "Je hebt het examen van deze module afgerond","failedScore": "{{score}}% - {{correct}}/{{total}} goed","retryHint": "Tik om opnieuw te proberen","alreadyPassed": "Je hebt dit examen al behaald"}
 }

@@ -6,10 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { TOTAL_LESSONS } from '@/constants/modules';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import { lessonProgressService } from '@/services/api/lessonProgressService';
-import { queryKeys } from '@/services/queryKeys';
+import { useCompletedLessons } from '@/hooks/useCompletedLessons';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
 import { OverviewCard } from './OverviewCard';
 
 export function ProgressCard() {
@@ -17,11 +15,7 @@ export function ProgressCard() {
   const theme = useTheme();
   const { t } = useTranslation();
 
-  const { data: completedLessons } = useQuery({
-    queryKey: queryKeys.progress.lessonProgress.completedByUser(user?.id ?? ''),
-    queryFn: () => lessonProgressService.listCompletedByUser(user!.id),
-    enabled: !!user?.id,
-  });
+  const { data: completedLessons } = useCompletedLessons(user?.id);
 
   const completedCount = completedLessons?.length ?? 0;
   const percentage = TOTAL_LESSONS > 0
@@ -34,9 +28,9 @@ export function ProgressCard() {
         <HStack className="items-center gap-4">
           <Box
             className="rounded-xl p-3"
-            style={{ backgroundColor: theme.avatarPrimary }}
+            style={{ backgroundColor: theme.brandAccentMuted }}
           >
-            <Ionicons name="bar-chart" size={28} color={theme.textPrimary} />
+            <Ionicons name="bar-chart" size={28} color={theme.brandAccent} />
           </Box>
           <VStack className="flex-1">
             <HStack className="items-center justify-between">
@@ -61,13 +55,13 @@ export function ProgressCard() {
             </Text>
             <Box
               className="mt-3 h-2 rounded-full overflow-hidden"
-              style={{ backgroundColor: theme.avatarPrimary }}
+              style={{ backgroundColor: theme.brandAccentMuted }}
             >
               <Box
                 className="h-full rounded-full"
                 style={{
                   width: `${percentage}%`,
-                  backgroundColor: theme.buttonPrimary,
+                  backgroundColor: theme.brandAccent,
                 }}
               />
             </Box>

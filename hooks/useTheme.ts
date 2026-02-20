@@ -1,3 +1,11 @@
+import {
+  accept,
+  decline,
+  primary,
+  primaryContrast,
+  quizIncorrect,
+  success,
+} from '@/constants/themeTokens';
 import { useThemePreference } from '@/contexts/ThemeContext';
 
 export interface ThemeColors {
@@ -12,6 +20,8 @@ export interface ThemeColors {
   buttonDeclineContrast: string;
   buttonPrimary: string;
   buttonPrimaryContrast: string;
+  brandAccent: string;
+  brandAccentMuted: string;
   tabActive: string;
   tabInactiveBg: string;
   tabInactiveText: string;
@@ -19,10 +29,18 @@ export interface ThemeColors {
   avatarWarning: string;
   badgeSuccess: string;
   badgeError: string;
+  quizCorrect: string;
+  quizIncorrect: string;
+  quizIncorrectBg: string;
   badgeWarning: string;
   badgeInfo: string;
   emptyBg: string;
   messageBg: string;
+  inputBg: string;
+  overlayBg: string;
+  starSuccess: string;
+  badgeSuccessBg: string;
+  badgeInfoBg: string;
   isDark: boolean;
 }
 
@@ -33,22 +51,32 @@ const lightTheme: ThemeColors = {
   textPrimary: '#000000',
   textSecondary: '#525252',
   textTertiary: '#737373',
-  buttonAccept: '#171717',
-  buttonDecline: '#b91c1c',
-  buttonDeclineContrast: '#FFFFFF',
-  buttonPrimary: '#171717',
-  buttonPrimaryContrast: '#FFFFFF',
-  tabActive: '#171717',
+  buttonAccept: accept.light,
+  buttonDecline: decline.light,
+  buttonDeclineContrast: decline.contrast,
+  buttonPrimary: primary.light,
+  buttonPrimaryContrast: primaryContrast.light,
+  brandAccent: primary.light,
+  brandAccentMuted: primary.mutedLight,
+  tabActive: primary.light,
   tabInactiveBg: '#F5F5F5',
   tabInactiveText: '#525252',
   avatarPrimary: '#E5E5E5',
   avatarWarning: '#fef3c7',
   badgeSuccess: '#dcfce7',
   badgeError: '#fee2e2',
+  quizCorrect: success,
+  quizIncorrect: quizIncorrect.light,
+  quizIncorrectBg: quizIncorrect.bgLight,
   badgeWarning: '#fef3c7',
   badgeInfo: '#f5f5f5',
   emptyBg: '#F5F5F5',
   messageBg: '#FAFAFA',
+  inputBg: '#FFFFFF',
+  overlayBg: 'rgba(0,0,0,0.5)',
+  starSuccess: success,
+  badgeSuccessBg: 'rgba(74, 222, 128, 0.35)',
+  badgeInfoBg: 'rgba(96, 165, 250, 0.35)',
   isDark: false,
 };
 
@@ -59,22 +87,32 @@ const darkTheme: ThemeColors = {
   textPrimary: '#FAFAFA',
   textSecondary: '#a3a3a3',
   textTertiary: '#737373',
-  buttonAccept: '#FAFAFA',
-  buttonDecline: '#f87171',
-  buttonDeclineContrast: '#FFFFFF',
-  buttonPrimary: '#FAFAFA',
-  buttonPrimaryContrast: '#171717',
-  tabActive: '#FAFAFA',
+  buttonAccept: accept.dark,
+  buttonDecline: decline.dark,
+  buttonDeclineContrast: decline.contrast,
+  buttonPrimary: primary.dark,
+  buttonPrimaryContrast: primaryContrast.dark,
+  brandAccent: primary.dark,
+  brandAccentMuted: primary.mutedDark,
+  tabActive: primary.dark,
   tabInactiveBg: '#262626',
   tabInactiveText: '#a3a3a3',
   avatarPrimary: '#262626',
   avatarWarning: '#78350f',
   badgeSuccess: '#064e3b',
   badgeError: '#7f1d1d',
+  quizCorrect: success,
+  quizIncorrect: quizIncorrect.dark,
+  quizIncorrectBg: quizIncorrect.bgDark,
   badgeWarning: '#78350f',
   badgeInfo: '#262626',
   emptyBg: '#171717',
   messageBg: '#0a0a0a',
+  inputBg: '#171717',
+  overlayBg: 'rgba(0,0,0,0.7)',
+  starSuccess: success,
+  badgeSuccessBg: 'rgba(74, 222, 128, 0.35)',
+  badgeInfoBg: 'rgba(96, 165, 250, 0.35)',
   isDark: true,
 };
 

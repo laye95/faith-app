@@ -37,18 +37,10 @@ class ModuleProgressService extends BaseService {
       payload.progress_percentage = data.progress_percentage;
     if (data.completed_at !== undefined) payload.completed_at = data.completed_at;
 
-    const { data: result, error } = await this.supabase
-      .from(this.tableName!)
-      .upsert(payload, {
-        onConflict: 'user_id,module_id',
-        ignoreDuplicates: false,
-      })
-      .select()
-      .single();
-
-    if (error) throw this.normalizeError(error);
-    if (!result) throw new Error('No data returned from upsert');
-    return result as ModuleProgress;
+    return this.upsertWithConflict<ModuleProgress>(payload, {
+      onConflict: 'user_id,module_id',
+      ignoreDuplicates: false,
+    });
   }
 
   async listByUser(userId: string): Promise<ModuleProgress[]> {

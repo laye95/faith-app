@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
@@ -7,7 +8,8 @@ import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 
-import { LanguageSwitcher } from '../login/_components/LanguageSwitcher';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { ThemeToggleIcon } from '../login/_components/ThemeToggleIcon';
 
 interface AuthTopBarProps {
   showBackButton?: boolean;
@@ -48,7 +50,27 @@ export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
         ) : (
           <Box />
         )}
-        <LanguageSwitcher />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.cardBg,
+            borderWidth: 1,
+            borderColor: theme.cardBorder,
+            borderRadius: 12,
+            overflow: 'hidden',
+          }}
+        >
+          <ThemeToggleIcon />
+          <View
+            style={{
+              width: 1,
+              height: 20,
+              backgroundColor: theme.cardBorder,
+            }}
+          />
+          <LanguageSwitcher variant="inline" />
+        </View>
       </HStack>
     </Box>
   );

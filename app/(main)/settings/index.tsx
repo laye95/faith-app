@@ -1,20 +1,23 @@
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
-import { MainTopBar } from '../_components/MainTopBar';
+import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { SettingRow } from './_components/SettingRow';
-import { ThemeSwitcher } from './_components/ThemeSwitcher';
 import { useTheme } from '@/hooks/useTheme';
+import { routes } from '@/constants/routes';
 import { router } from 'expo-router';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ScrollView } from 'react-native';
-
-import { LanguageSwitcher } from '../../(auth)/login/_components/LanguageSwitcher';
+import { ScrollView, TouchableOpacity } from 'react-native';
+import { createElement, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { bzzt } from '@/utils/haptics';
+import { SETTINGS_SECTIONS } from './_config/settingsSections';
 
 export default function SettingsScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
   return (
     <Box
@@ -29,47 +32,81 @@ export default function SettingsScreen() {
         title={t('navbar.settings')}
         currentSection="settings"
         showBackButton
-        onBack={() => router.replace('/(main)/profile')}
+        onBack={() => router.replace(routes.profile())}
       />
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 24 }}
+        contentContainerStyle={{
+          paddingTop: 16,
+          paddingBottom: 32,
+        }}
       >
-        <Box
-          className="rounded-2xl overflow-hidden"
-          style={{
-            backgroundColor: theme.cardBg,
-            borderWidth: 1,
-            borderColor: theme.cardBorder,
-          }}
-        >
-          <Box className="px-5 pt-4 pb-1">
-            <Text
-              className="text-xs font-semibold uppercase tracking-wider mb-3"
-              style={{ color: theme.textSecondary }}
-            >
-              {t('settings.preferences')}
-            </Text>
-          </Box>
-          <Box className="px-5 pb-4">
-            <SettingRow
-              icon="language"
-              labelKey="settings.language"
-            >
-              <LanguageSwitcher />
-            </SettingRow>
-            <Box className="mt-4">
-              <SettingRow
-                icon="color-palette"
-                labelKey="settings.theme"
-                isLast
+        {SETTINGS_SECTIONS.map((section) => {
+          const isCollapsed = collapsedSections[section.id] ?? false;
+          const toggleSection = () => {
+            bzzt();
+            setCollapsedSections((prev) => ({
+              ...prev,
+              [section.id]: !prev[section.id],
+            }));
+          };
+          return (
+            <Box key={section.id} className="mb-4">
+              <Box
+                className="rounded-xl overflow-hidden"
+                style={{
+                  backgroundColor: theme.cardBg,
+                }}
               >
-              <ThemeSwitcher />
-            </SettingRow>
+                <TouchableOpacity
+                  onPress={toggleSection}
+                  activeOpacity={0.7}
+                  className="flex-row items-center justify-between px-4 py-3.5"
+                  style={{
+                    borderBottomWidth: isCollapsed ? 0 : 1,
+                    borderBottomColor: theme.cardBorder,
+                  }}
+                >
+                  <Text
+                    className="text-xs font-medium uppercase tracking-wider"
+                    style={{ color: theme.textTertiary }}
+                  >
+                    {t(section.titleKey)}
+                  </Text>
+                  <Ionicons
+                    name={isCollapsed ? 'chevron-down' : 'chevron-up'}
+                    size={20}
+                    color={theme.textSecondary}
+                  />
+                </TouchableOpacity>
+                {!isCollapsed &&
+                  section.rows.map((row, rowIndex) => {
+                    const Component = row.component;
+                    const componentProps = (row.componentProps ?? {}) as Record<string, unknown>;
+                    return (
+                      <Box
+                        key={row.id}
+                        style={{
+                          borderTopWidth: rowIndex > 0 ? 1 : 0,
+                          borderTopColor: theme.cardBorder,
+                        }}
+                      >
+                        <SettingRow
+                          icon={row.icon}
+                          labelKey={row.labelKey}
+                          isLast={row.isLast}
+                          fullWidthChildren={row.fullWidthChildren}
+                        >
+                          {createElement(Component, componentProps)}
+                        </SettingRow>
+                      </Box>
+                    );
+                  })}
+              </Box>
             </Box>
-          </Box>
-        </Box>
+          );
+        })}
       </ScrollView>
     </Box>
   );

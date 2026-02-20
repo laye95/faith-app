@@ -13,7 +13,6 @@ export default function BibleSchoolLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="lesson/[moduleId]/[lessonId]" />
     </Stack>
   );
 }

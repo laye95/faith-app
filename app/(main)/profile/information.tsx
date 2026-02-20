@@ -12,13 +12,15 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { userService } from "@/services/api/userService";
 import { queryKeys } from "@/services/queryKeys";
 import { bzzt } from "@/utils/haptics";
+import { getErrorMessage } from "@/utils/errors";
+import { validateName } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MainTopBar } from "../_components/MainTopBar";
+import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 
 export default function ProfileInformationScreen() {
   const { user } = useAuth();
@@ -49,16 +51,9 @@ export default function ProfileInformationScreen() {
     },
   });
 
-  const validateName = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return t("auth.nameRequired");
-    if (trimmed.length < 2) return t("auth.nameMinLength");
-    return "";
-  };
-
   const handleSave = () => {
     bzzt();
-    const err = validateName(fullName);
+    const err = validateName(fullName, t);
     setNameError(err);
     if (err) return;
     if (!hasChanges || !profile?.id) return;
@@ -239,9 +234,7 @@ export default function ProfileInformationScreen() {
                   className="text-sm"
                   style={{ color: theme.buttonDecline }}
                 >
-                  {updateMutation.error instanceof Error
-                    ? updateMutation.error.message
-                    : t("profile.saveFailed")}
+                  {getErrorMessage(updateMutation.error, t("profile.saveFailed"))}
                 </Text>
               )}
             </VStack>

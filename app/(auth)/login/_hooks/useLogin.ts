@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 
+import { getErrorMessage } from '@/utils/errors';
 import { authService } from '@/services/api/authService';
 
 interface UseLoginReturn {
@@ -28,11 +29,7 @@ export function useLogin(): UseLoginReturn {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
     onError: async (err: unknown) => {
-      let errorMessage = 'Inloggen mislukt. Probeer het opnieuw.';
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
+      setError(getErrorMessage(err, 'Inloggen mislukt. Probeer het opnieuw.'));
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });

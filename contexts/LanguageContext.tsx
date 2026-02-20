@@ -4,10 +4,10 @@ import {
   initializeI18n,
   isSupportedLocale,
   setLanguage as setI18nLanguage,
-  SUPPORTED_LOCALES,
   type SupportedLocale,
-} from '@/i18n';
-import { userSettingsService } from '@/services/api/userSettingsService';
+} from "@/i18n";
+import { userSettingsService } from "@/services/api/userSettingsService";
+import { useRouter } from "expo-router";
 import {
   createContext,
   ReactNode,
@@ -16,10 +16,9 @@ import {
   useEffect,
   useMemo,
   useState,
-} from 'react';
-import { useRouter } from 'expo-router';
+} from "react";
 
-import { useAuth } from './AuthContext';
+import { useAuth } from "./AuthContext";
 
 interface LanguageContextType {
   locale: SupportedLocale;
@@ -28,13 +27,13 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  locale: 'en',
+  locale: "nl",
   changeLanguage: async () => {},
   isInitialized: false,
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<SupportedLocale>('en');
+  const [locale, setLocale] = useState<SupportedLocale>("nl");
   const [isInitialized, setIsInitialized] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
@@ -47,47 +46,74 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         try {
           const dbLanguage = await userSettingsService.getSetting<string>(
             user.id,
-            'language',
+            "language",
           );
 
           if (dbLanguage && isSupportedLocale(dbLanguage)) {
-            await setI18nLanguage(dbLanguage as SupportedLocale);
-            setLocale(dbLanguage as SupportedLocale);
+            const localeToUse =
+              dbLanguage === "en" ? "nl" : (dbLanguage as SupportedLocale);
+            if (dbLanguage === "en") {
+              await userSettingsService.setSetting(user.id, "language", "nl");
+            }
+            await setI18nLanguage(localeToUse);
+            setLocale(localeToUse);
           } else {
             const storedLanguage = await getStoredLanguage();
             const currentLang = (storedLanguage ||
               getCurrentLanguage()) as SupportedLocale;
-            const validLang = isSupportedLocale(currentLang) ? currentLang : 'en';
+            const validLang = isSupportedLocale(currentLang)
+              ? currentLang === "en"
+                ? "nl"
+                : currentLang
+              : "nl";
             setLocale(validLang);
 
             if (storedLanguage && isSupportedLocale(storedLanguage)) {
               try {
                 await userSettingsService.setSetting(
                   user.id,
-                  'language',
-                  storedLanguage,
+                  "language",
+                  validLang,
                 );
               } catch (settingError: unknown) {
-                const err = settingError as { requiresLogout?: boolean; code?: string };
-                if (err?.requiresLogout || err?.code === 'USER_RECORD_NOT_FOUND') {
+                const err = settingError as {
+                  requiresLogout?: boolean;
+                  code?: string;
+                };
+                if (
+                  err?.requiresLogout ||
+                  err?.code === "USER_RECORD_NOT_FOUND"
+                ) {
                   await signOut();
-                  router.replace('/');
+                  router.replace("/");
                   return;
                 }
                 console.warn(
-                  'Failed to save language preference (user may not be ready yet)',
+                  "Failed to save language preference (user may not be ready yet)",
                 );
               }
             }
           }
         } catch (error) {
-          console.error('Error loading language from database:', error);
+          console.error("Error loading language from database:", error);
           const currentLang = getCurrentLanguage() as SupportedLocale;
-          setLocale(isSupportedLocale(currentLang) ? currentLang : 'en');
+          setLocale(
+            isSupportedLocale(currentLang)
+              ? currentLang === "en"
+                ? "nl"
+                : currentLang
+              : "nl",
+          );
         }
       } else {
         const currentLang = getCurrentLanguage() as SupportedLocale;
-        setLocale(isSupportedLocale(currentLang) ? currentLang : 'en');
+        setLocale(
+          isSupportedLocale(currentLang)
+            ? currentLang === "en"
+              ? "nl"
+              : currentLang
+            : "nl",
+        );
       }
 
       setIsInitialized(true);
@@ -102,15 +128,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
       if (user?.id) {
         try {
-          await userSettingsService.setSetting(user.id, 'language', newLocale);
+          await userSettingsService.setSetting(user.id, "language", newLocale);
         } catch (error: unknown) {
           const err = error as { requiresLogout?: boolean; code?: string };
-          if (err?.requiresLogout || err?.code === 'USER_RECORD_NOT_FOUND') {
+          if (err?.requiresLogout || err?.code === "USER_RECORD_NOT_FOUND") {
             await signOut();
-            router.replace('/');
+            router.replace("/");
             return;
           }
-          console.error('Error saving language to database', error);
+          console.error("Error saving language to database", error);
         }
       }
     },
@@ -136,7 +162,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
 }

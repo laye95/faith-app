@@ -13,6 +13,7 @@ interface SettingRowProps {
   value?: React.ReactNode;
   children?: React.ReactNode;
   isLast?: boolean;
+  fullWidthChildren?: boolean;
 }
 
 export function SettingRow({
@@ -22,36 +23,43 @@ export function SettingRow({
   value,
   children,
   isLast,
+  fullWidthChildren,
 }: SettingRowProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const color = iconColor ?? theme.textSecondary;
 
   return (
-    <Box>
-      <Text
-        className="text-sm font-semibold mb-2"
-        style={{ color: theme.textPrimary }}
-      >
-        {t(labelKey)}
-      </Text>
-      <HStack
-        className="items-center justify-between"
-        style={{
-          paddingBottom: isLast ? 0 : 16,
-          borderBottomWidth: isLast ? 0 : 1,
-          borderBottomColor: theme.cardBorder,
-        }}
-      >
-        <HStack className="items-center gap-3 flex-1 min-w-0">
-          <Ionicons name={icon} size={22} color={color} />
-        </HStack>
-      {children ? (
-        <Box className="ml-3" style={{ flexShrink: 0 }}>{children}</Box>
-      ) : (
-        value !== undefined && <Box className="ml-3" style={{ flexShrink: 0 }}>{value}</Box>
-      )}
+    <HStack
+      className="items-center justify-between px-4 py-3"
+      style={{
+        minHeight: 48,
+      }}
+    >
+      <HStack className="items-center gap-3 flex-1 min-w-0">
+        <Ionicons name={icon} size={20} color={color} />
+        <Text
+          className="text-base font-medium"
+          style={{ color: theme.textPrimary }}
+          numberOfLines={1}
+        >
+          {t(labelKey)}
+        </Text>
       </HStack>
-    </Box>
+      {children ? (
+        <Box
+          className="ml-3"
+          style={fullWidthChildren ? { flex: 1, minWidth: 0 } : { flexShrink: 0 }}
+        >
+          {children}
+        </Box>
+      ) : (
+        value !== undefined && (
+          <Box className="ml-3" style={{ flexShrink: 0 }}>
+            {value}
+          </Box>
+        )
+      )}
+    </HStack>
   );
 }

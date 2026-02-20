@@ -1,0 +1,813 @@
+import { MainTopBar } from "@/app/(main)/_components/MainTopBar";
+import { Box } from "@/components/ui/box";
+import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
+import { MODULES } from "@/constants/modules";
+import { routes } from "@/constants/routes";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLessonUnlocks } from "@/hooks/useLessonUnlocks";
+import { useButtonShadow } from "@/hooks/useShadows";
+import { useTheme } from "@/hooks/useTheme";
+import { useToast } from "@/hooks/useToast";
+import { useTranslation } from "@/hooks/useTranslation";
+import { moduleProgressService } from "@/services/api/moduleProgressService";
+import { quizAttemptService } from "@/services/api/quizAttemptService";
+import { queryKeys } from "@/services/queryKeys";
+import { quizContentService } from "@/services/quizContentService";
+import type { QuizQuestion } from "@/types/quiz";
+import { bzzt } from "@/utils/haptics";
+import { didPassExam, getMinCorrectRequired } from "@/utils/unlockLogic";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  InteractionManager,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const EXAM_PROGRESS_KEY = (userId: string, moduleId: string) =>
+  `@faith_app:exam_progress:${userId}:${moduleId}`;
+
+export default function ExamScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
+  const navigation = useNavigation();
+  const theme = useTheme();
+  const { t, locale } = useTranslation();
+  const toast = useToast();
+  const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+
+  const module = MODULES.find((m) => m.id === id);
+  const {
+    isExamUnlocked,
+    passedModuleIds,
+    isLoading: unlocksLoading,
+  } = useLessonUnlocks();
+  const buttonShadow = useButtonShadow();
+
+  const { data: questions, isLoading: questionsLoading } = useQuery({
+    queryKey: ["quizQuestions", id, locale],
+    queryFn: () => quizContentService.getQuestionsForModule(id!, locale),
+    enabled: !!id && !!module,
+  });
+
+  const { data: attempts } = useQuery({
+    queryKey: queryKeys.progress.quizAttempts(user?.id ?? "", id ?? ""),
+    queryFn: () => quizAttemptService.listByUserAndModule(user!.id, id!),
+    enabled: !!user?.id && !!id,
+  });
+
+  const [selectedAnswers, setSelectedAnswers] = useState<
+    Record<string, string>
+  >({});
+  const [submitted, setSubmitted] = useState(false);
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+  const [passedResult, setPassedResult] = useState<{
+    score: number;
+    correct: number;
+    total: number;
+  } | null>(null);
+  const [submitConfirmVisible, setSubmitConfirmVisible] = useState(false);
+  const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
+  const [alreadyPassedModalVisible, setAlreadyPassedModalVisible] =
+    useState(false);
+  const alreadyPassedHandledRef = useRef(false);
+  const pendingLeaveActionRef = useRef<{
+    type: string;
+    payload?: object;
+  } | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const introHeightRef = useRef(140);
+  const cardTopsRef = useRef<number[]>([]);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const SCROLL_THRESHOLD = 150;
+
+  const attemptNumber = (attempts?.length ?? 0) + 1;
+
+  useEffect(() => {
+    if (!user?.id || !id || !questions?.length || progressLoaded) return;
+    const key = EXAM_PROGRESS_KEY(user.id, id);
+    AsyncStorage.getItem(key)
+      .then((raw) => {
+        if (!raw) return;
+        const parsed = JSON.parse(raw) as
+          | { answers: Record<string, string>; submitted?: boolean }
+          | Record<string, string>;
+        const answers =
+          "answers" in parsed && typeof parsed.answers === "object"
+            ? parsed.answers
+            : (parsed as Record<string, string>);
+        const valid: Record<string, string> = {};
+        for (const q of questions) {
+          const optionId = answers[q.id];
+          if (optionId && q.options.some((o) => o.id === optionId)) {
+            valid[q.id] = optionId;
+          }
+        }
+        if (Object.keys(valid).length > 0) {
+          setSelectedAnswers(valid);
+          if (
+            "submitted" in parsed &&
+            parsed.submitted === true &&
+            Object.keys(valid).length === questions.length
+          ) {
+            setSubmitted(true);
+          } else {
+            const firstUnansweredIndex = questions.findIndex(
+              (q) => !valid[q.id],
+            );
+            if (firstUnansweredIndex >= 0) {
+              InteractionManager.runAfterInteractions(() => {
+                setTimeout(() => {
+                  const top =
+                    cardTopsRef.current[firstUnansweredIndex] ??
+                    firstUnansweredIndex * 280;
+                  const y = 24 + introHeightRef.current + top;
+                  scrollRef.current?.scrollTo({
+                    y: Math.max(0, y),
+                    animated: true,
+                  });
+                }, 500);
+              });
+            }
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => setProgressLoaded(true));
+  }, [user?.id, id, questions, progressLoaded]);
+
+  useEffect(() => {
+    if (!user?.id || !id || Object.keys(selectedAnswers).length === 0) return;
+    const key = EXAM_PROGRESS_KEY(user.id, id);
+    const payload = {
+      answers: selectedAnswers,
+      ...(submitted ? { submitted: true } : {}),
+    };
+    AsyncStorage.setItem(key, JSON.stringify(payload)).catch(() => {});
+  }, [user?.id, id, selectedAnswers, submitted]);
+
+  const submitMutation = useMutation({
+    mutationFn: async () => {
+      if (!user?.id || !id || !questions) return;
+      const correct = questions.filter(
+        (q) => selectedAnswers[q.id] === q.options.find((o) => o.correct)?.id,
+      ).length;
+      const score = Math.round((correct / questions.length) * 100);
+      const passed = didPassExam(correct, questions.length);
+      await quizAttemptService.createAttempt(user.id, id, {
+        attempt_number: attemptNumber,
+        score_percentage: score,
+        passed,
+        answers: selectedAnswers,
+        correct_count: correct,
+        total_count: questions.length,
+      });
+      if (passed) {
+        await moduleProgressService.markCompleted(user.id, id);
+      }
+      return { passed, score, correct, total: questions.length };
+    },
+    onSuccess: async (result) => {
+      if (!result) return;
+      queryClient.invalidateQueries({ queryKey: ["progress"] });
+      if (result.passed) {
+        if (user?.id && id) {
+          await AsyncStorage.removeItem(EXAM_PROGRESS_KEY(user.id, id));
+        }
+        setPassedResult({
+          score: result.score,
+          correct: result.correct,
+          total: result.total,
+        });
+        setShowSuccessScreen(true);
+      } else {
+        setSubmitted(true);
+      }
+    },
+    onError: () => {
+      const total = questions?.length ?? 3;
+      toast.error(
+        t("quiz.fail", {
+          minCorrect: getMinCorrectRequired(total),
+          total,
+        }),
+      );
+    },
+  });
+
+  const scrollToQuestion = useCallback((idx: number) => {
+    const top = cardTopsRef.current[idx] ?? idx * 280;
+    const y = 24 + introHeightRef.current + top;
+    scrollRef.current?.scrollTo({
+      y: Math.max(0, y),
+      animated: true,
+    });
+  }, []);
+
+  const handleSelectAnswer = useCallback(
+    (questionId: string, optionId: string, questionIndex: number) => {
+      if (submitted) return;
+      setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+      if (questions && questionIndex < questions.length - 1) {
+        setTimeout(() => scrollToQuestion(questionIndex + 1), 300);
+      }
+    },
+    [submitted, questions, scrollToQuestion],
+  );
+
+  const handleSubmit = useCallback(() => {
+    if (!questions || questions.length === 0) return;
+    const unanswered = questions.filter((q) => !selectedAnswers[q.id]);
+    if (unanswered.length > 0) {
+      toast.error(t("quiz.answerAll"));
+      return;
+    }
+    setSubmitConfirmVisible(true);
+  }, [questions, selectedAnswers, t, toast]);
+
+  const handleRetry = useCallback(() => {
+    if (user?.id && id) {
+      AsyncStorage.removeItem(EXAM_PROGRESS_KEY(user.id, id)).catch(() => {});
+    }
+    setSelectedAnswers({});
+    setSubmitted(false);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  }, [user?.id, id]);
+
+  useEffect(() => {
+    if (unlocksLoading || !id || !module || showSuccessScreen) return;
+    if (!isExamUnlocked(id)) {
+      toast.error(t("exam.unlockHint"));
+      router.replace(routes.bibleschoolModule(id));
+      return;
+    }
+    if (passedModuleIds.has(id) && !alreadyPassedHandledRef.current) {
+      alreadyPassedHandledRef.current = true;
+      setAlreadyPassedModalVisible(true);
+    }
+  }, [id, isExamUnlocked, passedModuleIds, unlocksLoading, module, showSuccessScreen, toast, t]);
+
+  useEffect(() => {
+    const unsub = navigation.addListener("beforeRemove", (e) => {
+      if (
+        showSuccessScreen ||
+        submitted ||
+        Object.keys(selectedAnswers).length === 0 ||
+        submitMutation.isPending
+      ) {
+        return;
+      }
+      e.preventDefault();
+      pendingLeaveActionRef.current = e.data.action;
+      setLeaveConfirmVisible(true);
+    });
+    return unsub;
+  }, [
+    navigation,
+    selectedAnswers,
+    submitted,
+    showSuccessScreen,
+    submitMutation.isPending,
+    t,
+  ]);
+
+  if (!module) return null;
+  if (!unlocksLoading && !isExamUnlocked(id!)) return null;
+  if (
+    !unlocksLoading &&
+    passedModuleIds.has(id!) &&
+    !showSuccessScreen &&
+    !alreadyPassedModalVisible
+  )
+    return null;
+
+  const allAnswered =
+    questions &&
+    questions.length > 0 &&
+    questions.every((q) => selectedAnswers[q.id]);
+
+  const correctCount =
+    questions?.filter(
+      (q) => selectedAnswers[q.id] === q.options.find((o) => o.correct)?.id,
+    ).length ?? 0;
+  const scorePercentage =
+    questions?.length && questions.length > 0
+      ? Math.round((correctCount / questions.length) * 100)
+      : 0;
+
+  return (
+    <Box
+      className="flex-1 px-6"
+      style={{
+        paddingTop: insets.top + 24,
+        paddingBottom: insets.bottom + 24,
+        backgroundColor: theme.pageBg,
+      }}
+    >
+      <MainTopBar
+        title={t("quiz.title")}
+        currentSection="bibleschool"
+        showBackButton
+        onBack={() => navigation.goBack()}
+      />
+
+      <ConfirmModal
+        visible={submitConfirmVisible}
+        title={t("quiz.submitConfirmTitle")}
+        message={t("quiz.submitConfirmMessage")}
+        cancelLabel={t("quiz.cancel")}
+        confirmLabel={t("quiz.submit")}
+        onCancel={() => setSubmitConfirmVisible(false)}
+        onConfirm={() => {
+          setSubmitConfirmVisible(false);
+          bzzt();
+          submitMutation.mutate();
+        }}
+      />
+
+      <ConfirmModal
+        visible={leaveConfirmVisible}
+        title={t("quiz.leaveConfirmTitle")}
+        message={t("quiz.leaveConfirmMessage")}
+        cancelLabel={t("quiz.cancel")}
+        confirmLabel={t("quiz.backToModule")}
+        variant="destructive"
+        onCancel={() => {
+          setLeaveConfirmVisible(false);
+          pendingLeaveActionRef.current = null;
+        }}
+        onConfirm={() => {
+          setLeaveConfirmVisible(false);
+          const action = pendingLeaveActionRef.current;
+          pendingLeaveActionRef.current = null;
+          if (action) navigation.dispatch(action);
+        }}
+      />
+
+      <ConfirmModal
+        visible={alreadyPassedModalVisible}
+        title={t("quiz.pass")}
+        message={t("exam.alreadyPassed")}
+        confirmLabel={t("quiz.backToModule")}
+        showCancel={false}
+        onCancel={() => {
+          setAlreadyPassedModalVisible(false);
+          router.replace(routes.bibleschoolModule(id!));
+        }}
+        onConfirm={() => {
+          setAlreadyPassedModalVisible(false);
+          router.replace(routes.bibleschoolModule(id!));
+        }}
+      />
+
+      {questionsLoading ? (
+        <LoadingScreen message={t("quiz.loading")} />
+      ) : showSuccessScreen ? (
+        <Box className="flex-1 items-center justify-center px-6">
+          <Box
+            className="rounded-full p-6 mb-6"
+            style={{ backgroundColor: theme.badgeSuccess }}
+          >
+            <Ionicons
+              name="checkmark-circle"
+              size={64}
+              color={theme.quizCorrect}
+            />
+          </Box>
+          <Text
+            className="text-xl font-bold text-center mb-2"
+            style={{ color: theme.textPrimary }}
+          >
+            {t("quiz.pass")}
+          </Text>
+          <Text
+            className="text-base text-center mb-8"
+            style={{ color: theme.textSecondary }}
+          >
+            {passedResult
+              ? t("quiz.scoreSummary", {
+                  score: passedResult.score,
+                  correct: passedResult.correct,
+                  total: passedResult.total,
+                })
+              : ""}
+          </Text>
+          <Button
+            onPress={() => router.replace(routes.bibleschoolModule(id!))}
+            action="primary"
+            variant="solid"
+            size="lg"
+            className="h-14 cursor-pointer rounded-2xl min-w-[200]"
+            style={{
+              backgroundColor: theme.buttonPrimary,
+              ...buttonShadow,
+              shadowColor: theme.buttonPrimary,
+            }}
+          >
+            <ButtonText
+              className="text-base font-semibold"
+              style={{ color: theme.buttonPrimaryContrast }}
+            >
+              {t("quiz.backToModule")}
+            </ButtonText>
+          </Button>
+        </Box>
+      ) : !questions || questions.length === 0 ? (
+        <Box className="flex-1 items-center justify-center py-20">
+          <Text style={{ color: theme.textSecondary }}>
+            {t("lessonsPage.empty")}
+          </Text>
+        </Box>
+      ) : (
+        <Box className="flex-1">
+          <ScrollView
+            ref={scrollRef}
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            onScroll={(e) => {
+              const y = e.nativeEvent.contentOffset.y;
+              setShowScrollToTop(y > SCROLL_THRESHOLD);
+            }}
+            scrollEventThrottle={100}
+            contentContainerStyle={{
+              paddingTop: 24,
+              paddingBottom: 24,
+            }}
+          >
+            <View
+              onLayout={(e) => {
+                introHeightRef.current = e.nativeEvent.layout.height;
+              }}
+            >
+              <Text
+                className="text-sm mb-4"
+                style={{ color: theme.textSecondary }}
+              >
+                {t("quiz.intro", {
+                  minCorrect: getMinCorrectRequired(questions.length),
+                  total: questions.length,
+                })}
+              </Text>
+            </View>
+            <VStack className="gap-6">
+              {questions.map((q, index) => (
+                <View
+                  key={q.id}
+                  onLayout={(e) => {
+                    cardTopsRef.current[index] = e.nativeEvent.layout.y;
+                  }}
+                >
+                  <QuestionCard
+                    question={q}
+                    questionNumber={index + 1}
+                    totalQuestions={questions.length}
+                    selectedId={selectedAnswers[q.id]}
+                    onSelect={(optionId) =>
+                      handleSelectAnswer(q.id, optionId, index)
+                    }
+                    disabled={submitted}
+                    showFeedback={submitted}
+                    theme={theme}
+                    t={t}
+                  />
+                </View>
+              ))}
+            </VStack>
+          </ScrollView>
+          <Box
+            className="px-6 pt-4 pb-6"
+            style={{
+              paddingBottom: insets.bottom + 24,
+              backgroundColor: theme.pageBg,
+              borderTopWidth: 1,
+              borderTopColor: theme.cardBorder,
+            }}
+          >
+            {submitted ? (
+              <VStack className="gap-3">
+                {questions && questions.length > 0 && (
+                  <Box
+                    className="rounded-xl px-4 py-3"
+                    style={{
+                      backgroundColor: theme.cardBg,
+                      borderWidth: 1,
+                      borderColor: theme.cardBorder,
+                    }}
+                  >
+                    <Box className="flex-row items-center justify-between mb-2">
+                      <Text
+                        className="text-xs font-semibold uppercase tracking-wide"
+                        style={{ color: theme.textTertiary }}
+                      >
+                        {t("quiz.attemptNumber", { number: attemptNumber })}
+                      </Text>
+                      <Text
+                        className="text-sm font-semibold"
+                        style={{ color: theme.textPrimary }}
+                      >
+                        {t("quiz.scoreSummary", {
+                          score: scorePercentage,
+                          correct: correctCount,
+                          total: questions.length,
+                        })}
+                      </Text>
+                    </Box>
+                    <Text
+                      className="text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      {t("quiz.fail", {
+                        minCorrect: getMinCorrectRequired(questions.length),
+                        total: questions.length,
+                      })}
+                    </Text>
+                  </Box>
+                )}
+                <Button
+                  onPress={handleRetry}
+                  action="primary"
+                  variant="solid"
+                  size="lg"
+                  className="h-14 cursor-pointer rounded-2xl"
+                  style={{
+                    backgroundColor: theme.buttonPrimary,
+                    ...buttonShadow,
+                    shadowColor: theme.buttonPrimary,
+                  }}
+                >
+                  <ButtonText
+                    className="text-base font-semibold"
+                    style={{ color: theme.buttonPrimaryContrast }}
+                  >
+                    {t("quiz.retry")}
+                  </ButtonText>
+                </Button>
+              </VStack>
+            ) : (
+              <VStack className="gap-3">
+                <Box>
+                  <Text
+                    className="text-sm font-medium mb-1.5"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {t("quiz.questionProgress", {
+                      current: questions.filter((q) => selectedAnswers[q.id])
+                        .length,
+                      total: questions.length,
+                    })}
+                  </Text>
+                  <View
+                    className="h-1.5 rounded-full overflow-hidden"
+                    style={{ backgroundColor: theme.cardBorder }}
+                  >
+                    <View
+                      className="h-full rounded-full"
+                      style={{
+                        backgroundColor: theme.buttonPrimary,
+                        width: `${(questions.filter((q) => selectedAnswers[q.id]).length / questions.length) * 100}%`,
+                      }}
+                    />
+                  </View>
+                </Box>
+                <Button
+                  onPress={handleSubmit}
+                  action="primary"
+                  variant="solid"
+                  size="lg"
+                  isDisabled={!allAnswered || submitMutation.isPending}
+                  className="h-14 cursor-pointer rounded-2xl"
+                  style={{
+                    backgroundColor: theme.buttonPrimary,
+                    ...buttonShadow,
+                    shadowColor: theme.buttonPrimary,
+                  }}
+                >
+                  {submitMutation.isPending && (
+                    <ButtonSpinner className="mr-2" />
+                  )}
+                  <ButtonText
+                    className="text-base font-semibold"
+                    style={{ color: theme.buttonPrimaryContrast }}
+                  >
+                    {t("quiz.submit")}
+                  </ButtonText>
+                </Button>
+              </VStack>
+            )}
+          </Box>
+          {showScrollToTop && (
+            <View
+              style={{
+                position: "absolute",
+                right: 12,
+                bottom: insets.bottom + 140,
+              }}
+              pointerEvents="box-none"
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  bzzt();
+                  scrollRef.current?.scrollTo({ y: 0, animated: true });
+                }}
+                activeOpacity={0.7}
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: theme.cardBg,
+                  borderWidth: 1,
+                  borderColor: theme.cardBorder,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons
+                  name="arrow-up-circle"
+                  size={28}
+                  color={theme.textPrimary}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+function QuestionCard({
+  question,
+  questionNumber,
+  totalQuestions,
+  selectedId,
+  onSelect,
+  disabled,
+  showFeedback,
+  theme,
+  t,
+}: {
+  question: QuizQuestion;
+  questionNumber: number;
+  totalQuestions: number;
+  selectedId?: string;
+  onSelect: (optionId: string) => void;
+  disabled: boolean;
+  showFeedback: boolean;
+  theme: ReturnType<typeof useTheme>;
+  t: (key: string, params?: Record<string, string | number>) => string;
+}) {
+  const correctOptionId = question.options.find((o) => o.correct)?.id;
+  const isCorrect = selectedId === correctOptionId;
+
+  return (
+    <Box
+      className="rounded-2xl p-4"
+      style={{
+        backgroundColor: theme.cardBg,
+        borderWidth: 1,
+        borderColor: showFeedback
+          ? isCorrect
+            ? theme.quizCorrect
+            : theme.quizIncorrect
+          : theme.cardBorder,
+      }}
+    >
+      <Box className="mb-3">
+        <Text
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: theme.textTertiary }}
+        >
+          {t("quiz.questionOf", {
+            current: questionNumber,
+            total: totalQuestions,
+          })}
+        </Text>
+      </Box>
+      {showFeedback && (
+        <Box className="flex-row items-center gap-2 mb-3">
+          <Ionicons
+            name={isCorrect ? "checkmark-circle" : "close-circle"}
+            size={28}
+            color={isCorrect ? theme.quizCorrect : theme.quizIncorrect}
+          />
+          <Text
+            className="text-base font-semibold"
+            style={{
+              color: isCorrect ? theme.quizCorrect : theme.quizIncorrect,
+            }}
+          >
+            {isCorrect ? t("quiz.correct") : t("quiz.incorrect")}
+          </Text>
+        </Box>
+      )}
+      <Text
+        className="text-base font-semibold mb-4"
+        style={{ color: theme.textPrimary }}
+      >
+        {question.question ?? t(question.questionKey as never)}
+      </Text>
+      <VStack className="gap-2">
+        {question.options.map((opt) => {
+          const isCorrectOption = opt.correct;
+          const isUserSelection = selectedId === opt.id;
+          const showAsCorrect = showFeedback && isCorrectOption;
+          const showAsIncorrect =
+            showFeedback && isUserSelection && !isCorrectOption;
+
+          let optionBg = theme.pageBg;
+          let optionBorder = theme.cardBorder;
+          let optionTextColor = theme.textSecondary;
+          if (showFeedback) {
+            if (showAsCorrect) {
+              optionBg = theme.quizCorrect;
+              optionBorder = theme.quizCorrect;
+              optionTextColor = theme.textPrimary;
+            } else if (showAsIncorrect) {
+              optionBg = theme.quizIncorrectBg;
+              optionBorder = theme.quizIncorrect;
+              optionTextColor = theme.textPrimary;
+            } else if (isUserSelection) {
+              optionBg = theme.pageBg;
+              optionBorder = theme.cardBorder;
+              optionTextColor = theme.textSecondary;
+            }
+          } else if (isUserSelection) {
+            if (theme.isDark) {
+              optionBg = "#FFFFFF";
+              optionBorder = theme.cardBorder;
+              optionTextColor = "#171717";
+            } else {
+              optionBg = "#171717";
+              optionBorder = "#171717";
+              optionTextColor = "#FFFFFF";
+            }
+          }
+
+          const optionContent = (
+            <Box
+              className="rounded-xl p-3 flex-row items-center justify-between"
+              style={{
+                backgroundColor: optionBg,
+                borderWidth: 1,
+                borderColor: optionBorder,
+              }}
+            >
+              <Text
+                className="text-sm flex-1"
+                style={{ color: optionTextColor }}
+              >
+                {opt.answer ?? t(opt.key as never)}
+              </Text>
+              {showFeedback && (
+                <Ionicons
+                  name={
+                    showAsCorrect
+                      ? "checkmark-circle"
+                      : showAsIncorrect
+                        ? "close-circle"
+                        : "ellipse-outline"
+                  }
+                  size={26}
+                  color={
+                    showAsCorrect
+                      ? theme.textPrimary
+                      : showAsIncorrect
+                        ? theme.quizIncorrect
+                        : theme.textTertiary
+                  }
+                />
+              )}
+            </Box>
+          );
+
+          return showFeedback ? (
+            <Box key={opt.id}>{optionContent}</Box>
+          ) : (
+            <TouchableOpacity
+              key={opt.id}
+              onPress={() => {
+                bzzt();
+                onSelect(opt.id);
+              }}
+              activeOpacity={0.7}
+              className="cursor-pointer"
+            >
+              {optionContent}
+            </TouchableOpacity>
+          );
+        })}
+      </VStack>
+    </Box>
+  );
+}

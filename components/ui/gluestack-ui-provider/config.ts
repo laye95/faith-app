@@ -1,4 +1,10 @@
 'use client';
+import {
+  primaryScaleLight,
+  primaryScaleDark,
+  primary,
+  declineRgb,
+} from '@/constants/themeTokens';
 import { vars } from 'nativewind';
 
 export const config = {
@@ -8,10 +14,10 @@ export const config = {
     '--color-primary-100': '229 229 229',
     '--color-primary-200': '212 212 212',
     '--color-primary-300': '163 163 163',
-    '--color-primary-400': '115 115 115',
-    '--color-primary-500': '23 23 23',
-    '--color-primary-600': '23 23 23',
-    '--color-primary-700': '10 10 10',
+    '--color-primary-400': primaryScaleLight[400],
+    '--color-primary-500': primaryScaleLight[500],
+    '--color-primary-600': primaryScaleLight[600],
+    '--color-primary-700': primaryScaleLight[700],
     '--color-primary-800': '8 8 8',
     '--color-primary-900': '5 5 5',
     '--color-primary-950': '3 3 3',
@@ -153,6 +159,17 @@ export const config = {
     '--color-indicator-primary': '23 23 23',
     '--color-indicator-info': '83 153 236',
     '--color-indicator-error': '185 28 28',
+
+    '--theme-button-primary-light': primary.lightRgb,
+    '--theme-button-primary-dark': primary.darkRgb,
+    '--theme-tab-active-light': primary.lightRgb,
+    '--theme-tab-active-dark': primary.darkRgb,
+    '--theme-button-accept-light': '16 185 129',
+    '--theme-button-accept-dark': '16 185 129',
+    '--theme-button-decline-light': declineRgb.light,
+    '--theme-button-decline-dark': declineRgb.dark,
+    '--theme-avatar-primary-light': '229 229 229',
+    '--theme-avatar-primary-dark': '56 56 56',
   }),
   dark: vars({
     '--color-primary-0': '3 3 3',
@@ -160,10 +177,10 @@ export const config = {
     '--color-primary-100': '8 8 8',
     '--color-primary-200': '10 10 10',
     '--color-primary-300': '23 23 23',
-    '--color-primary-400': '115 115 115',
-    '--color-primary-500': '250 250 250',
-    '--color-primary-600': '250 250 250',
-    '--color-primary-700': '252 252 252',
+    '--color-primary-400': primaryScaleDark[400],
+    '--color-primary-500': primaryScaleDark[500],
+    '--color-primary-600': primaryScaleDark[600],
+    '--color-primary-700': primaryScaleDark[700],
     '--color-primary-800': '253 253 253',
     '--color-primary-900': '254 254 254',
     '--color-primary-950': '255 255 255',
@@ -305,5 +322,16 @@ export const config = {
     '--color-indicator-primary': '250 250 250',
     '--color-indicator-info': '161 199 245',
     '--color-indicator-error': '232 70 69',
+
+    '--theme-button-primary-light': primary.lightRgb,
+    '--theme-button-primary-dark': primary.darkRgb,
+    '--theme-tab-active-light': primary.lightRgb,
+    '--theme-tab-active-dark': primary.darkRgb,
+    '--theme-button-accept-light': '16 185 129',
+    '--theme-button-accept-dark': '16 185 129',
+    '--theme-button-decline-light': declineRgb.light,
+    '--theme-button-decline-dark': declineRgb.dark,
+    '--theme-avatar-primary-light': '229 229 229',
+    '--theme-avatar-primary-dark': '56 56 56',
   }),
 };

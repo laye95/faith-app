@@ -7,3 +7,7 @@ export function bzzt(): void {
 export function bzztMedium(): void {
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 }
+
+export function bzztWarning(): void {
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+}

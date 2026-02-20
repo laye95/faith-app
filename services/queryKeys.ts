@@ -7,6 +7,28 @@ export const queryKeys = {
     all: ['users'] as const,
     detail: (id: string) => ['users', id] as const,
   },
+  admin: {
+    bibleschoolAnalytics: (from?: string, to?: string) =>
+      ['admin', 'bibleschoolAnalytics', from, to] as const,
+    quizAnalytics: (from?: string, to?: string) =>
+      ['admin', 'quizAnalytics', from, to] as const,
+    timeAnalytics: (from?: string, to?: string) =>
+      ['admin', 'timeAnalytics', from, to] as const,
+    users: (limit: number, offset: number, search?: string) =>
+      ['admin', 'users', limit, offset, search] as const,
+    userDetail: (userId: string) => ['admin', 'userDetail', userId] as const,
+  },
+  vimeo: {
+    playbackUrl: (videoId: string) => ['vimeo', 'playbackUrl', videoId] as const,
+    thumbnailUrl: (videoId: string) => ['vimeo', 'thumbnailUrl', videoId] as const,
+  },
+  bibleschool: {
+    modules: (locale: string) => ['bibleschool', 'modules', locale] as const,
+    module: (id: string, locale: string) =>
+      ['bibleschool', 'module', id, locale] as const,
+    lesson: (moduleId: string, lessonId: string, locale: string) =>
+      ['bibleschool', 'lesson', moduleId, lessonId, locale] as const,
+  },
   progress: {
     overview: (userId: string) => ['progress', 'overview', userId] as const,
     lesson: (userId: string, lessonId: string) =>
@@ -22,6 +44,8 @@ export const queryKeys = {
         ['progress', 'lessonProgress', userId, moduleId] as const,
       completedByUser: (userId: string) =>
         ['progress', 'lessonProgress', 'completedByUser', userId] as const,
+      lastWatchedByUser: (userId: string) =>
+        ['progress', 'lessonProgress', 'lastWatchedByUser', userId] as const,
     },
     moduleProgress: {
       byUserModule: (userId: string, moduleId: string) =>

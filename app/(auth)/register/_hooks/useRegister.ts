@@ -1,10 +1,14 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 
+import { routes } from '@/constants/routes';
+import { getErrorMessage } from '@/utils/errors';
 import { getCurrentLanguage, isSupportedLocale } from '@/i18n';
 import { useTranslation } from '@/hooks/useTranslation';
+import { THEME_STORAGE_KEY } from '@/contexts/ThemeContext';
 import { authService } from '@/services/api/authService';
 import { userSettingsService } from '@/services/api/userSettingsService';
 
@@ -36,28 +40,42 @@ export function useRegister(): UseRegisterReturn {
     },
     onSuccess: async (authData) => {
       if (authData?.user?.id) {
+        const userId = authData.user.id;
         try {
           const currentLanguage = getCurrentLanguage();
           if (isSupportedLocale(currentLanguage)) {
             await userSettingsService.setSetting(
-              authData.user.id,
+              userId,
               'language',
               currentLanguage,
             );
           }
         } catch {
-          // Non-blocking; language will sync on next login
+          //
+        }
+        try {
+          const storedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+          if (
+            storedTheme &&
+            (storedTheme === 'light' ||
+              storedTheme === 'dark' ||
+              storedTheme === 'system')
+          ) {
+            await userSettingsService.setSetting(
+              userId,
+              'theme',
+              storedTheme,
+            );
+          }
+        } catch {
+          //
         }
       }
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace('/');
+      router.replace(routes.main());
     },
     onError: async (err: unknown) => {
-      let errorMessage = t('auth.registrationFailed');
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
+      setError(getErrorMessage(err, t('auth.registrationFailed')));
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });

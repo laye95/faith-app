@@ -4,22 +4,34 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import en from './locales/en.json';
 import nl from './locales/nl.json';
+import bg from './locales/bg.json';
 import hi from './locales/hi.json';
 import id from './locales/id.json';
 
 import {
   isSupportedLocale,
+  isDisplayLocale,
   LANGUAGES,
+  LANGUAGES_FOR_UI,
   SUPPORTED_LOCALES,
+  DISPLAY_LOCALES,
   type SupportedLocale,
 } from './localeConfig';
 
-export { isSupportedLocale, LANGUAGES, SUPPORTED_LOCALES };
+export {
+  isSupportedLocale,
+  isDisplayLocale,
+  LANGUAGES,
+  LANGUAGES_FOR_UI,
+  SUPPORTED_LOCALES,
+  DISPLAY_LOCALES,
+};
 export type { SupportedLocale };
 
 const i18n = new I18n({
   en,
   nl,
+  bg,
   hi,
   id,
 });
@@ -52,11 +64,17 @@ export const initializeI18n = async (): Promise<void> => {
   const deviceLanguage =
     Localization.getLocales()[0]?.languageCode?.split(/[-_]/)[0] || 'en';
 
-  let locale: SupportedLocale = 'en';
+  let locale: SupportedLocale = 'nl';
   if (storedLanguage && SUPPORTED_LOCALES.includes(storedLanguage as SupportedLocale)) {
-    locale = storedLanguage as SupportedLocale;
-  } else if (SUPPORTED_LOCALES.includes(deviceLanguage as SupportedLocale)) {
+    const stored = storedLanguage as SupportedLocale;
+    locale = stored === 'en' ? 'nl' : stored;
+    if (stored === 'en') {
+      await AsyncStorage.setItem(STORAGE_KEY, 'nl');
+    }
+  } else if (DISPLAY_LOCALES.includes(deviceLanguage as SupportedLocale)) {
     locale = deviceLanguage as SupportedLocale;
+  } else if (deviceLanguage === 'en') {
+    locale = 'nl';
   }
 
   i18n.locale = locale;

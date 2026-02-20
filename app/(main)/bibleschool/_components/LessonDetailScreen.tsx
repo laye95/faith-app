@@ -2,43 +2,235 @@ import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { MainTopBar } from '../../_components/MainTopBar';
+import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import {
-  MODULES,
-  getLessonsForModule,
-  type Lesson,
-} from '@/constants/modules';
+import { useModule, useModules } from '@/hooks/useBibleschoolContent';
+import { useVimeoPlaybackUrl } from '@/hooks/useVimeoPlaybackUrl';
+import { useVimeoThumbnail } from '@/hooks/useVimeoThumbnail';
+import { useLessonUnlocks } from '@/hooks/useLessonUnlocks';
+import type { BibleschoolLesson } from '@/types/bibleschool';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { useEvent, useEventListener } from 'expo';
 import * as WebBrowser from 'expo-web-browser';
+import { routes } from '@/constants/routes';
 import { useNavigation, router } from 'expo-router';
-import { bzzt } from '@/utils/haptics';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { lessonProgressService } from '@/services/api/lessonProgressService';
+import { moduleProgressService } from '@/services/api/moduleProgressService';
+import { queryKeys } from '@/services/queryKeys';
+import { bzzt, bzztWarning } from '@/utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ScrollView, TouchableOpacity } from 'react-native';
+import {
+  ActivityIndicator,
+  AppState,
+  type AppStateStatus,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { LockedLessonModal } from '@/app/(main)/bibleschool/(tabs)/modules/[id]/_components/LockedLessonModal';
 
-function LessonVideoPlayer({ videoUrl }: { videoUrl: string }) {
+interface LessonVideoPlayerProps {
+  videoUrl: string;
+  initialPositionSeconds: number;
+  onSavePosition: (seconds: number, immediate?: boolean) => void;
+  onMarkComplete?: () => void;
+  pipRef?: React.MutableRefObject<{
+    start: () => void;
+    stop: () => void;
+    onPiPStop: (() => void) | null;
+  } | null>;
+}
+
+function LessonVideoPlayer({
+  videoUrl,
+  initialPositionSeconds,
+  onSavePosition,
+  onMarkComplete,
+  pipRef,
+}: LessonVideoPlayerProps) {
+  const videoViewRef = useRef<VideoView>(null);
+  const lastPositionRef = useRef(initialPositionSeconds);
+  const onSavePositionRef = useRef(onSavePosition);
+  const onMarkCompleteRef = useRef(onMarkComplete);
+  const hasAppliedInitialSeekRef = useRef(false);
+  const hasMarkedCompleteRef = useRef(false);
+  onSavePositionRef.current = onSavePosition;
+  onMarkCompleteRef.current = onMarkComplete;
+
   const player = useVideoPlayer(videoUrl, (p) => {
     p.loop = false;
+    p.timeUpdateEventInterval = 2;
+    p.staysActiveInBackground = true;
+    if (initialPositionSeconds > 0) {
+      p.currentTime = initialPositionSeconds;
+    }
+    p.play();
   });
 
+  useEventListener(player, 'timeUpdate', ({ currentTime }) => {
+    lastPositionRef.current = currentTime;
+    onSavePositionRef.current(currentTime, false);
+    if (onMarkCompleteRef.current && !hasMarkedCompleteRef.current) {
+      const duration = player.duration;
+      if (duration > 0 && currentTime / duration >= 0.9) {
+        hasMarkedCompleteRef.current = true;
+        onMarkCompleteRef.current();
+      }
+    }
+  });
+
+  useEventListener(player, 'playToEnd', () => {
+    if (onMarkCompleteRef.current && !hasMarkedCompleteRef.current) {
+      hasMarkedCompleteRef.current = true;
+      onMarkCompleteRef.current();
+    }
+  });
+
+  useEventListener(player, 'playingChange', ({ isPlaying }) => {
+    if (!isPlaying) {
+      const pos = player.currentTime;
+      lastPositionRef.current = pos;
+      onSavePositionRef.current(pos, true);
+    }
+  });
+
+  const { status } = useEvent(player, 'statusChange', { status: player.status });
+
+  useEventListener(player, 'statusChange', ({ status: s }) => {
+    if (
+      s === 'readyToPlay' &&
+      initialPositionSeconds > 0 &&
+      !hasAppliedInitialSeekRef.current
+    ) {
+      hasAppliedInitialSeekRef.current = true;
+      player.currentTime = initialPositionSeconds;
+    }
+  });
+
+  useEffect(() => {
+    if (initialPositionSeconds > 0 && !hasAppliedInitialSeekRef.current) {
+      hasAppliedInitialSeekRef.current = true;
+      player.currentTime = initialPositionSeconds;
+    }
+  }, [initialPositionSeconds]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        try {
+          videoViewRef.current?.stopPictureInPicture();
+        } catch (_) {}
+        try {
+          player.pause();
+        } catch (_) {}
+        onSavePositionRef.current(lastPositionRef.current, true);
+      };
+    }, [player]),
+  );
+
+  useEffect(() => {
+    if (pipRef) {
+      pipRef.current = {
+        start: () => {
+          try {
+            videoViewRef.current?.startPictureInPicture();
+          } catch (_) {}
+        },
+        stop: () => {
+          try {
+            videoViewRef.current?.stopPictureInPicture();
+          } catch (_) {}
+        },
+        onPiPStop: null,
+      };
+      return () => {
+        pipRef.current = null;
+      };
+    }
+  }, [pipRef]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state === 'inactive' || state === 'background') {
+        requestAnimationFrame(() => {
+          try {
+            videoViewRef.current?.startPictureInPicture();
+          } catch (_) {}
+        });
+      }
+      if (state === 'active') {
+        try {
+          videoViewRef.current?.stopPictureInPicture();
+        } catch (_) {}
+        player.play();
+      }
+    });
+    return () => sub.remove();
+  }, [player]);
+
+  const isLoading = status === 'loading' || status === 'idle';
+  const [showLoader, setShowLoader] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) {
+      const t = setTimeout(() => setShowLoader(true), 400);
+      return () => clearTimeout(t);
+    }
+    setShowLoader(false);
+  }, [isLoading]);
+
   return (
-    <VideoView
-      style={{ width: '100%', aspectRatio: 16 / 9 }}
-      player={player}
-      allowsFullscreen
-      allowsPictureInPicture
-      contentFit="contain"
-    />
+    <View
+      style={{
+        width: '100%',
+        aspectRatio: 16 / 9,
+        borderRadius: 16,
+        overflow: 'hidden',
+      }}
+    >
+      <VideoView
+        ref={videoViewRef}
+        style={{ width: '100%', height: '100%' }}
+        player={player}
+        fullscreenOptions={{ enable: true }}
+        allowsPictureInPicture
+        startsPictureInPictureAutomatically={true}
+        contentFit="contain"
+        onPictureInPictureStop={() => pipRef?.current?.onPiPStop?.()}
+      />
+      {isLoading && showLoader && (
+        <Animated.View
+          entering={FadeIn.duration(150)}
+          exiting={FadeOut.duration(200)}
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              backgroundColor: '#000000',
+              alignItems: 'center',
+              justifyContent: 'center',
+            } as const,
+          ]}
+        >
+          <ActivityIndicator size="small" color="#e5e5e5" />
+        </Animated.View>
+      )}
+    </View>
   );
 }
 
 function LessonVideoPlaceholder({ theme }: { theme: ReturnType<typeof useTheme> }) {
   return (
     <Box
-      className="w-full items-center justify-center"
+      className="w-full items-center justify-center overflow-hidden rounded-2xl"
       style={{
         aspectRatio: 16 / 9,
         backgroundColor: theme.avatarPrimary,
@@ -46,9 +238,9 @@ function LessonVideoPlaceholder({ theme }: { theme: ReturnType<typeof useTheme> 
     >
       <Box
         className="rounded-full p-4 items-center justify-center"
-        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        style={{ backgroundColor: theme.overlayBg }}
       >
-        <Ionicons name="play" size={48} color="#ffffff" />
+        <Ionicons name="play" size={48} color={theme.buttonPrimaryContrast} />
       </Box>
     </Box>
   );
@@ -99,25 +291,199 @@ function HandoutButton({
   );
 }
 
+const NEXT_THUMBNAIL_WIDTH = 120;
+const NEXT_THUMBNAIL_HEIGHT = 68;
+
+function NextLessonThumbnail({
+  thumbnailUrl,
+  theme,
+  isLoading,
+}: {
+  thumbnailUrl?: string;
+  theme: ReturnType<typeof useTheme>;
+  isLoading?: boolean;
+}) {
+  return (
+    <Box
+      className="rounded-xl overflow-hidden items-center justify-center"
+      style={{
+        width: NEXT_THUMBNAIL_WIDTH,
+        height: NEXT_THUMBNAIL_HEIGHT,
+        backgroundColor: theme.avatarPrimary,
+      }}
+    >
+      {thumbnailUrl ? (
+        <Image
+          key={thumbnailUrl}
+          source={{ uri: thumbnailUrl }}
+          style={{ width: NEXT_THUMBNAIL_WIDTH, height: NEXT_THUMBNAIL_HEIGHT }}
+          contentFit="cover"
+        />
+      ) : isLoading ? (
+        <ActivityIndicator size="small" color={theme.textTertiary} />
+      ) : null}
+      <Box
+        className="absolute inset-0 items-center justify-center"
+        pointerEvents="none"
+      >
+        <Box className="rounded-full p-2 items-center justify-center">
+          <Ionicons name="play" size={18} color="#ffffff" />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+type LessonLike = {
+  id: string;
+  order: number;
+  title?: string;
+  titleKey?: string;
+  thumbnailUrl?: string;
+  videoId?: string;
+};
+
 function NextLessonCard({
   nextLesson,
   moduleId,
   theme,
   t,
+  isLocked,
+  onPress,
+  onLockedPress,
 }: {
-  nextLesson: Lesson;
+  nextLesson: LessonLike;
   moduleId: string;
   theme: ReturnType<typeof useTheme>;
   t: (key: string, params?: Record<string, string | number>) => string;
+  isLocked: boolean;
+  onPress: () => void;
+  onLockedPress?: () => void;
 }) {
+  const videoIdForThumb = !nextLesson.thumbnailUrl && nextLesson.videoId ? nextLesson.videoId : undefined;
+  const { data: vimeoThumbnail, isLoading } = useVimeoThumbnail(videoIdForThumb);
+  const thumbnailUrl = nextLesson.thumbnailUrl ?? vimeoThumbnail ?? undefined;
+  const thumbnailLoading = !!videoIdForThumb && isLoading && !thumbnailUrl;
+
+  const handlePress = () => {
+    if (isLocked) {
+      onLockedPress?.();
+    } else {
+      onPress();
+    }
+  };
+
+  const lessonNumberStr = t('lessons.lessonNumber', { number: nextLesson.order });
+  const titleStr = nextLesson.title ?? (nextLesson.titleKey ? t(nextLesson.titleKey as never) : '');
+  const showNumberSeparately = !titleStr.trim().toLowerCase().startsWith(lessonNumberStr.trim().toLowerCase());
+
   return (
     <TouchableOpacity
-      onPress={() => {
-        bzzt();
-        router.replace(`/(main)/bibleschool/modules/${moduleId}/${nextLesson.id}`);
-      }}
+      onPress={handlePress}
       activeOpacity={0.7}
       className="cursor-pointer"
+      style={isLocked ? { opacity: 0.6 } : undefined}
+    >
+      <Box
+        className="rounded-2xl overflow-hidden"
+        style={{
+          backgroundColor: theme.cardBg,
+          borderWidth: 1,
+          borderColor: theme.cardBorder,
+        }}
+      >
+        <Box className="flex-row items-center py-3 pr-4">
+          <Box className="pl-3 mr-4">
+            <Box
+              style={{
+                width: NEXT_THUMBNAIL_WIDTH,
+                height: NEXT_THUMBNAIL_HEIGHT,
+                position: 'relative',
+              }}
+            >
+              <NextLessonThumbnail
+                thumbnailUrl={thumbnailUrl}
+                theme={theme}
+                isLoading={thumbnailLoading}
+              />
+              {isLocked ? (
+                <Box
+                  className="absolute inset-0 items-center justify-center rounded-xl overflow-hidden"
+                  style={{ backgroundColor: theme.overlayBg }}
+                  pointerEvents="none"
+                >
+                  <Ionicons name="lock-closed" size={24} color="#ffffff" />
+                </Box>
+              ) : null}
+            </Box>
+          </Box>
+          <Box className="flex-1 justify-center min-w-0">
+            {showNumberSeparately && (
+              <Text
+                className="text-xs font-medium mb-0.5"
+                style={{ color: theme.textSecondary }}
+              >
+                {t('lessons.nextLesson', { number: nextLesson.order })}
+              </Text>
+            )}
+            <Text
+              className="text-base font-medium"
+              style={{ color: theme.textPrimary }}
+              numberOfLines={2}
+            >
+              {titleStr}
+            </Text>
+          </Box>
+          {isLocked ? (
+            <Box
+              className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
+              style={{ backgroundColor: theme.cardBorder }}
+            >
+              <Ionicons name="lock-closed" size={14} color={theme.textSecondary} />
+              <Text
+                className="text-xs font-semibold"
+                style={{ color: theme.textSecondary }}
+              >
+                {t('lessons.locked')}
+              </Text>
+            </Box>
+          ) : (
+            <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
+          )}
+        </Box>
+      </Box>
+    </TouchableOpacity>
+  );
+}
+
+function StartExamCard({
+  moduleId,
+  theme,
+  t,
+  isLocked,
+  onLockedPress,
+}: {
+  moduleId: string;
+  theme: ReturnType<typeof useTheme>;
+  t: (key: string, params?: Record<string, string | number>) => string;
+  isLocked: boolean;
+  onLockedPress?: () => void;
+}) {
+  const handlePress = () => {
+    if (isLocked) {
+      onLockedPress?.();
+    } else {
+      bzzt();
+      router.replace(routes.bibleschoolModuleExam(moduleId));
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.7}
+      className="cursor-pointer"
+      style={isLocked ? { opacity: 0.6 } : undefined}
     >
       <Box
         className="rounded-2xl overflow-hidden flex-row items-center p-4"
@@ -128,36 +494,53 @@ function NextLessonCard({
         }}
       >
         <Box
-          className="rounded-xl overflow-hidden"
+          className="rounded-xl p-2.5 mr-4 items-center justify-center"
           style={{
-            width: 96,
-            height: 54,
             backgroundColor: theme.avatarPrimary,
+            position: 'relative',
           }}
         >
-          {nextLesson.thumbnailUrl ? (
-            <Image
-              source={{ uri: nextLesson.thumbnailUrl }}
-              style={{ width: 96, height: 54 }}
-              contentFit="cover"
-            />
+          <Ionicons name="document-text" size={24} color={theme.textPrimary} />
+          {isLocked ? (
+            <Box
+              className="absolute inset-0 items-center justify-center rounded-xl overflow-hidden"
+              style={{ backgroundColor: theme.overlayBg }}
+              pointerEvents="none"
+            >
+              <Ionicons name="lock-closed" size={24} color="#ffffff" />
+            </Box>
           ) : null}
         </Box>
-        <Box className="flex-1 ml-4">
-          <Text
-            className="text-xs font-medium mb-0.5"
-            style={{ color: theme.textSecondary }}
-          >
-            {t('lessons.nextLesson', { number: nextLesson.order })}
-          </Text>
+        <Box className="flex-1 min-w-0">
           <Text
             className="text-base font-semibold"
             style={{ color: theme.textPrimary }}
           >
-            {t(nextLesson.titleKey as never)}
+            {t('exam.takeExam')}
+          </Text>
+          <Text
+            className="text-xs mt-0.5"
+            style={{ color: theme.textSecondary }}
+          >
+            {isLocked ? t('exam.unlockHint') : t('exam.readyHint')}
           </Text>
         </Box>
-        <Ionicons name="chevron-forward" size={24} color={theme.textTertiary} />
+        {isLocked ? (
+          <Box
+            className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
+            style={{ backgroundColor: theme.cardBorder }}
+          >
+            <Ionicons name="lock-closed" size={14} color={theme.textSecondary} />
+            <Text
+              className="text-xs font-semibold"
+              style={{ color: theme.textSecondary }}
+            >
+              {t('lessons.locked')}
+            </Text>
+          </Box>
+        ) : (
+          <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
+        )}
       </Box>
     </TouchableOpacity>
   );
@@ -176,7 +559,7 @@ function BackToModuleCard({
     <TouchableOpacity
       onPress={() => {
         bzzt();
-        router.replace(`/(main)/bibleschool/modules/${moduleId}`);
+        router.replace(routes.bibleschoolModule(moduleId));
       }}
       activeOpacity={0.7}
       className="cursor-pointer"
@@ -215,16 +598,123 @@ interface LessonDetailScreenProps {
 export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenProps) {
   const navigation = useNavigation();
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { isLessonUnlocked, isExamUnlocked, nextUnlockedTarget } = useLessonUnlocks();
 
-  const module = MODULES.find((m) => m.id === moduleId);
-  const lessons = module ? getLessonsForModule(moduleId) : [];
+  const { data: moduleData } = useModule(moduleId, locale);
+  const { data: modules } = useModules(locale);
+  const lessons = moduleData?.lessons ?? [];
   const lesson = lessons.find((l) => l.id === lessonId);
   const nextLesson = lesson
     ? lessons.find((l) => l.order === lesson.order + 1)
     : undefined;
 
+  const { data: progress, isLoading: progressLoading } = useQuery({
+    queryKey: queryKeys.progress.lessonProgress.byUserLesson(user?.id ?? '', lessonId),
+    queryFn: () => lessonProgressService.getByUserAndLesson(user!.id, lessonId),
+    enabled: !!user?.id && !!lessonId,
+    staleTime: 0,
+    refetchOnMount: 'always',
+  });
+
+  const {
+    data: vimeoUrl,
+    isLoading: vimeoLoading,
+    isError: vimeoError,
+    refetch: refetchVimeo,
+  } = useVimeoPlaybackUrl(
+    lesson?.videoId && !lesson.videoUrl ? lesson.videoId : undefined,
+  );
+
+  const savePositionMutation = useMutation({
+    mutationFn: async (videoPositionSeconds: number) => {
+      return lessonProgressService.upsertByUserAndLesson(user!.id, lessonId, {
+        module_id: moduleId,
+        video_position_seconds: videoPositionSeconds,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.progress.lessonProgress.lastWatchedByUser(user?.id ?? ''),
+      });
+    },
+  });
+
+  const markCompleteMutation = useMutation({
+    mutationFn: async () => {
+      await lessonProgressService.upsertByUserAndLesson(user!.id, lessonId, {
+        module_id: moduleId,
+        completed: true,
+        completed_at: new Date().toISOString(),
+      });
+      const list = await lessonProgressService.listByUserAndModule(user!.id, moduleId);
+      const completedCount = list.filter((p) => p.completed).length;
+      const progressPercentage = Math.round((completedCount / lessons.length) * 100);
+      await moduleProgressService.upsertByUserAndModule(user!.id, moduleId, {
+        status: 'in_progress',
+        progress_percentage: progressPercentage,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          Array.isArray(query.queryKey) &&
+          query.queryKey[0] === 'progress',
+      });
+    },
+  });
+
+  const lastSaveTimeRef = useRef(0);
+  const lastSavePositionRef = useRef<number | null>(null);
+  const [lockedModal, setLockedModal] = useState<{
+    message: string;
+    prerequisiteLessonNumber: number;
+    targetModuleNumber: number;
+    targetModuleId: string;
+    targetModuleTitle: string;
+    targetLessonId: string | null;
+    isExam: boolean;
+  } | null>(null);
+  const pipRef = useRef<{
+    start: () => void;
+    stop: () => void;
+    onPiPStop: (() => void) | null;
+  } | null>(null);
+
+  const handleSavePosition = useCallback(
+    (seconds: number, immediate = false) => {
+      if (!user?.id) return;
+      const position = Math.floor(seconds);
+      const now = Date.now();
+      if (immediate) {
+        savePositionMutation.mutate(position);
+        lastSaveTimeRef.current = now;
+        lastSavePositionRef.current = position;
+        return;
+      }
+      const elapsed = now - lastSaveTimeRef.current;
+      const positionDelta =
+        lastSavePositionRef.current !== null
+          ? Math.abs(position - lastSavePositionRef.current)
+          : 999;
+      if (elapsed >= 5000 || positionDelta >= 10) {
+        savePositionMutation.mutate(position);
+        lastSaveTimeRef.current = now;
+        lastSavePositionRef.current = position;
+      }
+    },
+    [user?.id, savePositionMutation],
+  );
+
+  const handleMarkComplete = useCallback(() => {
+    if (!user?.id || progress?.completed) return;
+    markCompleteMutation.mutate();
+  }, [user?.id, progress?.completed, markCompleteMutation]);
+
+  const module = moduleData;
   if (!module || !lesson) {
     return null;
   }
@@ -232,7 +722,18 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
   const handleLessonHandout = () => {
     bzzt();
     if (lesson.lessonHandoutUrl) {
-      WebBrowser.openBrowserAsync(lesson.lessonHandoutUrl);
+      pipRef.current?.start();
+      if (pipRef.current) {
+        pipRef.current.onPiPStop = () => {
+          WebBrowser.dismissBrowser().catch(() => {});
+        };
+      }
+      requestAnimationFrame(() => {
+        WebBrowser.openBrowserAsync(lesson.lessonHandoutUrl!).finally(() => {
+          if (pipRef.current) pipRef.current.onPiPStop = null;
+          setTimeout(() => pipRef.current?.stop(), 300);
+        });
+      });
     }
   };
 
@@ -240,43 +741,133 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
     bzzt();
     const moduleHandoutUrl = module.moduleHandoutUrl ?? lesson.moduleHandoutUrl;
     if (moduleHandoutUrl) {
-      WebBrowser.openBrowserAsync(moduleHandoutUrl);
+      pipRef.current?.start();
+      if (pipRef.current) {
+        pipRef.current.onPiPStop = () => {
+          WebBrowser.dismissBrowser().catch(() => {});
+        };
+      }
+      requestAnimationFrame(() => {
+        WebBrowser.openBrowserAsync(moduleHandoutUrl).finally(() => {
+          if (pipRef.current) pipRef.current.onPiPStop = null;
+          setTimeout(() => pipRef.current?.stop(), 300);
+        });
+      });
     }
   };
 
+  const handleLockedPress = () => {
+    bzztWarning();
+    const target = nextUnlockedTarget;
+    if (!target) return;
+    const mod = modules?.find((m) => m.id === target.module.id);
+    const targetModuleTitle = mod?.title ?? t(target.module.titleKey as never);
+    if (target.type === 'lesson') {
+      setLockedModal({
+        message: t('lessons.lockedModalMessageModuleLesson', {
+          moduleNumber: target.module.order,
+          number: target.lesson.order,
+        }),
+        prerequisiteLessonNumber: target.lesson.order,
+        targetModuleNumber: target.module.order,
+        targetModuleId: target.module.id,
+        targetModuleTitle,
+        targetLessonId: target.lesson.id,
+        isExam: false,
+      });
+    } else {
+      setLockedModal({
+        message: t('lessons.lockedModalMessageExamModule', {
+          moduleNumber: target.module.order,
+        }),
+        prerequisiteLessonNumber: 0,
+        targetModuleNumber: target.module.order,
+        targetModuleId: target.module.id,
+        targetModuleTitle,
+        targetLessonId: null,
+        isExam: true,
+      });
+    }
+  };
+
+  const videoUrl = lesson.videoUrl ?? vimeoUrl ?? undefined;
+  const videoLoading = !lesson.videoUrl && !!lesson.videoId && vimeoLoading;
+  if (__DEV__ && lesson) {
+    console.log('[LessonDetail] lessonId:', lessonId, 'videoId:', lesson.videoId, 'videoUrl:', videoUrl ?? 'none', 'vimeoLoading:', vimeoLoading, 'vimeoError:', vimeoError);
+    console.log('[LessonDetail] full lesson:', JSON.stringify(lesson, null, 2));
+  }
+  const showVimeoRetry =
+    !lesson.videoUrl && !!lesson.videoId && vimeoError && !videoUrl;
+
   return (
     <Box
-      className="flex-1 px-6"
+      className="flex-1"
       style={{ backgroundColor: theme.pageBg }}
     >
       <Box
+        className="px-6"
         style={{
           paddingTop: insets.top + 24,
-          paddingBottom: insets.bottom,
+          paddingBottom: 0,
         }}
       >
         <MainTopBar
-          title={t(lesson.titleKey as never)}
+          title={lesson.title ?? ''}
           currentSection="bibleschool"
           showBackButton
           onBack={() => navigation.goBack()}
         />
       </Box>
+      <Box className="px-6 rounded-2xl overflow-hidden">
+        {videoUrl ? (
+          (progressLoading && user) || videoLoading ? (
+            <LessonVideoPlaceholder theme={theme} />
+          ) : (
+            <LessonVideoPlayer
+              videoUrl={videoUrl}
+              initialPositionSeconds={progress?.video_position_seconds ?? 0}
+              onSavePosition={handleSavePosition}
+              onMarkComplete={handleMarkComplete}
+              pipRef={pipRef}
+            />
+          )
+        ) : showVimeoRetry ? (
+          <TouchableOpacity
+            onPress={() => {
+              bzzt();
+              refetchVimeo();
+            }}
+            className="rounded-2xl overflow-hidden p-8 items-center justify-center"
+            style={{
+              backgroundColor: theme.cardBg,
+              borderWidth: 1,
+              borderColor: theme.cardBorder,
+            }}
+          >
+            <Ionicons
+              name="refresh-circle-outline"
+              size={48}
+              style={{ color: theme.textSecondary, marginBottom: 12 }}
+            />
+            <Text
+              className="text-base font-medium text-center"
+              style={{ color: theme.textPrimary }}
+            >
+              {t('lessons.videoLoadError', 'Video could not load. Tap to retry.')}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <LessonVideoPlaceholder theme={theme} />
+        )}
+      </Box>
       <ScrollView
-        className="flex-1"
+        className="flex-1 px-6"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
+          paddingTop: 24,
           paddingBottom: insets.bottom + 100,
         }}
       >
-        <Box className="rounded-2xl overflow-hidden" style={{ marginBottom: 24 }}>
-          {lesson.videoUrl ? (
-            <LessonVideoPlayer videoUrl={lesson.videoUrl} />
-          ) : (
-            <LessonVideoPlaceholder theme={theme} />
-          )}
-        </Box>
-
         <Box
           className="rounded-2xl overflow-hidden p-5 mb-6"
           style={{
@@ -295,7 +886,7 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
             className="text-lg font-bold mb-4"
             style={{ color: theme.textPrimary }}
           >
-            {t(lesson.titleKey as never)}
+            {lesson.title ?? ''}
           </Text>
           <VStack className="gap-4">
             <Box>
@@ -312,20 +903,23 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
                 {lesson.content || t('lessonsPage.empty')}
               </Text>
             </Box>
-            <Box>
-              <Text
-                className="text-sm font-semibold uppercase tracking-wider mb-2"
-                style={{ color: theme.textSecondary }}
-              >
-                {t('lessons.goal')}
-              </Text>
-              <Text
-                className="text-base"
-                style={{ color: theme.textPrimary }}
-              >
-                {lesson.goal || t('lessonsPage.empty')}
-              </Text>
-            </Box>
+            {lesson.goal &&
+              !lesson.content?.trim().toLowerCase().includes(lesson.goal.trim().toLowerCase()) && (
+              <Box>
+                <Text
+                  className="text-sm font-semibold uppercase tracking-wider mb-2"
+                  style={{ color: theme.textSecondary }}
+                >
+                  {t('lessons.goal')}
+                </Text>
+                <Text
+                  className="text-base"
+                  style={{ color: theme.textPrimary }}
+                >
+                  {lesson.goal}
+                </Text>
+              </Box>
+            )}
           </VStack>
         </Box>
 
@@ -354,7 +948,9 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
           className="text-sm font-semibold uppercase tracking-wider mb-3"
           style={{ color: theme.textSecondary }}
         >
-          {nextLesson ? t('lessons.nextLesson', { number: nextLesson.order }) : t('lessons.backToModule')}
+          {nextLesson
+            ? t('lessons.nextLesson', { number: nextLesson.order })
+            : t('exam.takeExam')}
         </Text>
         {nextLesson ? (
           <NextLessonCard
@@ -362,11 +958,49 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
             moduleId={moduleId}
             theme={theme}
             t={t}
+            isLocked={!isLessonUnlocked(moduleId, nextLesson)}
+            onPress={() => {
+              bzzt();
+              router.replace(routes.bibleschoolModuleLesson(moduleId, nextLesson.id));
+            }}
+            onLockedPress={handleLockedPress}
           />
         ) : (
-          <BackToModuleCard moduleId={moduleId} theme={theme} t={t} />
+          <StartExamCard
+            moduleId={moduleId}
+            theme={theme}
+            t={t}
+            isLocked={!isExamUnlocked(moduleId)}
+            onLockedPress={handleLockedPress}
+          />
         )}
       </ScrollView>
+      <LockedLessonModal
+        visible={lockedModal !== null}
+        message={lockedModal?.message ?? ''}
+        prerequisiteLessonNumber={lockedModal?.prerequisiteLessonNumber ?? 0}
+        isExam={lockedModal?.isExam ?? false}
+        targetModuleNumber={lockedModal?.targetModuleNumber ?? 0}
+        targetModuleId={lockedModal?.targetModuleId ?? ''}
+        targetModuleTitle={lockedModal?.targetModuleTitle ?? ''}
+        targetLessonId={lockedModal?.targetLessonId ?? null}
+        onClose={() => setLockedModal(null)}
+        onGoToPrerequisite={() => {
+          if (!lockedModal) return;
+          bzzt();
+          setLockedModal(null);
+          if (lockedModal.isExam) {
+            router.push(routes.bibleschoolModuleExam(lockedModal.targetModuleId));
+          } else if (lockedModal.targetLessonId) {
+            router.push(
+              routes.bibleschoolModuleLesson(
+                lockedModal.targetModuleId,
+                lockedModal.targetLessonId,
+              ),
+            );
+          }
+        }}
+      />
     </Box>
   );
 }

@@ -3,6 +3,7 @@ import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslation } from "@/hooks/useTranslation";
+import { routes } from "@/constants/routes";
 import { bzzt } from "@/utils/haptics";
 import { router } from "expo-router";
 import { TouchableOpacity } from "react-native";
@@ -11,8 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { AuthTopBar } from "../_components/AuthTopBar";
 
+import { AuthHeader } from "../_components/AuthHeader";
 import { RegisterForm } from "./_components/RegisterForm";
-import { RegisterHeader } from "./_components/RegisterHeader";
 import { useRegister } from "./_hooks/useRegister";
 
 export default function RegisterScreen() {
@@ -26,7 +27,7 @@ export default function RegisterScreen() {
       <FormScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <Box className="flex-1 px-6 py-6 justify-center">
             <Animated.View entering={FadeIn.duration(600)}>
-              <RegisterHeader />
+              <AuthHeader titleKey="auth.getStarted" subtitleKey="auth.registerSubtitle" />
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(200).duration(600)}>
@@ -51,7 +52,7 @@ export default function RegisterScreen() {
                 <TouchableOpacity
                   onPress={() => {
                     bzzt();
-                    router.push("/(auth)/login");
+                    router.push(routes.auth('login'));
                   }}
                   activeOpacity={0.7}
                   className="cursor-pointer"

@@ -234,6 +234,50 @@ export class BaseService {
     });
   }
 
+  protected async upsertWithConflict<T, D extends Record<string, unknown> = Record<string, unknown>>(
+    data: D,
+    options: { onConflict: string; ignoreDuplicates?: boolean },
+  ): Promise<T> {
+    if (!this.tableName) {
+      throw new Error("tableName must be defined to use upsertWithConflict");
+    }
+
+    this.log("info", `Upserting ${this.tableName}`, { data, options });
+
+    try {
+      const { data: result, error } = await this.supabase
+        .from(this.tableName!)
+        .upsert(data, {
+          onConflict: options.onConflict,
+          ignoreDuplicates: options.ignoreDuplicates ?? false,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (!result) throw new Error("No data returned from upsert");
+      return result as T;
+    } catch (error) {
+      this.log("error", "Upsert failed", error);
+      throw this.normalizeError(error);
+    }
+  }
+
+  protected async executeRpc<T>(
+    name: string,
+    params?: Record<string, unknown>,
+  ): Promise<T> {
+    try {
+      const { data, error } = await this.supabase.rpc(name, params);
+
+      if (error) throw error;
+      return data as T;
+    } catch (error) {
+      this.log("error", `RPC ${name} failed`, error);
+      throw this.normalizeError(error);
+    }
+  }
+
   protected async delete(id: string): Promise<void> {
     if (!this.tableName) {
       throw new Error("tableName must be defined to use delete method");

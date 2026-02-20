@@ -60,6 +60,8 @@ export interface QuizAttempt {
   score_percentage: number;
   passed: boolean;
   answers: Record<string, string> | null;
+  correct_count: number | null;
+  total_count: number | null;
   completed_at: string;
   created_at: string;
 }
@@ -71,5 +73,7 @@ export interface CreateQuizAttemptInput {
   score_percentage: number;
   passed: boolean;
   answers?: Record<string, string> | null;
+  correct_count?: number;
+  total_count?: number;
   completed_at?: string;
 }

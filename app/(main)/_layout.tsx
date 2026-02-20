@@ -1,6 +1,8 @@
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { useAuth } from '@/contexts/AuthContext';
 import { SectionNavigationProvider, useSectionNavigation } from '@/contexts/SectionNavigationContext';
+import { useLastSectionRestore } from '@/hooks/useLastSectionRestore';
+import { useStreak } from '@/hooks/useStreak';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Redirect } from 'expo-router';
@@ -11,6 +13,8 @@ import { DrawerContent } from './_components/DrawerContent';
 function MainLayoutContent() {
   const { session } = useAuth();
   const { isNavigating, targetSection } = useSectionNavigation();
+  useLastSectionRestore();
+  useStreak();
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -34,12 +38,13 @@ function MainLayoutContent() {
           swipeEnabled: true,
         }}
         drawerContent={(props) => <DrawerContent {...props} />}
-        drawerPosition="right"
       >
         <Drawer.Screen name="index" />
+        <Drawer.Screen name="admin" />
         <Drawer.Screen name="bibleschool" />
         <Drawer.Screen name="podcasts" />
         <Drawer.Screen name="sermons" />
+        <Drawer.Screen name="faith-business-school" />
         <Drawer.Screen name="profile" />
         <Drawer.Screen name="settings/index" />
       </Drawer>

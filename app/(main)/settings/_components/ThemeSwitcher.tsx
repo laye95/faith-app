@@ -16,6 +16,10 @@ import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
 import type { ThemePreference } from '@/contexts/ThemeContext';
 
+interface ThemeSwitcherProps {
+  fullWidth?: boolean;
+}
+
 const THEME_OPTIONS: Array<{
   value: ThemePreference;
   icon: keyof typeof Ionicons.glyphMap;
@@ -26,7 +30,7 @@ const THEME_OPTIONS: Array<{
   { value: 'system', icon: 'phone-portrait', labelKey: 'settings.themeSystem' },
 ];
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ fullWidth = false }: ThemeSwitcherProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { preference, setPreference } = useThemePreference();
@@ -36,6 +40,9 @@ export function ThemeSwitcher() {
   const isDark = theme.isDark;
   const { width: screenWidth } = Dimensions.get('window');
   const switcherWidth = Math.min(screenWidth - 96, 320);
+  const containerStyle = fullWidth
+    ? { flex: 1, alignSelf: 'stretch' as const }
+    : { width: switcherWidth, minWidth: switcherWidth };
 
   const currentLabel =
     THEME_OPTIONS.find((o) => o.value === preference)?.labelKey ?? 'system';
@@ -62,11 +69,7 @@ export function ThemeSwitcher() {
   };
 
   return (
-    <View
-      ref={triggerRef}
-      style={{ width: switcherWidth, minWidth: switcherWidth }}
-      collapsable={false}
-    >
+    <View ref={triggerRef} style={containerStyle} collapsable={false}>
       <TouchableOpacity
         onPress={handleOpen}
         activeOpacity={0.7}

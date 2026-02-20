@@ -1,3 +1,4 @@
+import { NotificationDropdown } from '@/components/ui/NotificationDropdown';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
@@ -13,6 +14,7 @@ interface MainTopBarProps {
   title: string;
   currentSection: string;
   showBackButton?: boolean;
+  showNotifications?: boolean;
   onBack?: () => void;
 }
 
@@ -20,6 +22,7 @@ export function MainTopBar({
   title,
   currentSection,
   showBackButton = false,
+  showNotifications = true,
   onBack,
 }: MainTopBarProps) {
   const theme = useTheme();
@@ -64,7 +67,11 @@ export function MainTopBar({
           {title}
         </Text>
       </Box>
-      <Box className="w-20 items-end justify-center" style={{ minHeight: 44 }}>
+      <Box
+        className="flex-row items-center justify-end gap-2"
+        style={{ minHeight: 44 }}
+      >
+        {showNotifications && <NotificationDropdown />}
         <TouchableOpacity
           onPress={() => {
             bzzt();

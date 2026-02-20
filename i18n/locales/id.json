@@ -1,4 +1,7 @@
 {
+  "app": {
+    "versionLabel": "Versi aplikasi {{version}}"
+  },
   "auth": {
     "back": "Kembali",
     "welcomeBack": "Selamat datang kembali",
@@ -32,6 +35,12 @@
     "passwordsDoNotMatch": "Kata sandi tidak cocok",
     "registrationFailed": "Pendaftaran gagal. Silakan coba lagi."
   },
+  "streak": {
+    "days": "{{count}} hari"
+  },
+  "notifications": {
+    "empty": "Tidak ada notifikasi"
+  },
   "home": {
     "welcome": "Selamat datang",
     "subtitle": "Anda masuk ke Faith Generation Bible school.",
@@ -46,25 +55,100 @@
     "faithGeneration": "Faith Generation",
     "faithGenerationBibleSchool": "Faith Generation Bible School",
     "bibleSchoolDescription": "Ikuti sekolah Alkitab online gratis dengan 100 pelajaran untuk memperkuat fondasi iman Anda.",
-    "back": "Kembali"
+    "back": "Kembali",
+    "yesterday": "Kemarin",
+    "daysAgo": "{{count}}h yang lalu",
+    "weeksAgo": "{{count}}mgu yang lalu"
   },
   "comingSoon": {
     "badge": "Segera hadir",
     "podcastsDescription": "Kami sedang menyiapkan podcast yang inspirasional untuk memperkuat iman Anda. Dengarkan pengajaran, kesaksian, dan dorongan di mana pun Anda berada.",
-    "sermonsDescription": "Tonton dan dengarkan khotbah yang kuat dari Faith Generation. Perpustakaan video dan audio kami akan segera tersedia di sini."
+    "sermonsDescription": "Tonton dan dengarkan khotbah yang kuat dari Faith Generation. Perpustakaan video dan audio kami akan segera tersedia di sini.",
+    "faithBusinessSchoolDescription": "Faith Business School segera hadir. Temukan cara membangun bisnis berdasarkan prinsip Alkitab."
   },
   "hub": {
     "title": "Apa yang ingin Anda lakukan hari ini?",
     "bibleschool": "Sekolah Alkitab",
     "bibleschoolSubtitle": "100 pelajaran, 20 modul",
-    "podcasts": "Podcast",
-    "podcastsSubtitle": "Dengarkan pengajaran dan dorongan",
+    "faithBusinessSchool": "Faith Business School",
+    "faithBusinessSchoolSubtitle": "Bisnis dan kewirausahaan",
+    "healingSchool": "Healing School",
+    "healingSchoolSubtitle": "Segera hadir",
     "sermons": "Khotbah",
     "sermonsSubtitle": "Tonton dan dengarkan khotbah",
+    "podcasts": "Podcast",
+    "podcastsSubtitle": "Dengarkan pengajaran dan dorongan",
+    "bibleVersesLearn": "Belajar ayat Alkitab",
+    "bibleVersesLearnSubtitle": "Segera hadir",
+    "audiobooks": "Buku audio",
+    "audiobooksSubtitle": "Segera hadir",
+    "giving": "Memberi",
+    "givingSubtitle": "Segera hadir",
+    "miracles": "Mukjizat",
+    "miraclesSubtitle": "Segera hadir",
+    "bibleReadingSchedule": "Jadwal baca Alkitab",
+    "bibleReadingScheduleSubtitle": "Segera hadir",
     "comingSoon": "Segera hadir"
+  },
+  "admin": {
+    "overview": "Ringkasan Admin",
+    "welcome": "Dasbor Admin",
+    "analytics": "Analitik Sekolah Alkitab",
+    "users": "Pengguna",
+    "quickLinks": "Tautan cepat",
+    "totalModuleCompletions": "Total penyelesaian modul",
+    "usersComingSoon": "Daftar pengguna segera hadir",
+    "bibleschoolAnalytics": "Analitik Sekolah Alkitab",
+    "totalUsers": "Total pengguna",
+    "moduleCompletion": "Penyelesaian modul",
+    "completed": "Selesai",
+    "inProgress": "Sedang berjalan",
+    "mostCompleted": "Modul paling selesai",
+    "completionRate": "Tingkat penyelesaian",
+    "analyticsComingSoon": "Analitik segera hadir",
+    "quizPerformance": "Kinerja kuis",
+    "avgScore": "rata",
+    "passed": "lulus",
+    "activeUsers": "Pengguna aktif",
+    "last7Days": "7 hari terakhir",
+    "last30Days": "30 hari terakhir",
+    "newUsersLast30Days": "Pendaftaran baru (14 hari terakhir)",
+    "newSignupsInPeriod": "Pendaftaran baru",
+    "lessonCompletionsInPeriod": "Penyelesaian pelajaran",
+    "moduleCompletionsInPeriod": "Penyelesaian modul",
+    "activeUsersNote": "Pengguna dengan progres",
+    "totalInPeriod": "Total",
+    "noDataInPeriod": "Tidak ada data dalam periode yang dipilih",
+    "showingLastDays": "Menampilkan {{count}} hari terakhir",
+    "showMore": "Tampilkan lebih",
+    "showLess": "Tampilkan kurang",
+    "engagementFunnel": "Corong keterlibatan",
+    "loadingUsers": "Memuat pengguna...",
+    "searchUsers": "Cari berdasarkan email atau nama",
+    "lastActivity": "Aktivitas terakhir",
+    "noUsersFound": "Tidak ada pengguna yang cocok",
+    "noUsers": "Belum ada pengguna",
+    "joined": "Bergabung",
+    "progressSummary": "Ringkasan kemajuan",
+    "lessonsCompleted": "Pelajaran selesai",
+    "modulesCompleted": "Modul selesai",
+    "quizAttempts": "Percobaan kuis",
+    "moduleProgress": "Kemajuan modul",
+    "dateRange": "Rentang tanggal",
+    "allTime": "Semua",
+    "daysShort": "h",
+    "export": "Ekspor CSV",
+    "exporting": "Mengekspor...",
+    "exportSuccess": "Ekspor selesai",
+    "exportFailed": "Ekspor gagal",
+    "exportUnavailable": "Berbagi tidak tersedia",
+    "exportAnalytics": "Ekspor Analitik Sekolah Alkitab",
+    "customizeGraphs": "Sesuaikan",
+    "selectGraphs": "Pilih analitik yang akan ditampilkan"
   },
   "navbar": {
     "home": "Beranda",
+    "account": "Akun",
     "bibleschool": "Sekolah Alkitab",
     "podcasts": "Podcast",
     "sermons": "Khotbah",
@@ -81,11 +165,15 @@
     "progressPlaceholder": "0 dari 100 pelajaran selesai","progressCount": "{{completed}} dari {{total}} pelajaran selesai",
     "currentVideoTitle": "Video saat ini",
     "currentVideoPlaceholder": "Pelajaran terakhir yang Anda tonton akan muncul di sini",
+    "currentVideoContext": "{{moduleName}}",
+    "moduleWithNumber": "Module {{number}}",
     "continueWatching": "Lanjutkan menonton",
     "continueLearningTitle": "Lanjutkan belajar",
     "continueLearningPlaceholder": "Jelajahi modul dan lanjutkan dari tempat Anda berhenti",
     "continueLearningAllDone": "Anda telah menyelesaikan semua pelajaran",
-    "continueLearningNext": "Module {{moduleNumber}}: {{moduleName}} · Pelajaran {{lessonNumber}}: {{lessonName}}"
+    "continueLearningNext": "{{moduleLabel}} · {{lessonName}}",
+    "continueLearningExamNext": "{{moduleLabel}} · Lanjutkan dengan ujian",
+    "startFirstLesson": "Mulai pelajaran pertama Anda"
   },
   "profile": {
     "information": "Informasi profil",
@@ -100,9 +188,16 @@
     "themeLight": "Terang",
     "themeDark": "Gelap",
     "themeSystem": "Sistem",
-    "preferences": "Preferensi"
+    "preferences": "Preferensi",
+    "notifications": "Notifikasi",
+    "notificationsPush": "Pemberitahuan push",
+    "notificationsLessonReminders": "Pengingat pelajaran",
+    "notificationsStreakReminders": "Pengingat streak",
+    "notificationsExamReminders": "Pengingat ujian",
+    "notificationsNewContent": "Konten baru"
   },
   "loading": {
+    "video": "Memuat video...",
     "section": {
       "index": "Memuat...",
       "bibleschool": "Memuat Sekolah Alkitab...",
@@ -118,6 +213,9 @@
     "attemptSingular": "1 percobaan",
     "attemptPlural": "{{count}} percobaan",
     "attemptZero": "0 percobaan",
+    "currentModule": "Modul saat ini",
+    "completedModules": "Modul selesai",
+    "allModules": "Semua modul",
     "1": {"title": "Fondasi Iman", "description": "Membangun fondasi rohani yang kuat"},
     "2": {"title": "Penyembuhan", "description": "Memahami penyembuhan ilahi dan kesempurnaan"},
     "3": {"title": "Pembebasan", "description": "Kebebasan melalui Kristus"},
@@ -139,7 +237,9 @@
     "19": {"title": "Hidup Kerajaan", "description": "Hidup sebagai warga Surga"},
     "20": {"title": "Kelulusan", "description": "Melanjutkan perjalanan Anda"}
   },
-  "lessons": {"lessonNumber": "Pelajaran {{number}}","content": "Isi pelajaran ini","goal": "Tujuan pelajaran ini","nextLesson": "Berikutnya: Pelajaran {{number}}","backToModule": "Kembali ke modul","completed": "Selesai","modules":{"1":{"1":"Apa itu Iman?","2":"Objek Iman","3":"Bertumbuh dalam Iman","4":"Iman dan Perbuatan","5":"Hidup oleh Iman"},"2":{"1":"Hati Tuhan untuk Kesembuhan","2":"Dasar Alkitabiah Kesembuhan","3":"Menerima Kesembuhan","4":"Melayani Kesembuhan","5":"Kesaksian Kesembuhan"},"3":{"1":"Memahami Perbudakan","2":"Otoritas Kristus","3":"Langkah ke Kebebasan","4":"Berjalan dalam Pembebasan","5":"Membantu Orang Lain Mendapat Kebebasan"},"4":{"1":"Kuasa Pujian","2":"Pujian vs. Penyembahan","3":"Masuk ke Hadirat-Nya","4":"Menyembah dalam Roh dan Kebenaran","5":"Gaya Hidup Pujian"},"5":{"1":"Surga: Rumah Kekal Kita","2":"Memahami Neraka","3":"Penghakiman Terakhir","4":"Hidup dengan Perspektif Kekal","5":"Mempersiapkan Kekekalan"},"6":{"1":"Menemukan Karunia Anda","2":"Karunia Nubuat","3":"Kata-kata Pengetahuan dan Hikmat","4":"Karunia Iman dan Kesembuhan","5":"Mengelola Karunia Rohani"},"7":{"1":"Diciptakan untuk Tujuan","2":"Menemukan Panggilan Anda","3":"Hambatan Memenuhi Panggilan","4":"Berjalan dalam Takdir Anda","5":"Menyelesaikan dengan Baik"},"8":{"1":"Kuasa Doa","2":"Berdoa dengan Firman Allah","3":"Dasar-dasar Pengantaraan","4":"Berdoa untuk Kota Anda","5":"Mengembangkan Kehidupan Doa"},"9":{"1":"Siapakah Roh Kudus?","2":"Baptisan dalam Roh","3":"Buah Roh","4":"Mendengarkan Roh","5":"Berjalan dalam Roh Setiap Hari"},"10":{"1":"Iman Melampaui Kata-kata","2":"Iman yang Memindahkan Gunung","3":"Mengatasi Keraguan","4":"Iman dalam Ujian","5":"Warisan Iman"},"11":{"1":"Firman yang Hidup","2":"Mempelajari Kitab Suci","3":"Merenungkan Firman Allah","4":"Menerapkan Kitab Suci","5":"Firman dalam Hidup Anda"},"12":{"1":"Rancangan Allah untuk Relasi","2":"Pernikahan dan Keluarga","3":"Pertemanan dan Komunitas","4":"Penyelesaian Konflik","5":"Memulihkan Relasi yang Rusak"},"13":{"1":"Kepemimpinan Hamba","2":"Memimpin dengan Contoh","3":"Memberdayakan Orang Lain","4":"Menangani Tanggung Jawab","5":"Kepemimpinan di Bawah Tekanan"},"14":{"1":"Amanat Agung","2":"Kesaksian Pribadi Anda","3":"Membagikan dengan Berani","4":"Mencapai Dunia Anda","5":"Memuridkan"},"15":{"1":"Siapa Anda di dalam Kristus","2":"Mematahkan Identitas Palsu","3":"Anak-anak Laki-laki dan Perempuan","4":"Hidup dari Identitas","5":"Warisan Kerajaan Anda"},"16":{"1":"Memahami Ketakutan","2":"Ketakutan vs. Iman","3":"Kasih Allah yang Sempurna","4":"Mengalahkan Ketakutan Umum","5":"Kebebasan dari Ketakutan"},"17":{"1":"Sukacita Memberi","2":"Prinsip Alkitabiah Memberi","3":"Persepuluhan dan Persembahan","4":"Kemurahan sebagai Penyembahan","5":"Menuai Apa yang Anda Tabur"},"18":{"1":"Prinsip Sabat","2":"Istirahat di dalam Allah","3":"Mengelola Waktu Anda","4":"Pemulihan Melalui Istirahat","5":"Ritme Istirahat"},"19":{"1":"Warga Surga","2":"Nilai-nilai Kerajaan","3":"Mencari Kerajaan Terlebih Dahulu","4":"Pengaruh Kerajaan","5":"Hidup untuk Sang Raja"},"20":{"1":"Tinjauan: Perjalanan Anda","2":"Ringkasan Pelajaran Utama","3":"Langkah Selanjutnya","4":"Perayaan Kelulusan","5":"Melanjutkan Perjalanan"}}},
+  "lessons": {"lessonNumber": "Pelajaran {{number}}","content": "Isi pelajaran ini","goal": "Tujuan pelajaran ini","nextLesson": "Berikutnya: Pelajaran {{number}}","backToModule": "Kembali ke modul","completed": "Selesai","locked": "Terkunci","unlockHint": "Selesaikan pelajaran {{number}} untuk membuka","videoLoadError": "Video tidak dapat dimuat. Ketuk untuk mencoba lagi.","lockedModalTitle": "Pelajaran terkunci","lockedModalMessage": "Selesaikan pelajaran {{number}} terlebih dahulu untuk melanjutkan.","lockedModalMessageWithModule": "Selesaikan pelajaran {{number}} dari {{module}} terlebih dahulu untuk melanjutkan.","lockedModalMessageModuleLesson": "Selesaikan module {{moduleNumber}} pelajaran {{number}} terlebih dahulu untuk melanjutkan.","lockedModalMessageExamModule": "Lulus ujian module {{moduleNumber}} terlebih dahulu untuk membuka pelajaran ini.","lockedModalMessageExamWithModule": "Lulus ujian {{module}} terlebih dahulu untuk membuka pelajaran ini.","lockedModalMessageFirstLesson": "Lulus ujian modul sebelumnya terlebih dahulu untuk membuka pelajaran ini.","lockedModalOk": "Tutup","lockedModalGoToLesson": "Buka pelajaran {{number}}","lockedModalGoToLessonModule": "Buka module {{moduleNumber}} pelajaran {{number}}","lockedModalGoToExam": "Buka ujian","lockedModalGoToExamModule": "Buka ujian module {{moduleNumber}}","modules":{"1":{"1":"Apa itu Iman?","2":"Objek Iman","3":"Bertumbuh dalam Iman","4":"Iman dan Perbuatan","5":"Hidup oleh Iman"},"2":{"1":"Hati Tuhan untuk Kesembuhan","2":"Dasar Alkitabiah Kesembuhan","3":"Menerima Kesembuhan","4":"Melayani Kesembuhan","5":"Kesaksian Kesembuhan"},"3":{"1":"Memahami Perbudakan","2":"Otoritas Kristus","3":"Langkah ke Kebebasan","4":"Berjalan dalam Pembebasan","5":"Membantu Orang Lain Mendapat Kebebasan"},"4":{"1":"Kuasa Pujian","2":"Pujian vs. Penyembahan","3":"Masuk ke Hadirat-Nya","4":"Menyembah dalam Roh dan Kebenaran","5":"Gaya Hidup Pujian"},"5":{"1":"Surga: Rumah Kekal Kita","2":"Memahami Neraka","3":"Penghakiman Terakhir","4":"Hidup dengan Perspektif Kekal","5":"Mempersiapkan Kekekalan"},"6":{"1":"Menemukan Karunia Anda","2":"Karunia Nubuat","3":"Kata-kata Pengetahuan dan Hikmat","4":"Karunia Iman dan Kesembuhan","5":"Mengelola Karunia Rohani"},"7":{"1":"Diciptakan untuk Tujuan","2":"Menemukan Panggilan Anda","3":"Hambatan Memenuhi Panggilan","4":"Berjalan dalam Takdir Anda","5":"Menyelesaikan dengan Baik"},"8":{"1":"Kuasa Doa","2":"Berdoa dengan Firman Allah","3":"Dasar-dasar Pengantaraan","4":"Berdoa untuk Kota Anda","5":"Mengembangkan Kehidupan Doa"},"9":{"1":"Siapakah Roh Kudus?","2":"Baptisan dalam Roh","3":"Buah Roh","4":"Mendengarkan Roh","5":"Berjalan dalam Roh Setiap Hari"},"10":{"1":"Iman Melampaui Kata-kata","2":"Iman yang Memindahkan Gunung","3":"Mengatasi Keraguan","4":"Iman dalam Ujian","5":"Warisan Iman"},"11":{"1":"Firman yang Hidup","2":"Mempelajari Kitab Suci","3":"Merenungkan Firman Allah","4":"Menerapkan Kitab Suci","5":"Firman dalam Hidup Anda"},"12":{"1":"Rancangan Allah untuk Relasi","2":"Pernikahan dan Keluarga","3":"Pertemanan dan Komunitas","4":"Penyelesaian Konflik","5":"Memulihkan Relasi yang Rusak"},"13":{"1":"Kepemimpinan Hamba","2":"Memimpin dengan Contoh","3":"Memberdayakan Orang Lain","4":"Menangani Tanggung Jawab","5":"Kepemimpinan di Bawah Tekanan"},"14":{"1":"Amanat Agung","2":"Kesaksian Pribadi Anda","3":"Membagikan dengan Berani","4":"Mencapai Dunia Anda","5":"Memuridkan"},"15":{"1":"Siapa Anda di dalam Kristus","2":"Mematahkan Identitas Palsu","3":"Anak-anak Laki-laki dan Perempuan","4":"Hidup dari Identitas","5":"Warisan Kerajaan Anda"},"16":{"1":"Memahami Ketakutan","2":"Ketakutan vs. Iman","3":"Kasih Allah yang Sempurna","4":"Mengalahkan Ketakutan Umum","5":"Kebebasan dari Ketakutan"},"17":{"1":"Sukacita Memberi","2":"Prinsip Alkitabiah Memberi","3":"Persepuluhan dan Persembahan","4":"Kemurahan sebagai Penyembahan","5":"Menuai Apa yang Anda Tabur"},"18":{"1":"Prinsip Sabat","2":"Istirahat di dalam Allah","3":"Mengelola Waktu Anda","4":"Pemulihan Melalui Istirahat","5":"Ritme Istirahat"},"19":{"1":"Warga Surga","2":"Nilai-nilai Kerajaan","3":"Mencari Kerajaan Terlebih Dahulu","4":"Pengaruh Kerajaan","5":"Hidup untuk Sang Raja"},"20":{"1":"Tinjauan: Perjalanan Anda","2":"Ringkasan Pelajaran Utama","3":"Langkah Selanjutnya","4":"Perayaan Kelulusan","5":"Melanjutkan Perjalanan"}}},
   "lessonsPage": {"title": "Pelajaran", "empty": "Tidak ada pelajaran dalam modul ini", "lessonsCount": "{{count}} pelajaran"},
-  "handouts": {"title": "Handout","lesson": "Handout pelajaran","module": "Handout modul"}
+  "handouts": {"title": "Handout","lesson": "Handout pelajaran","module": "Handout modul"},
+  "quiz": {"title": "Ujian Modul","loading": "Memuat ujian...","intro": "Jawab semua pertanyaan. Anda membutuhkan minimal {{minCorrect}} dari {{total}} benar untuk lulus.","submit": "Kirim","pass": "Selamat! Anda lulus.","fail": "Belum. Anda membutuhkan minimal {{minCorrect}} dari {{total}} benar untuk lulus.","retry": "Coba lagi","answerAll": "Silakan jawab semua pertanyaan","correct": "Benar","incorrect": "Salah","scoreSummary": "{{score}}% - {{correct}}/{{total}} benar","questionProgress": "{{current}} dari {{total}} dijawab","questionOf": "Pertanyaan {{current}} dari {{total}}","submitConfirmTitle": "Kirim jawaban?","submitConfirmMessage": "Anda tidak dapat mengubah jawaban setelah mengirim.","cancel": "Batal","leaveConfirmTitle": "Tinggalkan ujian?","leaveConfirmMessage": "Progres Anda telah disimpan.","attemptNumber": "Percobaan {{number}}","continue": "Lanjutkan","backToModule": "Kembali ke modul","modules":{"1":{"questions":{"1":{"question":"Apa itu iman?","a":"Keyakinan pada apa yang kita harapkan","b":"Perasaan","c":"Agama","d":"Emosi"},"2":{"question":"Iman datang dari:","a":"Orang tua kita","b":"Mendengar Firman Allah","c":"Pendidikan","d":"Pengalaman"},"3":{"question":"Tanpa iman tidak mungkin:","a":"Bekerja","b":"Beristirahat","c":"Berkenan kepada Allah","d":"Makan"}}}}},
+  "exam": {"takeExam": "Kerjakan ujian","unlockHint": "Selesaikan semua pelajaran untuk membuka","readyHint": "Semua pelajaran selesai","passed": "Ujian lulus","passedHint": "Anda telah menyelesaikan ujian modul ini","failedScore": "{{score}}% - {{correct}}/{{total}} benar","retryHint": "Ketuk untuk mencoba lagi","alreadyPassed": "Anda sudah lulus ujian ini"}
 }

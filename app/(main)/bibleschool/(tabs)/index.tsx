@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import { MainTopBar } from '../../_components/MainTopBar';
+import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { ContinueLearningCard } from '../_components/ContinueLearningCard';
 import { CurrentVideoCard } from '../_components/CurrentVideoCard';
 import { ProgressCard } from '../_components/ProgressCard';

@@ -48,7 +48,9 @@ export const authService = {
   },
 
   async login(data: LoginData) {
-    try {
+    const LOGIN_TIMEOUT_MS = 20000;
+
+    const loginPromise = (async () => {
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email.trim().toLowerCase(),
         password: data.password,
@@ -56,6 +58,22 @@ export const authService = {
       if (error) throw error;
       if (!authData.user) throw new Error('Login failed');
       return authData;
+    })();
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(
+        () =>
+          reject(
+            new Error(
+              'Verbinding timed out. Controleer of je apparaat op hetzelfde netwerk zit als je computer en dat Supabase draait (supabase start).',
+            ),
+          ),
+        LOGIN_TIMEOUT_MS,
+      );
+    });
+
+    try {
+      return await Promise.race([loginPromise, timeoutPromise]);
     } catch (err) {
       if (
         typeof err === 'object' &&
@@ -64,6 +82,21 @@ export const authService = {
         'message' in err
       ) {
         throw normalizeAuthError(err as AuthError);
+      }
+      const msg =
+        err instanceof Error ? err.message.toLowerCase() : String(err);
+      if (
+        msg.includes('network') ||
+        msg.includes('fetch failed') ||
+        msg.includes('request failed') ||
+        msg.includes('connection') ||
+        msg.includes('timeout') ||
+        msg.includes('econnrefused') ||
+        msg.includes('enotfound')
+      ) {
+        throw new Error(
+          'Geen verbinding met de server. Controleer je internet en of je apparaat op hetzelfde netwerk zit als je computer.',
+        );
       }
       throw err;
     }

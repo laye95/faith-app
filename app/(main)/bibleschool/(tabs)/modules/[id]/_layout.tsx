@@ -13,6 +13,7 @@ export default function ModuleLessonsLayout() {
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen name="exam" />
       <Stack.Screen name="[lessonId]" />
     </Stack>
   );

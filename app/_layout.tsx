@@ -9,10 +9,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryProvider } from "@/providers/QueryProvider";
 
-export const unstable_settings = {
-  anchor: "(main)",
-};
-
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

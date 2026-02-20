@@ -14,7 +14,7 @@ import { useAuth } from './AuthContext';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
-const STORAGE_KEY = '@faith_app:theme';
+export const THEME_STORAGE_KEY = '@faith_app:theme';
 
 interface ThemeContextType {
   preference: ThemePreference;
@@ -43,6 +43,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             (stored === 'light' || stored === 'dark' || stored === 'system')
           ) {
             setPreferenceState(stored);
+            setIsLoaded(true);
             return;
           }
         } catch {
@@ -50,15 +51,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }
       }
       try {
-        const local = await AsyncStorage.getItem(STORAGE_KEY);
-        if (
+        const local = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        const validTheme =
           local &&
-          (local === 'light' || local === 'dark' || local === 'system')
-        ) {
+          (local === 'light' || local === 'dark' || local === 'system');
+        if (validTheme) {
           setPreferenceState(local);
+          if (user?.id) {
+            try {
+              await userSettingsService.setSetting(user.id, 'theme', local);
+            } catch {
+              //
+            }
+          }
+        } else {
+          setPreferenceState('system');
         }
       } catch {
-        //
+        setPreferenceState('system');
       } finally {
         setIsLoaded(true);
       }
@@ -70,7 +80,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     async (newPreference: ThemePreference) => {
       setPreferenceState(newPreference);
       try {
-        await AsyncStorage.setItem(STORAGE_KEY, newPreference);
+        await AsyncStorage.setItem(THEME_STORAGE_KEY, newPreference);
       } catch {
         //
       }
