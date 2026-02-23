@@ -9,6 +9,7 @@ import { useSectionNavigation } from '@/contexts/SectionNavigationContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { routes } from '@/constants/routes';
 import { saveProfileReturnHref } from '@/hooks/useLastSectionRestore';
 import { APP_VERSION } from '@/constants/version';
@@ -43,7 +44,10 @@ const ACCOUNT_SECTIONS: Array<{
   icon: keyof typeof Ionicons.glyphMap;
   labelKey: string;
   enabled?: boolean;
-}> = [{ name: 'profile', icon: 'person', labelKey: 'navbar.profile', enabled: true }];
+}> = [
+  { name: 'profile', icon: 'person', labelKey: 'navbar.profile', enabled: true },
+  { name: 'settings', icon: 'settings', labelKey: 'navbar.settings', enabled: true },
+];
 
 const ADMIN_SECTIONS: Array<{
   name: string;
@@ -55,6 +59,7 @@ const ADMIN_SECTIONS: Array<{
   { name: 'admin/analytics', icon: 'school', labelKey: 'admin.analytics', enabled: true },
   { name: 'admin/users', icon: 'people', labelKey: 'admin.users', enabled: true },
   { name: 'profile', icon: 'person', labelKey: 'navbar.profile', enabled: true },
+  { name: 'settings', icon: 'settings', labelKey: 'navbar.settings', enabled: true },
 ];
 
 const buttonStyle = (theme: ReturnType<typeof useTheme>) => ({
@@ -76,17 +81,30 @@ export function DrawerContent(props: DrawerContentComponentProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const isAdmin = useIsAdmin();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const { data: profile } = useUserProfile(user?.id);
   const { days: streakDays } = useStreak();
   const { startSectionNavigation } = useSectionNavigation();
   const { state, navigation } = props;
   const pathname = usePathname();
   const currentRoute = state.routes[state.index]?.name ?? '';
   const currentSection = currentRoute === 'index' ? 'index' : currentRoute.split('/')[0] ?? currentRoute;
+  const contentSections = isAdmin ? [] : CONTENT_SECTIONS.filter((s) => s.enabled !== false);
   const sections = isAdmin
     ? ADMIN_SECTIONS
-    : [...CONTENT_SECTIONS, ...ACCOUNT_SECTIONS];
+    : [...contentSections, ...ACCOUNT_SECTIONS];
+  const displayName = profile?.full_name ?? t('navbar.profile');
+  const displayEmail = profile?.email ?? user?.email ?? '';
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || '?';
   const isSectionSelected = (sectionName: string) => {
+    if (sectionName === 'settings') {
+      return pathname.includes('settings');
+    }
     if (isAdmin && sectionName.startsWith('admin')) {
       if (sectionName === 'admin') {
         const onAdminIndex = pathname.endsWith('/admin') || pathname.endsWith('/admin/');
@@ -104,6 +122,10 @@ export function DrawerContent(props: DrawerContentComponentProps) {
     navigation.closeDrawer();
     if (section.name.includes('/')) {
       router.push(routes.admin(section.name.replace('admin/', '')) as never);
+    } else if (section.name === 'settings') {
+      saveProfileReturnHref(pathname || '/(main)').then(() => {
+        navigation.navigate('settings' as never);
+      });
     } else {
       const routeName =
         section.name === 'index'
@@ -127,25 +149,10 @@ export function DrawerContent(props: DrawerContentComponentProps) {
       style={{
         backgroundColor: theme.pageBg,
         paddingTop: insets.top + 12,
-        paddingBottom: insets.bottom + 12,
       }}
     >
       <HStack className="items-center justify-between px-4 pb-3">
-        <HStack className="items-center gap-2">
-          <TouchableOpacity
-            onPress={() => {
-              bzzt();
-              navigation.closeDrawer();
-              signOut();
-            }}
-            activeOpacity={0.7}
-            className="items-center justify-center cursor-pointer"
-            style={buttonStyle(theme)}
-          >
-            <Ionicons name="log-out-outline" size={20} color={theme.buttonDecline} />
-          </TouchableOpacity>
-          <StreakPill days={streakDays} />
-        </HStack>
+        <StreakPill days={streakDays} />
         <TouchableOpacity
           onPress={() => {
             bzzt();
@@ -158,10 +165,51 @@ export function DrawerContent(props: DrawerContentComponentProps) {
           <Ionicons name="close" size={20} color={theme.textPrimary} />
         </TouchableOpacity>
       </HStack>
+      <Box
+        className="px-4 pb-4"
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: theme.cardBorder,
+        }}
+      >
+        <HStack className="items-center gap-3">
+          <Box
+            className="rounded-full w-12 h-12 items-center justify-center"
+            style={{ backgroundColor: theme.avatarPrimary }}
+          >
+            <Text
+              className="text-base font-semibold"
+              style={{ color: theme.textSecondary }}
+            >
+              {initials}
+            </Text>
+          </Box>
+          <VStack className="flex-1 min-w-0">
+            <Text
+              className="text-base font-semibold"
+              style={{ color: theme.textPrimary }}
+              numberOfLines={1}
+            >
+              {displayName}
+            </Text>
+            <Text
+              className="text-sm"
+              style={{ color: theme.textSecondary }}
+              numberOfLines={1}
+            >
+              {displayEmail}
+            </Text>
+          </VStack>
+        </HStack>
+      </Box>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 4 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingVertical: 4,
+          paddingBottom: insets.bottom + 120,
+        }}
       >
         <VStack className="gap-0">
           {sections.map((section, index) => {
@@ -252,14 +300,42 @@ export function DrawerContent(props: DrawerContentComponentProps) {
           })}
         </VStack>
       </ScrollView>
-      <Box
-        className="pt-6 pb-2 items-center"
+      <VStack
+        className="px-4 gap-3"
         style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingTop: 12,
+          paddingBottom: insets.bottom + 8,
           backgroundColor: theme.pageBg,
         }}
       >
+        <TouchableOpacity
+          onPress={() => {
+            bzzt();
+            navigation.closeDrawer();
+            signOut();
+          }}
+          activeOpacity={0.7}
+          className="rounded-2xl py-4 px-6 cursor-pointer items-center justify-center"
+          style={{
+            backgroundColor: theme.buttonDecline,
+          }}
+        >
+          <HStack className="items-center gap-2">
+            <Ionicons name="log-out-outline" size={20} color={theme.buttonDeclineContrast} />
+            <Text
+              className="text-base font-semibold"
+              style={{ color: theme.buttonDeclineContrast }}
+            >
+              {t('home.signOut')}
+            </Text>
+          </HStack>
+        </TouchableOpacity>
         <Box
-          className="px-4 py-2"
+          className="px-4 py-2 items-center"
           style={{
             backgroundColor: theme.tabInactiveBg,
             borderRadius: 8,
@@ -273,7 +349,7 @@ export function DrawerContent(props: DrawerContentComponentProps) {
             {t('app.versionLabel', { version: APP_VERSION })}
           </Text>
         </Box>
-      </Box>
+      </VStack>
     </Box>
   );
 }

@@ -1,6 +1,4 @@
-import { Box } from '@/components/ui/box';
-import { useCardShadow } from '@/hooks/useShadows';
-import { useTheme } from '@/hooks/useTheme';
+import { Card } from '@/components/ui/Card';
 
 interface OverviewCardProps {
   children: React.ReactNode;
@@ -8,20 +6,5 @@ interface OverviewCardProps {
 }
 
 export function OverviewCard({ children, className }: OverviewCardProps) {
-  const theme = useTheme();
-  const cardShadow = useCardShadow();
-
-  return (
-    <Box
-      className={`rounded-2xl overflow-hidden ${className ?? ''}`}
-      style={{
-        backgroundColor: theme.cardBg,
-        borderWidth: 1,
-        borderColor: theme.cardBorder,
-        ...cardShadow,
-      }}
-    >
-      {children}
-    </Box>
-  );
+  return <Card className={className}>{children}</Card>;
 }

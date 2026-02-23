@@ -7,16 +7,29 @@ import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Redirect } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { DrawerContent } from './_components/DrawerContent';
+
+const LOADING_DELAY_MS = 300;
 
 function MainLayoutContent() {
   const { session } = useAuth();
   const { isNavigating, targetSection } = useSectionNavigation();
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
   useLastSectionRestore();
   useStreak();
   const { t } = useTranslation();
   const theme = useTheme();
+
+  useEffect(() => {
+    if (!isNavigating) {
+      setShowLoadingOverlay(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowLoadingOverlay(true), LOADING_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [isNavigating]);
 
   if (!session) return <Redirect href="/(auth)/login" />;
 
@@ -46,9 +59,9 @@ function MainLayoutContent() {
         <Drawer.Screen name="sermons" />
         <Drawer.Screen name="faith-business-school" />
         <Drawer.Screen name="profile" />
-        <Drawer.Screen name="settings/index" />
+        <Drawer.Screen name="settings" />
       </Drawer>
-      {isNavigating && (
+      {showLoadingOverlay && (
         <View
           style={{
             position: 'absolute',

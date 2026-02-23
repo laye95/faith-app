@@ -6,6 +6,7 @@ import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useModule, useModules } from '@/hooks/useBibleschoolContent';
+import { useNetworkQuality } from '@/hooks/useNetworkQuality';
 import { useVimeoPlaybackUrl } from '@/hooks/useVimeoPlaybackUrl';
 import { useVimeoThumbnail } from '@/hooks/useVimeoThumbnail';
 import { useLessonUnlocks } from '@/hooks/useLessonUnlocks';
@@ -123,59 +124,63 @@ function LessonVideoPlayer({
     }
   }, [initialPositionSeconds]);
 
+  const safeStopPiP = useCallback(() => {
+    try {
+      const result = videoViewRef.current?.stopPictureInPicture?.();
+      if (result && typeof (result as Promise<unknown>).catch === 'function') {
+        (result as Promise<unknown>).catch(() => {});
+      }
+    } catch (_) {}
+  }, []);
+
+  const safeStartPiP = useCallback(() => {
+    try {
+      const result = videoViewRef.current?.startPictureInPicture?.();
+      if (result && typeof (result as Promise<unknown>).catch === 'function') {
+        (result as Promise<unknown>).catch(() => {});
+      }
+    } catch (_) {}
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       return () => {
-        try {
-          videoViewRef.current?.stopPictureInPicture();
-        } catch (_) {}
+        safeStopPiP();
         try {
           player.pause();
         } catch (_) {}
         onSavePositionRef.current(lastPositionRef.current, true);
       };
-    }, [player]),
+    }, [player, safeStopPiP]),
   );
 
   useEffect(() => {
     if (pipRef) {
       pipRef.current = {
-        start: () => {
-          try {
-            videoViewRef.current?.startPictureInPicture();
-          } catch (_) {}
-        },
-        stop: () => {
-          try {
-            videoViewRef.current?.stopPictureInPicture();
-          } catch (_) {}
-        },
+        start: safeStartPiP,
+        stop: safeStopPiP,
         onPiPStop: null,
       };
       return () => {
         pipRef.current = null;
       };
     }
-  }, [pipRef]);
+  }, [pipRef, safeStartPiP, safeStopPiP]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
       if (state === 'inactive' || state === 'background') {
-        requestAnimationFrame(() => {
-          try {
-            videoViewRef.current?.startPictureInPicture();
-          } catch (_) {}
-        });
+        requestAnimationFrame(safeStartPiP);
       }
       if (state === 'active') {
+        safeStopPiP();
         try {
-          videoViewRef.current?.stopPictureInPicture();
+          player.play();
         } catch (_) {}
-        player.play();
       }
     });
     return () => sub.remove();
-  }, [player]);
+  }, [player, safeStartPiP, safeStopPiP]);
 
   const isLoading = status === 'loading' || status === 'idle';
   const [showLoader, setShowLoader] = useState(false);
@@ -225,6 +230,14 @@ function LessonVideoPlayer({
       )}
     </View>
   );
+}
+
+function NextLessonPreloader({ videoUrl }: { videoUrl: string }) {
+  const source = { uri: videoUrl, useCaching: true };
+  useVideoPlayer(source, (p) => {
+    p.pause();
+  });
+  return null;
 }
 
 function LessonVideoPlaceholder({ theme }: { theme: ReturnType<typeof useTheme> }) {
@@ -603,6 +616,7 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { isLessonUnlocked, isExamUnlocked, nextUnlockedTarget } = useLessonUnlocks();
+  const networkQuality = useNetworkQuality();
 
   const { data: moduleData } = useModule(moduleId, locale);
   const { data: modules } = useModules(locale);
@@ -627,6 +641,12 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
     refetch: refetchVimeo,
   } = useVimeoPlaybackUrl(
     lesson?.videoId && !lesson.videoUrl ? lesson.videoId : undefined,
+    networkQuality,
+  );
+
+  const { data: nextVimeoUrl } = useVimeoPlaybackUrl(
+    nextLesson?.videoId && !nextLesson?.videoUrl ? nextLesson.videoId : undefined,
+    networkQuality,
   );
 
   const savePositionMutation = useMutation({
@@ -792,18 +812,16 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
 
   const videoUrl = lesson.videoUrl ?? vimeoUrl ?? undefined;
   const videoLoading = !lesson.videoUrl && !!lesson.videoId && vimeoLoading;
-  if (__DEV__ && lesson) {
-    console.log('[LessonDetail] lessonId:', lessonId, 'videoId:', lesson.videoId, 'videoUrl:', videoUrl ?? 'none', 'vimeoLoading:', vimeoLoading, 'vimeoError:', vimeoError);
-    console.log('[LessonDetail] full lesson:', JSON.stringify(lesson, null, 2));
-  }
   const showVimeoRetry =
     !lesson.videoUrl && !!lesson.videoId && vimeoError && !videoUrl;
+  const nextVideoUrl = nextVimeoUrl ?? nextLesson?.videoUrl;
 
   return (
     <Box
       className="flex-1"
       style={{ backgroundColor: theme.pageBg }}
     >
+      {nextVideoUrl ? <NextLessonPreloader videoUrl={nextVideoUrl} /> : null}
       <Box
         className="px-6"
         style={{

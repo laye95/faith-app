@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { MODULES, getLessonsForModule } from '@/constants/modules';
-import { getMockQuestionsForModule } from '@/constants/quizQuestions';
+import { MODULES } from '@/constants/modules';
 import { useCompletedLessons } from '@/hooks/useCompletedLessons';
+import { useIntroVideoWatched } from '@/hooks/useIntroVideoWatched';
 import { quizAttemptService } from '@/services/api/quizAttemptService';
 import { queryKeys } from '@/services/queryKeys';
 import {
@@ -15,6 +15,7 @@ import { useMemo } from 'react';
 
 export interface ExamStatusForModule {
   passed: boolean;
+  attemptCount?: number;
   latestFailedAttempt?: { score: number; correct: number; total: number };
 }
 
@@ -22,6 +23,8 @@ export function useLessonUnlocks() {
   const { user } = useAuth();
   const { data: completedLessons, isLoading: completedLoading } =
     useCompletedLessons(user?.id);
+  const { hasWatched: introVideoWatched, isLoading: introLoading } =
+    useIntroVideoWatched();
 
   const quizQueries = useQueries({
     queries: MODULES.map((m) => ({
@@ -47,12 +50,12 @@ export function useLessonUnlocks() {
     return set;
   }, [quizQueries]);
 
-  const isLoading = completedLoading || quizQueries.some((q) => q.isLoading);
+  const isLoading = completedLoading || introLoading || quizQueries.some((q) => q.isLoading);
 
   const checkLessonUnlocked = useMemo(
     () => (moduleId: string, lesson: { id: string; moduleId: string; order: number }) =>
-      isLessonUnlocked(moduleId, lesson, completedLessonIds, passedModuleIds),
-    [completedLessonIds, passedModuleIds],
+      isLessonUnlocked(moduleId, lesson, completedLessonIds, passedModuleIds, introVideoWatched),
+    [completedLessonIds, passedModuleIds, introVideoWatched],
   );
 
   const checkExamUnlocked = useMemo(
@@ -62,13 +65,13 @@ export function useLessonUnlocks() {
   );
 
   const nextUnlockedLesson = useMemo(
-    () => getNextUnlockedLesson(completedLessonIds, passedModuleIds),
-    [completedLessonIds, passedModuleIds],
+    () => getNextUnlockedLesson(completedLessonIds, passedModuleIds, introVideoWatched),
+    [completedLessonIds, passedModuleIds, introVideoWatched],
   );
 
   const nextUnlockedTarget = useMemo(
-    () => getNextUnlockedTarget(completedLessonIds, passedModuleIds),
-    [completedLessonIds, passedModuleIds],
+    () => getNextUnlockedTarget(completedLessonIds, passedModuleIds, introVideoWatched),
+    [completedLessonIds, passedModuleIds, introVideoWatched],
   );
 
   const getExamStatusForModule = useMemo(
@@ -77,16 +80,21 @@ export function useLessonUnlocks() {
       const moduleIndex = MODULES.findIndex((m) => m.id === moduleId);
       const attempts = quizQueries[moduleIndex]?.data ?? [];
       const latestAttempt = attempts[0];
-      if (passed || !latestAttempt) {
-        return { passed };
+      if (passed) {
+        return { passed, attemptCount: attempts.length };
+      }
+      if (!latestAttempt) {
+        return { passed: false };
       }
       const total =
-        latestAttempt.total_count ?? getMockQuestionsForModule(moduleId).length;
+        latestAttempt.total_count ??
+        (Object.keys(latestAttempt.answers ?? {}).length || 1);
       const correct =
         latestAttempt.correct_count ??
         Math.round((latestAttempt.score_percentage / 100) * total);
       return {
         passed: false,
+        attemptCount: attempts.length,
         latestFailedAttempt: {
           score: latestAttempt.score_percentage,
           correct,

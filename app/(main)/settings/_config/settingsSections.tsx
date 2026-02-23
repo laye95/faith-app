@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import type { Ionicons } from '@expo/vector-icons';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ThemeSwitcher } from '../_components/ThemeSwitcher';
+import { VideoQualitySelector } from '../_components/VideoQualitySelector';
 import { NotificationToggle } from '../_components/NotificationToggle';
 
 export interface SettingsRowConfig {
@@ -12,6 +13,8 @@ export interface SettingsRowConfig {
   componentProps?: Record<string, unknown>;
   fullWidthChildren?: boolean;
   isLast?: boolean;
+  useCard?: boolean;
+  descriptionKey?: string;
 }
 
 export interface SettingsSectionConfig {
@@ -32,6 +35,7 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
         component: LanguageSwitcher,
         componentProps: { fullWidth: true },
         fullWidthChildren: true,
+        useCard: true,
       },
       {
         id: 'theme',
@@ -41,6 +45,24 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
         componentProps: { fullWidth: true },
         fullWidthChildren: true,
         isLast: true,
+        useCard: true,
+      },
+    ],
+  },
+  {
+    id: 'video',
+    titleKey: 'settings.video',
+    rows: [
+      {
+        id: 'video-quality',
+        icon: 'videocam',
+        labelKey: 'settings.videoQuality',
+        component: VideoQualitySelector,
+        componentProps: { fullWidth: true },
+        fullWidthChildren: true,
+        isLast: true,
+        useCard: true,
+        descriptionKey: 'settings.videoQualityDescription',
       },
     ],
   },
@@ -52,7 +74,7 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
         id: 'notifications-master',
         icon: 'notifications',
         labelKey: 'settings.notificationsPush',
-        component: NotificationToggle,
+        component: NotificationToggle as ComponentType<Record<string, unknown>>,
         componentProps: { settingKey: 'notifications.enabled' },
         isLast: false,
       },
@@ -60,7 +82,8 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
         id: 'notifications-lessons',
         icon: 'book',
         labelKey: 'settings.notificationsLessonReminders',
-        component: NotificationToggle,
+        descriptionKey: 'settings.notificationsLessonRemindersDescription',
+        component: NotificationToggle as ComponentType<Record<string, unknown>>,
         componentProps: { settingKey: 'notifications.lesson_reminders' },
         isLast: false,
       },
@@ -68,7 +91,7 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
         id: 'notifications-streak',
         icon: 'flame',
         labelKey: 'settings.notificationsStreakReminders',
-        component: NotificationToggle,
+        component: NotificationToggle as ComponentType<Record<string, unknown>>,
         componentProps: { settingKey: 'notifications.streak_reminders' },
         isLast: false,
       },
@@ -76,7 +99,7 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
         id: 'notifications-exam',
         icon: 'school',
         labelKey: 'settings.notificationsExamReminders',
-        component: NotificationToggle,
+        component: NotificationToggle as ComponentType<Record<string, unknown>>,
         componentProps: { settingKey: 'notifications.exam_reminders' },
         isLast: false,
       },
@@ -84,7 +107,7 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
         id: 'notifications-content',
         icon: 'sparkles',
         labelKey: 'settings.notificationsNewContent',
-        component: NotificationToggle,
+        component: NotificationToggle as ComponentType<Record<string, unknown>>,
         componentProps: { settingKey: 'notifications.new_content' },
         isLast: true,
       },

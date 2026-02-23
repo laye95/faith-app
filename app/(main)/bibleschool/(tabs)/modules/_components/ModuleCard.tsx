@@ -1,8 +1,9 @@
+import { Badge } from "@/components/ui/Badge";
 import { Box } from "@/components/ui/box";
+import { Card } from "@/components/ui/Card";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import type { Module } from "@/constants/modules";
-import { useCardShadow } from "@/hooks/useShadows";
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { ModuleProgress } from "@/types/progress";
@@ -64,7 +65,6 @@ export function ModuleCard({
   onPress,
 }: ModuleCardProps) {
   const theme = useTheme();
-  const cardShadow = useCardShadow();
   const { t } = useTranslation();
   const status = progress?.status ?? "locked";
   const percentage = progress?.progress_percentage ?? 0;
@@ -83,15 +83,7 @@ export function ModuleCard({
       activeOpacity={0.9}
       className="cursor-pointer"
     >
-      <Box
-        className="rounded-2xl overflow-hidden"
-        style={{
-          backgroundColor: theme.cardBg,
-          borderWidth: 1,
-          borderColor: theme.cardBorder,
-          ...cardShadow,
-        }}
-      >
+      <Card padding="none">
         {module.backgroundImageUrl ? (
           <Box className="h-36">
             <Image
@@ -160,31 +152,10 @@ export function ModuleCard({
               }}
             >
               {(isCompleted || status === "in_progress") && (
-                <Box
-                  className="flex-row items-center gap-1.5 rounded-lg px-2.5 py-1"
-                  style={{
-                    backgroundColor: isCompleted
-                      ? theme.badgeSuccessBg
-                      : theme.badgeInfoBg,
-                  }}
-                >
-                  {isCompleted && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={14}
-                      color={theme.textPrimary}
-                    />
-                  )}
-                  <Text
-                    className="text-xs font-semibold"
-                    style={{
-                      color: theme.textPrimary,
-                      includeFontPadding: false,
-                    }}
-                  >
-                    {statusLabel}
-                  </Text>
-                </Box>
+                <Badge
+                  label={statusLabel}
+                  variant={isCompleted ? "success" : "info"}
+                />
               )}
               <Box
                 className="rounded-full p-1.5"
@@ -199,7 +170,7 @@ export function ModuleCard({
             </View>
           </View>
         </View>
-      </Box>
+      </Card>
     </TouchableOpacity>
   );
 }

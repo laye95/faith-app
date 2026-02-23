@@ -1,5 +1,6 @@
 import { MainTopBar } from "@/app/(main)/_components/MainTopBar";
 import { Box } from "@/components/ui/box";
+import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { routes } from "@/constants/routes";
@@ -47,7 +48,7 @@ export default function BibleSchoolModulesScreen() {
 
   const remainingModules = useMemo(() => {
     return allModulesExcludingCurrent.filter(
-      (m) => progressMap[m.id]?.status !== "completed"
+      (m) => progressMap[m.id]?.status !== "completed",
     );
   }, [allModulesExcludingCurrent, progressMap]);
 
@@ -140,43 +141,37 @@ export default function BibleSchoolModulesScreen() {
             </VStack>
           )}
           <VStack className="gap-2">
-          <Box
-            style={{
-              backgroundColor: theme.cardBg,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: theme.cardBorder,
-              overflow: "hidden",
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                bzzt();
-                setAllModulesExpanded((v) => !v);
-              }}
-              activeOpacity={0.5}
-              className="flex-row items-center justify-between px-4 py-3.5"
-              style={{
-                backgroundColor: theme.tabInactiveBg,
-                borderBottomWidth: allModulesExpanded ? 1 : 0,
-                borderBottomColor: theme.cardBorder,
-              }}
+            <CollapsibleSection
+              title={t("modules.allModules")}
+              collapsed={!allModulesExpanded}
+              onToggle={() => setAllModulesExpanded((v) => !v)}
+              headerBg={theme.tabInactiveBg}
             >
-              <Text
-                className="text-xs font-semibold uppercase tracking-wider"
-                style={{ color: theme.textSecondary }}
+              {remainingModules.map((module) => (
+                <ModuleCard
+                  key={module.id}
+                  module={{
+                    ...module,
+                    title: module.title,
+                    backgroundImageUrl: module.backgroundImageUrl,
+                  }}
+                  progress={progressMap[module.id] ?? null}
+                  attemptCount={attemptCountMap[module.id] ?? 0}
+                  onPress={() => {
+                    bzzt();
+                    router.push(routes.bibleschoolModule(module.id));
+                  }}
+                />
+              ))}
+            </CollapsibleSection>
+            {completedModules.length > 0 && (
+              <CollapsibleSection
+                title={t("modules.completedModules")}
+                collapsed={!completedModulesExpanded}
+                onToggle={() => setCompletedModulesExpanded((v) => !v)}
+                headerBg={theme.tabInactiveBg}
               >
-                {t("modules.allModules")}
-              </Text>
-              <Ionicons
-                name={allModulesExpanded ? "chevron-up" : "chevron-down"}
-                size={20}
-                color={theme.textSecondary}
-              />
-            </TouchableOpacity>
-            {allModulesExpanded && (
-              <VStack className="gap-4 px-3 pb-3 pt-4">
-                {remainingModules.map((module) => (
+                {completedModules.map((module) => (
                   <ModuleCard
                     key={module.id}
                     module={{
@@ -192,68 +187,8 @@ export default function BibleSchoolModulesScreen() {
                     }}
                   />
                 ))}
-              </VStack>
+              </CollapsibleSection>
             )}
-          </Box>
-          {completedModules.length > 0 && (
-            <Box
-              style={{
-                backgroundColor: theme.cardBg,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: theme.cardBorder,
-                overflow: "hidden",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  bzzt();
-                  setCompletedModulesExpanded((v) => !v);
-                }}
-                activeOpacity={0.5}
-                className="flex-row items-center justify-between px-4 py-3.5"
-                style={{
-                  backgroundColor: theme.tabInactiveBg,
-                  borderBottomWidth: completedModulesExpanded ? 1 : 0,
-                  borderBottomColor: theme.cardBorder,
-                }}
-              >
-                <Text
-                  className="text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: theme.textSecondary }}
-                >
-                  {t("modules.completedModules")}
-                </Text>
-                <Ionicons
-                  name={
-                    completedModulesExpanded ? "chevron-up" : "chevron-down"
-                  }
-                  size={20}
-                  color={theme.textSecondary}
-                />
-              </TouchableOpacity>
-              {completedModulesExpanded && (
-                <VStack className="gap-4 px-3 pb-3 pt-4">
-                  {completedModules.map((module) => (
-                    <ModuleCard
-                      key={module.id}
-                      module={{
-                        ...module,
-                        title: module.title,
-                        backgroundImageUrl: module.backgroundImageUrl,
-                      }}
-                      progress={progressMap[module.id] ?? null}
-                      attemptCount={attemptCountMap[module.id] ?? 0}
-                      onPress={() => {
-                        bzzt();
-                        router.push(routes.bibleschoolModule(module.id));
-                      }}
-                    />
-                  ))}
-                </VStack>
-              )}
-            </Box>
-          )}
           </VStack>
         </VStack>
       </ScrollView>
@@ -262,7 +197,7 @@ export default function BibleSchoolModulesScreen() {
           style={{
             position: "absolute",
             right: 12,
-            bottom: insets.bottom + 130,
+            bottom: insets.bottom + 90,
           }}
           pointerEvents="box-none"
         >

@@ -30,7 +30,18 @@ function parseVideoId(raw: string): string {
   return match ? match[1] : cleaned.replace(/\D/g, '') || '';
 }
 
-export async function getPlaybackUrl(videoId: string): Promise<string | null> {
+const MIN_ACCEPTABLE_WIDTH = 480;
+const DEFAULT_TARGET_WIDTH = 1280;
+
+export interface GetPlaybackUrlOptions {
+  maxWidth?: number;
+  preferHls?: boolean;
+}
+
+export async function getPlaybackUrl(
+  videoId: string,
+  options?: GetPlaybackUrlOptions,
+): Promise<string | null> {
   const token = getToken();
   const videoIdClean = parseVideoId(videoId);
   if (!videoIdClean) return null;
@@ -59,14 +70,29 @@ export async function getPlaybackUrl(videoId: string): Promise<string | null> {
     console.log('[Vimeo] got play.progressive count:', data.play?.progressive?.length ?? 0);
   }
   const progressive = data.play?.progressive ?? [];
+  const hlsUrl = data.play?.hls?.link ?? null;
 
-  const sorted = [...progressive]
-    .filter((p) => p.link)
-    .sort((a, b) => (b.width ?? 0) - (a.width ?? 0));
+  if (options?.preferHls && hlsUrl) return hlsUrl;
+
+  const targetWidth = options?.maxWidth ?? DEFAULT_TARGET_WIDTH;
+  const withLinks = progressive.filter((p) => p.link);
+  const acceptable = withLinks.filter((p) => (p.width ?? 0) >= MIN_ACCEPTABLE_WIDTH);
+  const candidates = acceptable.length > 0 ? acceptable : withLinks;
+  const withinLimit =
+    options?.maxWidth != null
+      ? candidates.filter((p) => (p.width ?? 0) <= options!.maxWidth!)
+      : candidates;
+  const pool = withinLimit.length > 0 ? withinLimit : candidates;
+  const sorted = [...pool].sort((a, b) => {
+    const aw = a.width ?? 0;
+    const bw = b.width ?? 0;
+    const aDist = Math.abs(aw - targetWidth);
+    const bDist = Math.abs(bw - targetWidth);
+    return aDist - bDist;
+  });
   const progressiveUrl = sorted[0]?.link ?? null;
   if (progressiveUrl) return progressiveUrl;
 
-  const hlsUrl = data.play?.hls?.link ?? null;
   return hlsUrl;
 }
 

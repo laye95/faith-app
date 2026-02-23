@@ -132,6 +132,8 @@ CREATE TABLE public.user_quiz_attempts (
   score_percentage INTEGER NOT NULL CHECK (score_percentage >= 0 AND score_percentage <= 100),
   passed BOOLEAN NOT NULL,
   answers JSONB,
+  correct_count INTEGER,
+  total_count INTEGER,
   completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );

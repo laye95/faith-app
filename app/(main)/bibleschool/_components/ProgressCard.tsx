@@ -1,5 +1,6 @@
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,17 +54,8 @@ export function ProgressCard() {
             >
               {t('overview.progressCount', { completed: completedCount, total: TOTAL_LESSONS })}
             </Text>
-            <Box
-              className="mt-3 h-2 rounded-full overflow-hidden"
-              style={{ backgroundColor: theme.brandAccentMuted }}
-            >
-              <Box
-                className="h-full rounded-full"
-                style={{
-                  width: `${percentage}%`,
-                  backgroundColor: theme.brandAccent,
-                }}
-              />
+            <Box className="mt-3">
+              <ProgressBar value={percentage} />
             </Box>
           </VStack>
         </HStack>

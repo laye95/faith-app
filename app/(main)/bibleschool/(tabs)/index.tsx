@@ -3,17 +3,38 @@ import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBibleschoolTab } from '@/contexts/BibleschoolTabContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
+import { routes } from '@/constants/routes';
 import { ContinueLearningCard } from '../_components/ContinueLearningCard';
 import { CurrentVideoCard } from '../_components/CurrentVideoCard';
 import { ProgressCard } from '../_components/ProgressCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
+import { useCallback } from 'react';
 import { ScrollView } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/services/queryKeys';
+import { bibleschoolService } from '@/services/storyblok/bibleschoolService';
 
 export default function BibleSchoolScreen() {
+  const { setActiveTab } = useBibleschoolTab();
+  const queryClient = useQueryClient();
+  const { locale } = useTranslation();
+
+  useFocusEffect(
+    useCallback(() => {
+      setActiveTab('index');
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.bibleschool.modules(locale),
+        queryFn: () => bibleschoolService.getModules(locale),
+      });
+    }, [setActiveTab, queryClient, locale])
+  );
   const { user } = useAuth();
   const theme = useTheme();
   const { t } = useTranslation();
@@ -36,6 +57,7 @@ export default function BibleSchoolScreen() {
         title={t('navbar.bibleschool')}
         currentSection="bibleschool"
         showBackButton
+        onBack={() => router.replace(routes.main())}
       />
 
       <ScrollView

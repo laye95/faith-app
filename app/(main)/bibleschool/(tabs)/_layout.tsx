@@ -1,21 +1,19 @@
-import { Tabs } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useTheme } from '@/hooks/useTheme';
-
-import { CustomTabBar } from '../../_components/CustomTabBar';
 
 export default function BibleSchoolTabsLayout() {
   const theme = useTheme();
 
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} section="bibleschool" />}
+    <Stack
       screenOptions={{
         headerShown: false,
-        sceneStyle: { backgroundColor: theme.pageBg },
+        animation: 'slide_from_right',
+        contentStyle: { backgroundColor: theme.pageBg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Overview' }} />
-      <Tabs.Screen name="modules" options={{ title: 'Modules' }} />
-    </Tabs>
+      <Stack.Screen name="index" options={{ title: 'Overview', animation: 'slide_from_left' }} />
+      <Stack.Screen name="modules" options={{ title: 'Modules', animation: 'slide_from_right' }} />
+    </Stack>
   );
 }

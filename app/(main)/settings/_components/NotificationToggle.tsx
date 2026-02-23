@@ -1,15 +1,13 @@
-import { useNotificationSetting } from '../_hooks/useNotificationSetting';
-import { useTheme } from '@/hooks/useTheme';
+import { Toggle } from '@/components/ui/Toggle';
 import { useToast } from '@/hooks/useToast';
 import { bzzt } from '@/utils/haptics';
-import { ActivityIndicator, Switch } from 'react-native';
+import { useNotificationSetting } from '../_hooks/useNotificationSetting';
 
 interface NotificationToggleProps {
   settingKey: string;
 }
 
 export function NotificationToggle({ settingKey }: NotificationToggleProps) {
-  const theme = useTheme();
   const toast = useToast();
   const [value, setValue, isLoading] = useNotificationSetting(settingKey);
 
@@ -22,19 +20,11 @@ export function NotificationToggle({ settingKey }: NotificationToggleProps) {
     }
   };
 
-  if (isLoading) {
-    return <ActivityIndicator size="small" color={theme.brandAccent} />;
-  }
-
   return (
-    <Switch
+    <Toggle
       value={value}
       onValueChange={handleToggle}
-      trackColor={{
-        false: theme.cardBorder,
-        true: theme.buttonAccept,
-      }}
-      thumbColor="#FFFFFF"
+      isLoading={isLoading}
     />
   );
 }

@@ -1,6 +1,7 @@
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
+import { useBibleschoolTab } from '@/contexts/BibleschoolTabContext';
 import { routes } from '@/constants/routes';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -16,6 +17,7 @@ import { OverviewCard } from './OverviewCard';
 export function ContinueLearningCard() {
   const theme = useTheme();
   const { t, locale } = useTranslation();
+  const { setActiveTab } = useBibleschoolTab();
   const { data: modules } = useModules(locale);
   const { nextUnlockedTarget, isLoading } = useLessonUnlocks();
 
@@ -65,12 +67,15 @@ export function ContinueLearningCard() {
     if (isLoading) return;
     bzzt();
     if (target?.type === 'lesson') {
+      setActiveTab('modules');
       router.push(
         routes.bibleschoolModuleLesson(target.module.id, target.lesson.id),
       );
     } else if (target?.type === 'exam') {
+      setActiveTab('modules');
       router.push(routes.bibleschoolModuleExam(target.module.id));
     } else {
+      setActiveTab('modules');
       router.push(routes.bibleschoolModules());
     }
   };

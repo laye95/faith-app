@@ -7,8 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, TouchableOpacity, View } from 'react-native';
+import { memo, useEffect } from 'react';
+import { TouchableOpacity, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface TabItem {
@@ -30,53 +31,36 @@ interface CustomTabBarProps extends BottomTabBarProps {
   section: keyof typeof TAB_CONFIG;
 }
 
+const SPRING_CONFIG = { damping: 18, stiffness: 400 };
+
+const AnimatedTabPill = memo(function AnimatedTabPill({
+  isFocused,
+  children,
+}: {
+  isFocused: boolean;
+  children: React.ReactNode;
+}) {
+  const scale = useSharedValue(1);
+
+  useEffect(() => {
+    scale.value = withSpring(isFocused ? 1.04 : 1, SPRING_CONFIG);
+  }, [isFocused, scale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return <Animated.View style={[animatedStyle, { width: '100%' }]}>{children}</Animated.View>;
+});
+
 export function CustomTabBar({ state, descriptors, navigation, section }: CustomTabBarProps) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { t } = useTranslation();
   const isDark = theme.isDark;
-  const previousIndex = useRef(state.index);
-  const scaleAnims = useRef<Record<string, Animated.Value>>({}).current;
 
   const tabItems = TAB_CONFIG[section];
   if (!tabItems || tabItems.length <= 1) return null;
-
-  state.routes.forEach((route) => {
-    if (!scaleAnims[route.key]) {
-      scaleAnims[route.key] = new Animated.Value(1);
-    }
-  });
-
-  useEffect(() => {
-    if (previousIndex.current !== state.index) {
-      const prevRoute = state.routes[previousIndex.current];
-      const newRoute = state.routes[state.index];
-      if (prevRoute && newRoute) {
-        Animated.parallel([
-          Animated.spring(scaleAnims[prevRoute.key], {
-            toValue: 1,
-            useNativeDriver: true,
-            tension: 300,
-            friction: 20,
-          }),
-          Animated.spring(scaleAnims[newRoute.key], {
-            toValue: 1.15,
-            useNativeDriver: true,
-            tension: 300,
-            friction: 20,
-          }),
-        ]).start(() => {
-          Animated.spring(scaleAnims[newRoute.key], {
-            toValue: 1,
-            useNativeDriver: true,
-            tension: 300,
-            friction: 20,
-          }).start();
-        });
-      }
-      previousIndex.current = state.index;
-    }
-  }, [state.index, state.routes, scaleAnims]);
 
   const inactiveIconColor = theme.tabInactiveText;
   const inactiveTextColor = theme.tabInactiveText;
@@ -150,12 +134,7 @@ export function CustomTabBar({ state, descriptors, navigation, section }: Custom
               }}
             >
               {isFocused ? (
-                <Animated.View
-                  style={{
-                    transform: [{ scale: scaleAnims[route.key] || 1 }],
-                    width: '100%',
-                  }}
-                >
+                <AnimatedTabPill isFocused={isFocused}>
                   <LinearGradient
                     colors={[theme.buttonPrimary, theme.buttonPrimary]}
                     start={{ x: 0, y: 0 }}
@@ -192,10 +171,10 @@ export function CustomTabBar({ state, descriptors, navigation, section }: Custom
                         }}
                       >
                         {config.label}
-                      </Text>
-                    </View>
-                  </LinearGradient>
-                </Animated.View>
+                    </Text>
+                  </View>
+                </LinearGradient>
+                </AnimatedTabPill>
               ) : (
                 <View
                   style={{

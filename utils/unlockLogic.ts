@@ -20,10 +20,11 @@ export function isLessonUnlocked(
   lesson: { id: string; moduleId: string; order: number },
   completedLessonIds: Set<string>,
   passedModuleIds: Set<string>,
+  introVideoWatched = true,
 ): boolean {
   if (lesson.order === 1) {
     const moduleIndex = MODULES.findIndex((m) => m.id === moduleId);
-    if (moduleIndex === 0) return true;
+    if (moduleIndex === 0) return introVideoWatched;
     const prevModule = MODULES[moduleIndex - 1];
     return passedModuleIds.has(prevModule.id);
   }
@@ -44,12 +45,13 @@ export function isExamUnlocked(
 export function getNextUnlockedLesson(
   completedLessonIds: Set<string>,
   passedModuleIds: Set<string>,
+  introVideoWatched = true,
 ): { lesson: Lesson; module: (typeof MODULES)[0] } | null {
   for (const module of MODULES) {
     const lessons = getLessonsForModule(module.id);
     for (const lesson of lessons) {
       if (completedLessonIds.has(lesson.id)) continue;
-      if (isLessonUnlocked(module.id, lesson, completedLessonIds, passedModuleIds)) {
+      if (isLessonUnlocked(module.id, lesson, completedLessonIds, passedModuleIds, introVideoWatched)) {
         return { lesson, module };
       }
       return null;
@@ -65,6 +67,7 @@ export type NextUnlockedTarget =
 export function getNextUnlockedTarget(
   completedLessonIds: Set<string>,
   passedModuleIds: Set<string>,
+  introVideoWatched = true,
 ): NextUnlockedTarget | null {
   for (const module of MODULES) {
     const lessons = getLessonsForModule(module.id);
@@ -72,7 +75,7 @@ export function getNextUnlockedTarget(
     if (!allLessonsDone) {
       for (const lesson of lessons) {
         if (completedLessonIds.has(lesson.id)) continue;
-        if (isLessonUnlocked(module.id, lesson, completedLessonIds, passedModuleIds)) {
+        if (isLessonUnlocked(module.id, lesson, completedLessonIds, passedModuleIds, introVideoWatched)) {
           return { type: 'lesson', lesson, module };
         }
         return null;

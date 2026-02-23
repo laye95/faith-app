@@ -89,10 +89,12 @@ export default function ExamScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const introHeightRef = useRef(140);
   const cardTopsRef = useRef<number[]>([]);
+  const [bottomBarHeight, setBottomBarHeight] = useState(120);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const SCROLL_THRESHOLD = 150;
 
-  const attemptNumber = (attempts?.length ?? 0) + 1;
+  const completedAttemptCount = attempts?.length ?? 0;
+  const attemptNumber = completedAttemptCount + 1;
 
   useEffect(() => {
     if (!user?.id || !id || !questions?.length || progressLoaded) return;
@@ -195,14 +197,11 @@ export default function ExamScreen() {
         setSubmitted(true);
       }
     },
-    onError: () => {
-      const total = questions?.length ?? 3;
-      toast.error(
-        t("quiz.fail", {
-          minCorrect: getMinCorrectRequired(total),
-          total,
-        }),
-      );
+    onError: (error) => {
+      if (__DEV__) {
+        console.warn("[Exam] Submit failed:", error);
+      }
+      toast.error(t("quiz.submitError"));
     },
   });
 
@@ -256,7 +255,16 @@ export default function ExamScreen() {
       alreadyPassedHandledRef.current = true;
       setAlreadyPassedModalVisible(true);
     }
-  }, [id, isExamUnlocked, passedModuleIds, unlocksLoading, module, showSuccessScreen, toast, t]);
+  }, [
+    id,
+    isExamUnlocked,
+    passedModuleIds,
+    unlocksLoading,
+    module,
+    showSuccessScreen,
+    toast,
+    t,
+  ]);
 
   useEffect(() => {
     const unsub = navigation.addListener("beforeRemove", (e) => {
@@ -493,6 +501,9 @@ export default function ExamScreen() {
               borderTopWidth: 1,
               borderTopColor: theme.cardBorder,
             }}
+            onLayout={(e) => {
+              setBottomBarHeight(e.nativeEvent.layout.height);
+            }}
           >
             {submitted ? (
               <VStack className="gap-3">
@@ -510,7 +521,7 @@ export default function ExamScreen() {
                         className="text-xs font-semibold uppercase tracking-wide"
                         style={{ color: theme.textTertiary }}
                       >
-                        {t("quiz.attemptNumber", { number: attemptNumber })}
+                        {t("quiz.attemptNumber", { number: completedAttemptCount })}
                       </Text>
                       <Text
                         className="text-sm font-semibold"
@@ -611,7 +622,7 @@ export default function ExamScreen() {
               style={{
                 position: "absolute",
                 right: 12,
-                bottom: insets.bottom + 140,
+                bottom: insets.bottom + bottomBarHeight,
               }}
               pointerEvents="box-none"
             >

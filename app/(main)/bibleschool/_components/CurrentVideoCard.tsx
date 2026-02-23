@@ -2,7 +2,10 @@ import { MODULES, getLessonsForModule } from '@/constants/modules';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
+import { useBibleschoolTab } from '@/contexts/BibleschoolTabContext';
 import { useLastWatchedLesson } from '@/hooks/useLastWatchedLesson';
+import { useIntroductionVimeoId } from '@/hooks/useBibleschoolContent';
+import { useIntroVideoWatched } from '@/hooks/useIntroVideoWatched';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useVimeoThumbnail } from '@/hooks/useVimeoThumbnail';
@@ -17,43 +20,64 @@ import { OverviewCard } from './OverviewCard';
 
 export function CurrentVideoCard() {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const { setActiveTab } = useBibleschoolTab();
   const { lesson, module, isLoading } = useLastWatchedLesson();
+  const { hasWatched: introWatched, isLoading: introLoading } =
+    useIntroVideoWatched();
+  const { data: introductionVimeoId } = useIntroductionVimeoId(locale);
 
   const fallbackLesson = getLessonsForModule(MODULES[0].id)[0];
   const fallbackModule = MODULES[0];
   const targetLesson = lesson ?? fallbackLesson;
   const targetModule = module ?? fallbackModule;
 
-  const videoIdForThumb =
-    targetLesson && !targetLesson.thumbnailUrl && targetLesson.videoId
+  const showIntro = !lesson && !introWatched;
+
+  const introThumbnailId = showIntro ? introductionVimeoId : undefined;
+  const lessonThumbId =
+    targetLesson &&
+    !targetLesson.thumbnailUrl &&
+    'videoId' in targetLesson &&
+    targetLesson.videoId
       ? targetLesson.videoId
       : undefined;
+  const videoIdForThumb = showIntro ? introThumbnailId : lessonThumbId;
   const { data: vimeoThumbnail, isLoading: thumbnailLoading } =
     useVimeoThumbnail(videoIdForThumb);
-  const thumbnailUrl =
-    targetLesson?.thumbnailUrl ?? vimeoThumbnail ?? undefined;
+  const thumbnailUrl = showIntro
+    ? vimeoThumbnail
+    : targetLesson?.thumbnailUrl ?? vimeoThumbnail ?? undefined;
 
   const moduleName =
     targetModule &&
     ('title' in targetModule
       ? targetModule.title
       : t((targetModule as { titleKey: string }).titleKey as never));
-  const lessonName =
-    targetLesson &&
-    ('title' in targetLesson
-      ? targetLesson.title
-      : t((targetLesson as { titleKey: string }).titleKey as never));
+  const lessonName = showIntro
+    ? t('overview.introVideoTitle')
+    : targetLesson &&
+      ('title' in targetLesson
+        ? targetLesson.title
+        : t((targetLesson as { titleKey: string }).titleKey as never));
 
-  const subtitle = isLoading
+  const subtitle = isLoading || introLoading
     ? t('overview.currentVideoPlaceholder')
-    : lesson && module
-      ? t('overview.currentVideoContext', { moduleName })
-      : t('overview.startFirstLesson');
+    : showIntro
+      ? t('overview.introVideoSubtitle')
+      : lesson && module
+        ? t('overview.currentVideoContext', { moduleName })
+        : t('overview.startFirstLesson');
 
   const handlePress = () => {
     bzzt();
-    router.push(routes.bibleschoolModuleLesson(targetModule.id, targetLesson.id));
+    if (showIntro) {
+      setActiveTab('modules');
+      router.push(routes.bibleschoolIntro());
+    } else {
+      setActiveTab('modules');
+      router.push(routes.bibleschoolModuleLesson(targetModule.id, targetLesson.id));
+    }
   };
 
   return (
@@ -61,9 +85,9 @@ export function CurrentVideoCard() {
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={handlePress}
-        disabled={isLoading}
+        disabled={!showIntro && isLoading}
         className="cursor-pointer"
-        style={{ opacity: isLoading ? 0.7 : 1 }}
+        style={{ opacity: !showIntro && isLoading ? 0.7 : 1 }}
       >
         <Box
           className="aspect-video items-center justify-center overflow-hidden"

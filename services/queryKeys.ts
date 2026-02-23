@@ -24,10 +24,18 @@ export const queryKeys = {
   },
   bibleschool: {
     modules: (locale: string) => ['bibleschool', 'modules', locale] as const,
+    introductionVimeoId: (locale: string) =>
+      ['bibleschool', 'introductionVimeoId', locale] as const,
     module: (id: string, locale: string) =>
       ['bibleschool', 'module', id, locale] as const,
     lesson: (moduleId: string, lessonId: string, locale: string) =>
       ['bibleschool', 'lesson', moduleId, lessonId, locale] as const,
+  },
+  userSettings: {
+    introWatched: (userId: string) =>
+      ['userSettings', 'introWatched', userId] as const,
+    introPosition: (userId: string) =>
+      ['userSettings', 'introPosition', userId] as const,
   },
   progress: {
     overview: (userId: string) => ['progress', 'overview', userId] as const,

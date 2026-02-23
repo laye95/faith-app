@@ -162,6 +162,9 @@
     "progressPlaceholder": "0 от 100 урока завършени",
     "progressCount": "{{completed}} от {{total}} урока завършени",
     "currentVideoTitle": "Текущо видео",
+    "introVideoTitle": "Въвеждащо видео",
+    "introVideoSubtitle": "Започнете своето пътуване",
+    "introVideoContent": "Това въведение ще ви помогне да започнете с Faith Generation Библийското училище. Ще научите какво да очаквате от 100 урока в 20 модула и как да извлечете максимум от пътуването си.",
     "currentVideoPlaceholder": "Последният гледан урок ще се появи тук",
     "continueWatching": "Продължи гледането",
     "moduleWithNumber": "Модул {{number}}",
@@ -174,6 +177,8 @@
   },
   "profile": {
     "information": "Информация за профила",
+    "informationSubtitle": "Редактирайте името и имейла си",
+    "settingsSubtitle": "Език, тема, известия и още",
     "save": "Запазване на промените",
     "saving": "Запазване...",
     "saved": "Профилът ви е актуализиран",
@@ -186,12 +191,24 @@
     "themeDark": "Тъмна",
     "themeSystem": "Системна",
     "preferences": "Предпочитания",
+    "preferencesSubtitle": "Език и външен вид",
+    "videoSubtitle": "Качество и възпроизвеждане",
+    "notificationsSubtitle": "Push известия и напомняния",
     "notifications": "Известия",
     "notificationsPush": "Push известия",
     "notificationsLessonReminders": "Напомняния за уроци",
+    "notificationsLessonRemindersDescription": "Получавайте напомняния да продължите уроците си",
     "notificationsStreakReminders": "Напомняния за серия",
     "notificationsExamReminders": "Напомняния за изпити",
-    "notificationsNewContent": "Нова съдържание"
+    "notificationsNewContent": "Нова съдържание",
+    "video": "Видео",
+    "videoQuality": "Качество на видеото",
+    "videoQualityAuto": "Автоматично (според връзката)",
+    "videoQualityHigh": "1280p",
+    "videoQualityMedium": "640p",
+    "videoQualityLow": "480p",
+    "videoQualityDataSaver": "Икономия на данни",
+    "videoQualityDescription": "Влияе на скоростта на зареждане и използването на данни"
   },
   "loading": {
     "video": "Зареждане на видео...",
@@ -294,6 +311,9 @@
     "locked": "Заключен",
     "unlockHint": "Завършете урок {{number}}, за да отключите",
     "videoLoadError": "Видеото не може да се зареди. Докоснете за повторен опит.",
+    "introRequiredMessage": "Гледайте първо въвеждащото видео",
+    "introPageLockedMessage": "Завършете видеото по-горе, за да отключите първия урок",
+    "watchIntro": "Гледай въвеждащото",
     "modules": {
       "1": {
         "1": "Какво е вярата?",
@@ -450,6 +470,7 @@
   "quiz": {
     "title": "Изпит по модул",
     "submit": "Изпращане",
+    "submitError": "Нещо се обърка. Моля, опитайте отново.",
     "pass": "Поздравления! Успешно преминахте.",
     "fail": "Още не. Нужни са ви поне {{minCorrect}} от {{total}} верни, за да минете.",
     "retry": "Опитайте отново",
@@ -493,6 +514,7 @@
     "passedHint": "Завършихте изпита по този модул",
     "failedScore": "{{score}}% - {{correct}}/{{total}} верни",
     "retryHint": "Докоснете за повторен опит",
+    "retryHintWithAttempt": "Опит {{count}} - Докоснете за повторен опит",
     "alreadyPassed": "Вече сте преминали този изпит"
   }
 }

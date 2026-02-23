@@ -10,7 +10,11 @@ export const PROFILE_RETURN_HREF_KEY = '@faith_app:profile_return_href';
 
 export async function saveProfileReturnHref(href: string): Promise<void> {
   try {
-    if (href && !href.includes('/profile')) {
+    if (
+      href &&
+      !href.includes('/profile') &&
+      !href.includes('/settings')
+    ) {
       await AsyncStorage.setItem(PROFILE_RETURN_HREF_KEY, href);
     }
   } catch {

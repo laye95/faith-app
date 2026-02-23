@@ -70,6 +70,14 @@ function getFilename(bg: StoryblokBackground | undefined): string | undefined {
   return bg?.filename;
 }
 
+const INTRO_VIDEO_FALLBACK_ID = '927139225';
+
+function parseIntroductionVimeoId(raw: string | undefined): string | undefined {
+  if (!raw || typeof raw !== 'string') return undefined;
+  const match = raw.match(/(?:vimeo\.com\/(?:video\/)?|^)(\d+)/);
+  return match ? match[1] : raw.replace(/\D/g, '') || undefined;
+}
+
 function extractVimeoId(lesson: StoryblokLesson): string | undefined {
   const raw =
     lesson.vimeo_id ??
@@ -147,6 +155,7 @@ function mapOldModuleToBibleschool(
 
 let cachedModules: BibleschoolModule[] | null = null;
 let cachedLocale: SupportedLocale | null = null;
+let cachedIntroductionVimeoId: string | null = null;
 
 export async function getModules(
   locale: SupportedLocale,
@@ -158,14 +167,9 @@ export async function getModules(
     version: 'published',
   });
 
-  if (__DEV__) {
-    console.log('[Storyblok] content keys:', Object.keys(story.content ?? {}));
-    console.log('[Storyblok] content.modules exists:', !!(story.content as Record<string, unknown>)?.modules);
-    const rawMods = (story.content as Record<string, unknown>)?.modules as StoryblokModule[] | undefined;
-    const firstLesson = rawMods?.[0]?.lessons?.[0];
-    console.log('[Storyblok] first lesson keys:', firstLesson ? Object.keys(firstLesson) : 'no lessons');
-    console.log('[Storyblok] first lesson raw:', JSON.stringify(firstLesson, null, 2));
-  }
+  const raw = story.content?.introduction_vimeo_id;
+  cachedIntroductionVimeoId = parseIntroductionVimeoId(raw) ?? INTRO_VIDEO_FALLBACK_ID;
+
   const rawModules = story.content?.modules ?? [];
   const modules = rawModules.map((m, idx) =>
     mapOldModuleToBibleschool(m, idx),
@@ -174,6 +178,16 @@ export async function getModules(
   cachedModules = modules;
   cachedLocale = locale;
   return modules;
+}
+
+export async function getIntroductionVimeoId(
+  locale: SupportedLocale,
+): Promise<string> {
+  if (cachedLocale === locale && cachedIntroductionVimeoId) {
+    return cachedIntroductionVimeoId;
+  }
+  await getModules(locale);
+  return cachedIntroductionVimeoId ?? INTRO_VIDEO_FALLBACK_ID;
 }
 
 export async function getModule(
@@ -201,4 +215,5 @@ export const bibleschoolService = {
   getModules,
   getModule,
   getLesson,
+  getIntroductionVimeoId,
 };

@@ -84,6 +84,16 @@ function getFallbackModule(
   } as BibleschoolModule;
 }
 
+export function useIntroductionVimeoId(locale: SupportedLocale) {
+  return useQuery({
+    queryKey: queryKeys.bibleschool.introductionVimeoId(locale),
+    queryFn: () => bibleschoolService.getIntroductionVimeoId(locale),
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+    refetchOnMount: 'always',
+  });
+}
+
 export function useModule(moduleId: string | undefined, locale: SupportedLocale) {
   const { t } = useTranslation();
 

@@ -1,7 +1,5 @@
-import { Box } from '@/components/ui/box';
+import { Card } from '@/components/ui/Card';
 import { NavigationRow } from '@/components/common/NavigationRow';
-import { useCardShadow } from '@/hooks/useShadows';
-import { useTheme } from '@/hooks/useTheme';
 import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
@@ -13,6 +11,7 @@ interface SectionCardProps {
   onPress: () => void;
   badge?: string;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 export function SectionCard({
@@ -22,31 +21,22 @@ export function SectionCard({
   onPress,
   badge,
   disabled = false,
+  compact = false,
 }: SectionCardProps) {
-  const theme = useTheme();
-  const cardShadow = useCardShadow();
-
   return (
-    <Box
-      className="rounded-2xl p-5"
-      style={{
-        backgroundColor: theme.cardBg,
-        borderWidth: 1,
-        borderColor: theme.cardBorder,
-        ...cardShadow,
-      }}
-    >
+    <Card padding={compact ? 'sm' : 'lg'}>
       <NavigationRow
         icon={icon}
         title={title}
         subtitle={subtitle}
         badge={badge}
         disabled={disabled}
+        compact={compact}
         onPress={() => {
           bzzt();
           onPress();
         }}
       />
-    </Box>
+    </Card>
   );
 }

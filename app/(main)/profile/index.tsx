@@ -4,6 +4,7 @@ import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { Text } from '@/components/ui/text';
 import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { VStack } from '@/components/ui/vstack';
+import { SectionCard } from '@/app/(main)/_components/SectionCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -56,86 +57,40 @@ export default function ProfileScreen() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: 24,
+          paddingTop: 20,
           paddingBottom: insets.bottom + 100,
         }}
       >
-      <VStack className="gap-6 items-center">
-        <Box
-          className="rounded-full w-20 h-20 items-center justify-center"
-          style={{ backgroundColor: theme.avatarPrimary }}
-        >
-          <Ionicons name="person" size={40} color={theme.textSecondary} />
-        </Box>
-        <Text
-          className="text-2xl font-bold text-center"
-          style={{ color: theme.textPrimary }}
-        >
-          {profile?.full_name ?? t('navbar.profile')}
-        </Text>
-        <Text
-          className="text-base text-center"
-          style={{ color: theme.textSecondary }}
-        >
-          {profile?.email ?? user?.email ?? ''}
-        </Text>
-
-        <VStack className="mt-4 gap-2 w-full">
-          <TouchableOpacity
-            onPress={() => {
-              bzzt();
-              router.push(routes.profile('information'));
-            }}
-            activeOpacity={0.7}
-            className="rounded-2xl py-4 px-6 cursor-pointer"
-            style={{
-              backgroundColor: theme.cardBg,
-              borderWidth: 1,
-              borderColor: theme.cardBorder,
-            }}
+        <VStack className="gap-4 items-center">
+          <Box
+            className="rounded-full w-16 h-16 items-center justify-center"
+            style={{ backgroundColor: theme.avatarPrimary }}
           >
-            <HStack className="items-center justify-between">
-              <HStack className="items-center gap-3">
-                <Ionicons name="person-outline" size={22} color={theme.textPrimary} />
-                <Text
-                  className="text-base font-semibold"
-                  style={{ color: theme.textPrimary }}
-                >
-                  {t('profile.information')}
-                </Text>
-              </HStack>
-              <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
-            </HStack>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              bzzt();
-              router.push(routes.settings());
-            }}
-            activeOpacity={0.7}
-            className="rounded-2xl py-4 px-6 cursor-pointer"
-            style={{
-              backgroundColor: theme.cardBg,
-              borderWidth: 1,
-              borderColor: theme.cardBorder,
-            }}
+            <Ionicons name="person" size={32} color={theme.textSecondary} />
+          </Box>
+          <Text
+            className="text-xl font-bold text-center"
+            style={{ color: theme.textPrimary }}
           >
-            <HStack className="items-center justify-between">
-              <HStack className="items-center gap-3">
-                <Ionicons name="settings-outline" size={22} color={theme.textPrimary} />
-                <Text
-                  className="text-base font-semibold"
-                  style={{ color: theme.textPrimary }}
-                >
-                  {t('navbar.settings')}
-                </Text>
-              </HStack>
-              <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
-            </HStack>
-          </TouchableOpacity>
+            {profile?.full_name ?? t('navbar.profile')}
+          </Text>
+          <Text
+            className="text-sm text-center"
+            style={{ color: theme.textSecondary }}
+          >
+            {profile?.email ?? user?.email ?? ''}
+          </Text>
+
+          <VStack className="mt-3 gap-3 w-full">
+            <SectionCard
+              icon="person-outline"
+              title={t('profile.information')}
+              subtitle={t('profile.informationSubtitle')}
+              onPress={() => router.push(routes.profile('information'))}
+              compact
+            />
+          </VStack>
         </VStack>
-      </VStack>
       </ScrollView>
 
       <Box
@@ -153,7 +108,7 @@ export default function ProfileScreen() {
             signOut();
           }}
           activeOpacity={0.7}
-          className="rounded-2xl py-4 px-6 cursor-pointer"
+          className="rounded-2xl py-3 px-5 cursor-pointer"
           style={{
             backgroundColor: theme.buttonDecline,
             alignItems: 'center',

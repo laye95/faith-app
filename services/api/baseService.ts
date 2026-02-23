@@ -594,24 +594,7 @@ export class BaseService {
     }
   }
 
-  protected log(level: "info" | "warn" | "error", message: string, data?: any) {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      const timestamp = new Date().toISOString();
-      const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
-
-      switch (level) {
-        case "info":
-          console.log(prefix, message, data || "");
-          break;
-        case "warn":
-          console.warn(prefix, message, data || "");
-          break;
-        case "error":
-          console.error(prefix, message, data || "");
-          break;
-      }
-    }
-  }
+  protected log(_level: "info" | "warn" | "error", _message: string, _data?: any) {}
 
   protected async getCurrentUserId(): Promise<string> {
     const {

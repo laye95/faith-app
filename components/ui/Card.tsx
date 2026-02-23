@@ -1,0 +1,41 @@
+import { forwardRef } from 'react';
+import { Box } from '@/components/ui/box';
+import { useCardShadow } from '@/hooks/useShadows';
+import { useTheme } from '@/hooks/useTheme';
+
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+}
+
+export const Card = forwardRef<React.ComponentRef<typeof Box>, CardProps>(
+  function Card({ children, className, padding = 'none' }, ref) {
+    const theme = useTheme();
+    const cardShadow = useCardShadow();
+
+    const paddingClass =
+      padding === 'sm'
+        ? 'p-3'
+        : padding === 'md'
+          ? 'p-4'
+          : padding === 'lg'
+            ? 'p-5'
+            : '';
+
+    return (
+      <Box
+        ref={ref}
+        className={`rounded-2xl overflow-hidden ${paddingClass} ${className ?? ''}`}
+        style={{
+          backgroundColor: theme.cardBg,
+          borderWidth: 1,
+          borderColor: theme.cardBorder,
+          ...cardShadow,
+        }}
+      >
+        {children}
+      </Box>
+    );
+  },
+);
