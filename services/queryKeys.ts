@@ -31,6 +31,13 @@ export const queryKeys = {
     introPosition: (userId: string) =>
       ['userSettings', 'introPosition', userId] as const,
   },
+  badges: {
+    all: ['badges'] as const,
+    userBadges: (userId: string) => ['badges', 'user', userId] as const,
+  },
+  notifications: {
+    list: (userId: string) => ['notifications', 'list', userId] as const,
+  },
   progress: {
     overview: (userId: string) => ['progress', 'overview', userId] as const,
     lesson: (userId: string, lessonId: string) =>

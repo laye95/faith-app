@@ -1,7 +1,7 @@
 {
   "name": "faith-app",
   "main": "expo-router/entry",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "scripts": {
     "eas-build-pre-install": "npm run version:sync",
     "start": "expo start",

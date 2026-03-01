@@ -15,8 +15,8 @@ import { ProgressCard } from '../_components/ProgressCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { useCallback } from 'react';
-import { ScrollView } from 'react-native';
+import { useCallback, useState } from 'react';
+import { RefreshControl, ScrollView } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/services/queryKeys';
 import { bibleschoolService } from '@/services/storyblok/bibleschoolService';
@@ -40,6 +40,18 @@ export default function BibleSchoolScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { data: profile, isLoading: profileLoading } = useUserProfile(user?.id);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({
+      queryKey: ['progress'],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.bibleschool.category(locale),
+    });
+    setRefreshing(false);
+  }, [queryClient, locale]);
 
   if (profileLoading && user?.id) {
     return <LoadingScreen message={t('loading.section.bibleschool')} />;
@@ -66,6 +78,13 @@ export default function BibleSchoolScreen() {
         contentContainerStyle={{
           paddingBottom: insets.bottom + 100,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.textTertiary}
+          />
+        }
       >
         <VStack className="gap-6">
           <Text

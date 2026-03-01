@@ -1,6 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import { checkAndAwardBadges } from '@/services/api/badgeService';
+import { streakService } from '@/services/api/streakService';
 
 const STREAK_KEY = (userId: string) => `faith_app_streak_${userId}`;
 
@@ -22,15 +25,24 @@ function daysBetween(a: string, b: string): number {
 
 async function loadAndUpdateStreak(userId: string): Promise<number> {
   const key = STREAK_KEY(userId);
-  const raw = await AsyncStorage.getItem(key);
   const today = getTodayLocal();
 
   let stored: StoredStreak | null = null;
-  if (raw) {
-    try {
-      stored = JSON.parse(raw) as StoredStreak;
-    } catch {
-      stored = null;
+  const dbStreak = await streakService.getStreak(userId).catch(() => null);
+  if (dbStreak) {
+    stored = {
+      lastActiveDate: dbStreak.last_active_date,
+      days: dbStreak.days,
+    };
+  }
+  if (!stored) {
+    const raw = await AsyncStorage.getItem(key);
+    if (raw) {
+      try {
+        stored = JSON.parse(raw) as StoredStreak;
+      } catch {
+        stored = null;
+      }
     }
   }
 
@@ -38,7 +50,7 @@ async function loadAndUpdateStreak(userId: string): Promise<number> {
   let newLastActive: string;
 
   if (!stored || !stored.lastActiveDate) {
-    newDays = 0;
+    newDays = 1;
     newLastActive = today;
   } else if (stored.lastActiveDate === today) {
     newDays = stored.days;
@@ -48,52 +60,46 @@ async function loadAndUpdateStreak(userId: string): Promise<number> {
     if (diff === 1) {
       newDays = stored.days + 1;
       newLastActive = today;
-    } else if (diff >= 3) {
-      newDays = 0;
+    } else if (diff > 1) {
+      newDays = 1;
       newLastActive = today;
     } else {
-      newDays = stored.days + 1;
-      newLastActive = today;
+      newDays = stored.days;
+      newLastActive = stored.lastActiveDate;
     }
   }
 
-  await AsyncStorage.setItem(
-    key,
-    JSON.stringify({ lastActiveDate: newLastActive, days: newDays }),
-  );
-  return newDays;
-}
+  const toStore = { lastActiveDate: newLastActive, days: newDays };
+  await AsyncStorage.setItem(key, JSON.stringify(toStore));
+  streakService.upsertStreak(userId, newLastActive, newDays).catch(() => {});
+  checkAndAwardBadges(userId).catch(() => {});
 
-async function loadStreak(userId: string): Promise<number> {
-  const key = STREAK_KEY(userId);
-  const raw = await AsyncStorage.getItem(key);
-  if (!raw) return 0;
-  try {
-    const stored = JSON.parse(raw) as StoredStreak;
-    return stored.days ?? 0;
-  } catch {
-    return 0;
-  }
+  return newDays;
 }
 
 export function useStreak() {
   const { user } = useAuth();
   const [days, setDays] = useState(0);
+  const loadingRef = useRef(false);
 
   useEffect(() => {
     if (!user?.id) {
       setDays(0);
+      loadingRef.current = false;
       return;
     }
-
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     let cancelled = false;
 
     loadAndUpdateStreak(user.id).then((updated) => {
+      loadingRef.current = false;
       if (!cancelled) setDays(updated);
     });
 
     return () => {
       cancelled = true;
+      loadingRef.current = false;
     };
   }, [user?.id]);
 

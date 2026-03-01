@@ -9,6 +9,7 @@ interface BaseModalProps {
   children: React.ReactNode;
   maxWidth?: number;
   closeOnOverlayPress?: boolean;
+  disableScale?: boolean;
 }
 
 export function BaseModal({
@@ -17,20 +18,29 @@ export function BaseModal({
   children,
   maxWidth = 320,
   closeOnOverlayPress = true,
+  disableScale = false,
 }: BaseModalProps) {
   const theme = useTheme();
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const scaleAnim = useRef(
+    new Animated.Value(disableScale ? 1 : 0.9),
+  ).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          friction: 8,
-          tension: 100,
-        }),
+        disableScale
+          ? Animated.timing(scaleAnim, {
+              toValue: 1,
+              duration: 0,
+              useNativeDriver: true,
+            })
+          : Animated.spring(scaleAnim, {
+              toValue: 1,
+              useNativeDriver: true,
+              friction: 8,
+              tension: 100,
+            }),
         Animated.timing(opacityAnim, {
           toValue: 1,
           duration: 200,
@@ -38,10 +48,10 @@ export function BaseModal({
         }),
       ]).start();
     } else {
-      scaleAnim.setValue(0.9);
+      scaleAnim.setValue(disableScale ? 1 : 0.9);
       opacityAnim.setValue(0);
     }
-  }, [visible, scaleAnim, opacityAnim]);
+  }, [visible, scaleAnim, opacityAnim, disableScale]);
 
   if (!visible) return null;
 

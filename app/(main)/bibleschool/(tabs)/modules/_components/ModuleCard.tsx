@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/Badge";
+import { BadgePill } from "@/components/ui/BadgePill";
 import { Box } from "@/components/ui/box";
 import { Card } from "@/components/ui/Card";
 import { HStack } from "@/components/ui/hstack";
@@ -152,7 +152,7 @@ export function ModuleCard({
               }}
             >
               {(isCompleted || status === "in_progress") && (
-                <Badge
+                <BadgePill
                   label={statusLabel}
                   variant={isCompleted ? "success" : "info"}
                 />

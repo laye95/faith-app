@@ -7,6 +7,7 @@ import { ThemeLayout } from "@/components/ThemeLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import { QueryProvider } from "@/providers/QueryProvider";
 
 export default function RootLayout() {
@@ -17,7 +18,9 @@ export default function RootLayout() {
           <AuthProvider>
             <ThemeProvider>
               <LanguageProvider>
-                <ThemeLayout />
+                <ToastProvider>
+                  <ThemeLayout />
+                </ToastProvider>
               </LanguageProvider>
             </ThemeProvider>
           </AuthProvider>

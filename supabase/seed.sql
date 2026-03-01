@@ -862,3 +862,28 @@ WHERE ump.user_id IN (SELECT id FROM public.users WHERE email LIKE '%@test.com')
 UPDATE public.user_quiz_attempts uqa
 SET completed_at = NOW() - (ABS(hashtext(uqa.user_id::text || uqa.module_id)) % 80 + 2) * INTERVAL '1 day'
 WHERE uqa.user_id IN (SELECT id FROM public.users WHERE email LIKE '%@test.com');
+
+INSERT INTO public.badges (id, name_key, description_key, icon, category, target_value, "order") VALUES
+  ('intro_watched', 'badges.introWatched', 'badges.introWatchedDescription', 'videocam', 'special', 1, -10),
+  ('first_lesson', 'badges.firstLesson', 'badges.firstLessonDescription', 'play-circle', 'special', 1, 0),
+  ('lesson_milestone_5', 'badges.lessonMilestone5', 'badges.lessonMilestone5Description', 'document-text', 'lesson', 5, 10),
+  ('lesson_milestone_10', 'badges.lessonMilestone10', 'badges.lessonMilestone10Description', 'document-text', 'lesson', 10, 20),
+  ('lesson_milestone_25', 'badges.lessonMilestone25', 'badges.lessonMilestone25Description', 'document-text', 'lesson', 25, 30),
+  ('lesson_milestone_50', 'badges.lessonMilestone50', 'badges.lessonMilestone50Description', 'document-text', 'lesson', 50, 40),
+  ('lesson_milestone_75', 'badges.lessonMilestone75', 'badges.lessonMilestone75Description', 'document-text', 'lesson', 75, 50),
+  ('lesson_milestone_100', 'badges.lessonMilestone100', 'badges.lessonMilestone100Description', 'document-text', 'lesson', 100, 60),
+  ('student_van_het_woord', 'badges.studentVanHetWoord', 'badges.studentVanHetWoordDescription', 'book', 'special', 10, 70),
+  ('streak_3', 'badges.streak3', 'badges.streak3Description', 'flame', 'streak', 3, 80),
+  ('volharder', 'badges.volharder', 'badges.volharderDescription', 'flame', 'streak', 7, 90),
+  ('streak_14', 'badges.streak14', 'badges.streak14Description', 'flame', 'streak', 14, 100),
+  ('streak_30', 'badges.streak30', 'badges.streak30Description', 'flame', 'streak', 30, 110),
+  ('strijder', 'badges.strijder', 'badges.strijderDescription', 'shield-checkmark', 'exam', 1, 120),
+  ('bijbelleraar', 'badges.bijbelleraar', 'badges.bijbelleraarDescription', 'school', 'special', 5, 130),
+  ('faith_finisher', 'badges.faithFinisher', 'badges.faithFinisherDescription', 'trophy', 'special', 20, 140),
+  ('schriftgeleerde', 'badges.schriftgeleerde', 'badges.schriftgeleerdeDescription', 'library', 'special', 100, 150)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.badges (id, name_key, description_key, icon, category, target_value, "order")
+SELECT 'module_' || n, 'badges.moduleCompleted', 'badges.moduleCompletedDescription', 'ribbon', 'module', n, 200 + n
+FROM generate_series(1, 20) AS n
+ON CONFLICT (id) DO NOTHING;

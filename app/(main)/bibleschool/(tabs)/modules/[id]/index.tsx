@@ -15,11 +15,11 @@ import { useLocalSearchParams, useNavigation, router } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { bzzt, bzztWarning } from '@/utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNetworkQuality } from '@/hooks/useNetworkQuality';
 import { queryKeys } from '@/services/queryKeys';
 import { vimeoService } from '@/services/vimeo/vimeoService';
-import { ScrollView, TouchableOpacity } from 'react-native';
+import { RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
 import { useLessonUnlocks } from '@/hooks/useLessonUnlocks';
 import { getCurrentTargetForModule } from '@/utils/unlockLogic';
 import { LockedLessonModal } from './_components/LockedLessonModal';
@@ -95,7 +95,13 @@ function LessonRow({
       >
         <Box className="flex-row items-center py-3 pr-4">
           <Box className="pl-3 mr-4">
-            <Box style={{ position: 'relative' }}>
+            <Box
+              style={{
+                position: 'relative',
+                borderRadius: 12,
+                overflow: 'hidden',
+              }}
+            >
               <VideoThumbnail
                 thumbnailUrl={thumbnailUrl}
                 isLoading={thumbnailLoading}
@@ -200,6 +206,16 @@ export default function ModuleLessonsScreen() {
   const { data: introductionVimeoId } = useIntroductionVimeoId(locale);
   const queryClient = useQueryClient();
   const networkQuality = useNetworkQuality();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['progress'] });
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.bibleschool.category(locale),
+    });
+    setRefreshing(false);
+  }, [queryClient, locale]);
 
   usePrefetchLessonThumbnails(id ?? '', lessons, introductionVimeoId ?? undefined);
 
@@ -294,6 +310,13 @@ export default function ModuleLessonsScreen() {
           paddingTop: 24,
           paddingBottom: insets.bottom + 100,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.textTertiary}
+          />
+        }
       >
         {lessons.length === 0 ? (
           <Box

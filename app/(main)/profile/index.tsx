@@ -7,6 +7,7 @@ import { VStack } from '@/components/ui/vstack';
 import { SectionCard } from '@/app/(main)/_components/SectionCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
+import { useUserBadges } from '@/hooks/useUserBadges';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +24,7 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { data: profile, isLoading: profileLoading } = useUserProfile(user?.id);
+  const { userBadges } = useUserBadges(user?.id);
 
   const handleBack = () => {
     getProfileReturnHref().then((href) => {
@@ -87,6 +89,16 @@ export default function ProfileScreen() {
               title={t('profile.information')}
               subtitle={t('profile.informationSubtitle')}
               onPress={() => router.push(routes.profile('information'))}
+              compact
+            />
+            <SectionCard
+              icon="ribbon-outline"
+              title={t('badges.title')}
+              subtitle={t('badges.subtitle', {
+                count: userBadges.length,
+              })}
+              badge={String(userBadges.length)}
+              onPress={() => router.push(routes.badges())}
               compact
             />
           </VStack>

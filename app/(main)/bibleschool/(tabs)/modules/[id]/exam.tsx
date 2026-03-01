@@ -13,6 +13,7 @@ import { useButtonShadow } from "@/hooks/useShadows";
 import { useTheme } from "@/hooks/useTheme";
 import { useToast } from "@/hooks/useToast";
 import { useTranslation } from "@/hooks/useTranslation";
+import { checkAndAwardBadges } from "@/services/api/badgeService";
 import { moduleProgressService } from "@/services/api/moduleProgressService";
 import { quizAttemptService } from "@/services/api/quizAttemptService";
 import { queryKeys } from "@/services/queryKeys";
@@ -186,6 +187,10 @@ export default function ExamScreen() {
       if (result.passed) {
         if (user?.id && id) {
           await AsyncStorage.removeItem(EXAM_PROGRESS_KEY(user.id, id));
+        }
+        if (user?.id) {
+          await checkAndAwardBadges(user.id).catch(() => []);
+          queryClient.invalidateQueries({ queryKey: queryKeys.badges.userBadges(user.id) });
         }
         setPassedResult({
           score: result.score,

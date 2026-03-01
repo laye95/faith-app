@@ -1,4 +1,5 @@
 import { useBibleschoolTab } from '@/contexts/BibleschoolTabContext';
+import { stackScreenOptions } from '@/constants/screenAnimationOptions';
 import { useTheme } from '@/hooks/useTheme';
 import { useFocusEffect } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -16,11 +17,10 @@ export default function ModulesLayout() {
 
   return (
     <Stack
-      screenOptions={{
+      screenOptions={stackScreenOptions({
         headerShown: false,
-        animation: 'slide_from_right',
         contentStyle: { backgroundColor: theme.pageBg },
-      }}
+      })}
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="[id]" />

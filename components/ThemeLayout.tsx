@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { useThemePreference } from '@/contexts/ThemeContext';
+import { stackScreenOptions } from '@/constants/screenAnimationOptions';
 
 export function ThemeLayout() {
   const { effectiveScheme } = useThemePreference();
@@ -17,16 +18,14 @@ export function ThemeLayout() {
       <NavThemeProvider
         value={effectiveScheme === 'dark' ? DarkTheme : DefaultTheme}
       >
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(auth)"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="(main)"
-            options={{ headerShown: false }}
-          />
+        <Stack
+          screenOptions={stackScreenOptions({
+            headerShown: false,
+          })}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(main)" />
         </Stack>
         <StatusBar style={effectiveScheme === 'dark' ? 'light' : 'dark'} />
       </NavThemeProvider>

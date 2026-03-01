@@ -22,6 +22,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { lessonProgressService } from '@/services/api/lessonProgressService';
 import { moduleProgressService } from '@/services/api/moduleProgressService';
+import { checkAndAwardBadges } from '@/services/api/badgeService';
 import { queryKeys } from '@/services/queryKeys';
 import { bzzt, bzztWarning } from '@/utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -442,6 +443,8 @@ function NextLessonCard({
                 width: NEXT_THUMBNAIL_WIDTH,
                 height: NEXT_THUMBNAIL_HEIGHT,
                 position: 'relative',
+                borderRadius: 12,
+                overflow: 'hidden',
               }}
             >
               <NextLessonThumbnail
@@ -696,14 +699,32 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
 
   const savePositionMutation = useMutation({
     mutationFn: async (videoPositionSeconds: number) => {
-      return lessonProgressService.upsertByUserAndLesson(user!.id, lessonId, {
+      const result = await lessonProgressService.upsertByUserAndLesson(user!.id, lessonId, {
         module_id: moduleId,
         video_position_seconds: videoPositionSeconds,
       });
+      const existing = await moduleProgressService.getByUserAndModule(user!.id, moduleId);
+      if (!existing || existing.status !== 'completed') {
+        const list = await lessonProgressService.listByUserAndModule(user!.id, moduleId);
+        const completedCount = list.filter((p) => p.completed).length;
+        const progressPercentage =
+          lessons.length > 0 && completedCount > 0
+            ? Math.round((completedCount / lessons.length) * 100)
+            : 0;
+        await moduleProgressService.upsertByUserAndModule(user!.id, moduleId, {
+          status: 'in_progress',
+          progress_percentage: progressPercentage,
+        });
+      }
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.progress.lessonProgress.lastWatchedByUser(user?.id ?? ''),
+      });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          Array.isArray(query.queryKey) && query.queryKey[0] === 'progress',
       });
     },
   });
@@ -723,12 +744,16 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
         progress_percentage: progressPercentage,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({
         predicate: (query) =>
           Array.isArray(query.queryKey) &&
           query.queryKey[0] === 'progress',
       });
+      if (user?.id) {
+        await checkAndAwardBadges(user.id).catch(() => []);
+        queryClient.invalidateQueries({ queryKey: queryKeys.badges.userBadges(user.id) });
+      }
     },
   });
 

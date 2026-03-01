@@ -19,8 +19,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useMemo, useState } from "react";
-import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { MainTopBar } from "@/app/(main)/_components/MainTopBar";
 
 export default function ProfileInformationScreen() {
@@ -117,10 +117,11 @@ export default function ProfileInformationScreen() {
         showBackButton
         onBack={() => navigation.goBack()}
       />
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 24 }}
+      <FormScrollView
+        contentContainerStyle={{
+          paddingTop: 24,
+          paddingBottom: insets.bottom + 24,
+        }}
       >
         <Box
           className="rounded-2xl overflow-hidden"
@@ -292,7 +293,7 @@ export default function ProfileInformationScreen() {
             </VStack>
           </Box>
         </Box>
-      </ScrollView>
+      </FormScrollView>
     </Box>
   );
 }

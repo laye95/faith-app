@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { stackScreenOptions } from "@/constants/screenAnimationOptions";
 import { Redirect, Stack } from "expo-router";
 
 export default function AuthLayout() {
@@ -14,10 +15,10 @@ export default function AuthLayout() {
 
   return (
     <Stack
-      screenOptions={{
+      screenOptions={stackScreenOptions({
         headerShown: false,
         contentStyle: { backgroundColor: "transparent" },
-      }}
+      })}
     >
       <Stack.Screen name="login/index" options={{ title: "Inloggen" }} />
       <Stack.Screen

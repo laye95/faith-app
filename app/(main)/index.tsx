@@ -159,15 +159,15 @@ export default function HubScreen() {
         className="items-center px-6"
         style={{
           paddingTop: 12,
-          paddingBottom: insets.bottom + 24,
+          paddingBottom: insets.bottom + 12,
           backgroundColor: theme.pageBg,
         }}
       >
         <Box
-          className="px-4 py-2"
+          className="px-3 py-1.5"
           style={{
             backgroundColor: theme.tabInactiveBg,
-            borderRadius: 8,
+            borderRadius: 6,
             alignSelf: 'center',
           }}
         >

@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/Badge';
+import { BadgePill } from '@/components/ui/BadgePill';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
@@ -107,7 +107,7 @@ export function Row(props: RowProps) {
       </HStack>
       {props.variant === 'navigation' ? (
         <>
-          {props.badge ? <Badge label={props.badge} /> : null}
+          {props.badge ? <BadgePill label={props.badge} /> : null}
           {props.rightElement ??
             (props.disabled ? null : (
               <Ionicons name="chevron-forward" size={isCompact ? 18 : 20} color={theme.textTertiary} />

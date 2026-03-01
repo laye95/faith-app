@@ -35,6 +35,7 @@ const RESTORABLE_SECTIONS = [
   'podcasts',
   'sermons',
   'profile',
+  'badges',
   'admin',
 ] as const;
 
@@ -56,6 +57,8 @@ function getHrefForSection(section: string): Href {
       return routes.sermons();
     case 'profile':
       return routes.profile();
+    case 'badges':
+      return routes.badges();
     case 'admin':
       return routes.admin();
     default:

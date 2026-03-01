@@ -1,19 +1,21 @@
-import { Stack } from 'expo-router';
+import {
+  rootScreenOptions,
+  stackScreenOptions,
+} from '@/constants/screenAnimationOptions';
 import { useTheme } from '@/hooks/useTheme';
+import { Stack } from 'expo-router';
 
 export default function BibleSchoolTabsLayout() {
   const theme = useTheme();
+  const baseOptions = stackScreenOptions({
+    headerShown: false,
+    contentStyle: { backgroundColor: theme.pageBg },
+  });
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'slide_from_right',
-        contentStyle: { backgroundColor: theme.pageBg },
-      }}
-    >
-      <Stack.Screen name="index" options={{ title: 'Overview', animation: 'slide_from_left' }} />
-      <Stack.Screen name="modules" options={{ title: 'Modules', animation: 'slide_from_right' }} />
+    <Stack screenOptions={baseOptions}>
+      <Stack.Screen name="index" options={rootScreenOptions({ title: 'Overview' })} />
+      <Stack.Screen name="modules" options={{ title: 'Modules' }} />
     </Stack>
   );
 }
