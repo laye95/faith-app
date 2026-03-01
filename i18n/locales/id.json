@@ -33,7 +33,9 @@
     "nameMinLength": "Nama minimal 2 karakter",
     "confirmPasswordRequired": "Konfirmasi kata sandi Anda",
     "passwordsDoNotMatch": "Kata sandi tidak cocok",
-    "registrationFailed": "Pendaftaran gagal. Silakan coba lagi."
+    "registrationFailed": "Pendaftaran gagal. Silakan coba lagi.",
+    "invalidCredentials": "Email atau kata sandi tidak valid. Periksa data Anda atau buat akun.",
+    "loginFailed": "Login gagal. Silakan coba lagi."
   },
   "streak": {
     "days": "{{count}} hari"

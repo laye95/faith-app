@@ -33,7 +33,9 @@
     "nameMinLength": "नाम कम से कम 2 अक्षरों का होना चाहिए",
     "confirmPasswordRequired": "अपने पासवर्ड की पुष्टि करें",
     "passwordsDoNotMatch": "पासवर्ड मेल नहीं खाते",
-    "registrationFailed": "पंजीकरण विफल। कृपया पुनः प्रयास करें।"
+    "registrationFailed": "पंजीकरण विफल। कृपया पुनः प्रयास करें।",
+    "invalidCredentials": "अमान्य ईमेल या पासवर्ड। अपना विवरण जांचें या खाता बनाएं।",
+    "loginFailed": "लॉगिन विफल। कृपया पुनः प्रयास करें।"
   },
   "streak": {
     "days": "{{count}} दिन"

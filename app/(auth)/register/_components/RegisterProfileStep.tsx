@@ -16,6 +16,7 @@ interface RegisterProfileStepProps {
   phoneError?: string;
   birthdateError?: string;
   isLoading: boolean;
+  onSubmit?: () => void;
 }
 
 export function RegisterProfileStep({
@@ -30,13 +31,14 @@ export function RegisterProfileStep({
   phoneError,
   birthdateError,
   isLoading,
+  onSubmit,
 }: RegisterProfileStepProps) {
   const theme = useTheme();
   const cardShadow = useAuthCardShadow();
 
   return (
     <Box
-      className="rounded-3xl p-8"
+      className="rounded-3xl p-6"
       style={{
         backgroundColor: theme.cardBg,
         borderWidth: 1,
@@ -57,6 +59,7 @@ export function RegisterProfileStep({
           phoneError={phoneError}
           birthdateError={birthdateError}
           editable={!isLoading}
+          onLastFieldSubmit={onSubmit}
         />
       </VStack>
     </Box>

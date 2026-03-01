@@ -34,6 +34,8 @@
     "confirmPasswordRequired": "Bevestig uw wachtwoord",
     "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
     "registrationFailed": "Registreren mislukt. Probeer het opnieuw.",
+    "invalidCredentials": "Ongeldig e-mailadres of wachtwoord. Controleer je gegevens of maak een account aan.",
+    "loginFailed": "Inloggen mislukt. Probeer het opnieuw.",
     "next": "Volgende",
     "stepOf": "Stap {{current}} van {{total}}",
     "step1Title": "Account",

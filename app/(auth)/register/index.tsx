@@ -100,7 +100,10 @@ export default function RegisterScreen() {
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: "transparent" }}>
         <AuthBackgroundDecor />
-        <AuthTopBar showBackButton onBack={() => router.back()} />
+        <AuthTopBar
+          showBackButton
+          onBack={currentStep > 0 ? prevStep : () => router.back()}
+        />
         <FormScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <Box className="flex-1 justify-center px-6 pt-4 pb-8">
             <Animated.View entering={FadeIn.duration(600)}>
@@ -117,8 +120,8 @@ export default function RegisterScreen() {
                 completeLabelKey="auth.createAccount"
                 isLastStep={isLastStep}
                 showStepIndicator
-                stepIndicatorVariant="text"
-                showBackButton={currentStep > 0}
+                stepIndicatorVariant="dots"
+                showBackButton={false}
                 isNextLoading={isLoading}
               >
                 {currentStep === 0 ? (
@@ -141,6 +144,7 @@ export default function RegisterScreen() {
                     setConfirmPasswordError={setConfirmPasswordError}
                     error={error}
                     isLoading={isLoading}
+                    onSubmit={handleNext}
                   />
                 ) : (
                   <RegisterProfileStep
@@ -155,6 +159,7 @@ export default function RegisterScreen() {
                     phoneError={phoneError}
                     birthdateError={birthdateError}
                     isLoading={isLoading}
+                    onSubmit={handleNext}
                   />
                 )}
               </StepManager>

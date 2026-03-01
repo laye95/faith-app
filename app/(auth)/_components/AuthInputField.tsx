@@ -72,17 +72,17 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
 
     const boxStyle = {
       backgroundColor: theme.inputBg,
-      borderWidth: hasError ? 1.5 : focused ? 1.5 : 1,
+      borderWidth: hasError ? 1.5 : 1,
       borderColor: hasError
         ? theme.buttonDecline
         : focused
           ? theme.buttonPrimary
           : theme.cardBorder,
-      shadowColor: focused ? theme.buttonPrimary : '#000',
-      shadowOffset: { width: 0, height: focused ? 2 : 0 },
-      shadowOpacity: focused ? 0.1 : isDark ? 0.15 : 0.03,
-      shadowRadius: focused ? 8 : 4,
-      elevation: focused ? 2 : 1,
+      shadowColor: 'transparent',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
     };
 
     const iconColor = hasError

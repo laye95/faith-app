@@ -11,16 +11,18 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   Dimensions,
-  Modal,
   FlatList,
+  Keyboard,
+  Modal,
   Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import type { TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 interface ProfileFieldsFormProps {
   phone: string;
@@ -34,6 +36,7 @@ interface ProfileFieldsFormProps {
   phoneError?: string;
   birthdateError?: string;
   editable?: boolean;
+  onLastFieldSubmit?: () => void;
 }
 
 function formatDateForDisplay(value: string | null): string {
@@ -59,10 +62,12 @@ export function ProfileFieldsForm({
   phoneError,
   birthdateError,
   editable = true,
+  onLastFieldSubmit,
 }: ProfileFieldsFormProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const isDark = theme.isDark;
+  const phoneRef = useRef<TextInput>(null);
+  const cityRef = useRef<TextInput>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [countrySearchQuery, setCountrySearchQuery] = useState('');
@@ -72,10 +77,6 @@ export function ProfileFieldsForm({
     const q = countrySearchQuery.toLowerCase().trim();
     return COUNTRIES.filter((c) => c.toLowerCase().includes(q));
   }, [countrySearchQuery]);
-
-  const maxSheetHeight = Dimensions.get('window').height * 0.7;
-  const inputBg = isDark ? theme.cardBg : '#ffffff';
-  const inputBorder = theme.cardBorder;
 
   const handleDateChange = (event: { type: string }, selectedDate?: Date) => {
     if (Platform.OS === 'android') setShowDatePicker(false);
@@ -113,9 +114,9 @@ export function ProfileFieldsForm({
           <Box
             className="overflow-hidden rounded-2xl"
             style={{
-              backgroundColor: inputBg,
+              backgroundColor: theme.inputBg,
               borderWidth: phoneError ? 1.5 : 1,
-              borderColor: phoneError ? theme.buttonDecline : inputBorder,
+              borderColor: phoneError ? theme.buttonDecline : theme.cardBorder,
             }}
           >
             <Input
@@ -133,6 +134,7 @@ export function ProfileFieldsForm({
                 </InputIcon>
               </InputSlot>
               <InputField
+                ref={phoneRef}
                 placeholder={t('auth.phonePlaceholder')}
                 value={phone}
                 onChangeText={onPhoneChange}
@@ -141,6 +143,11 @@ export function ProfileFieldsForm({
                 placeholderTextColor={theme.textTertiary}
                 className="pl-3 pr-5 text-base"
                 style={{ color: theme.textPrimary }}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() =>
+                  requestAnimationFrame(() => cityRef.current?.focus())
+                }
               />
             </Input>
           </Box>
@@ -168,9 +175,9 @@ export function ProfileFieldsForm({
             <Box
               className="rounded-2xl h-14 px-5 flex-row items-center"
               style={{
-                backgroundColor: inputBg,
+                backgroundColor: theme.inputBg,
                 borderWidth: birthdateError ? 1.5 : 1,
-                borderColor: birthdateError ? theme.buttonDecline : inputBorder,
+                borderColor: birthdateError ? theme.buttonDecline : theme.cardBorder,
               }}
             >
               <Ionicons
@@ -286,9 +293,9 @@ export function ProfileFieldsForm({
           <Box
             className="rounded-2xl h-14 px-5 flex-row items-center"
             style={{
-              backgroundColor: inputBg,
+              backgroundColor: theme.inputBg,
               borderWidth: 1,
-              borderColor: inputBorder,
+              borderColor: theme.cardBorder,
             }}
           >
             <Ionicons name="earth-outline" size={22} color={theme.textTertiary} />
@@ -339,9 +346,9 @@ export function ProfileFieldsForm({
                 <Box
                   className="rounded-xl overflow-hidden"
                   style={{
-                    backgroundColor: inputBg,
+                    backgroundColor: theme.inputBg,
                     borderWidth: 1,
-                    borderColor: inputBorder,
+                    borderColor: theme.cardBorder,
                   }}
                 >
                   <Input variant="outline" size="lg" className="h-12 border-0 bg-transparent">
@@ -402,9 +409,9 @@ export function ProfileFieldsForm({
         <Box
           className="overflow-hidden rounded-2xl"
           style={{
-            backgroundColor: inputBg,
+            backgroundColor: theme.inputBg,
             borderWidth: 1,
-            borderColor: inputBorder,
+            borderColor: theme.cardBorder,
           }}
         >
           <Input
@@ -418,6 +425,7 @@ export function ProfileFieldsForm({
               </InputIcon>
             </InputSlot>
             <InputField
+              ref={cityRef}
               placeholder={t('auth.cityPlaceholder')}
               value={city}
               onChangeText={onCityChange}
@@ -426,6 +434,12 @@ export function ProfileFieldsForm({
               placeholderTextColor={theme.textTertiary}
               className="pl-3 pr-5 text-base"
               style={{ color: theme.textPrimary }}
+              returnKeyType="done"
+              blurOnSubmit
+              onSubmitEditing={() => {
+                Keyboard.dismiss();
+                onLastFieldSubmit?.();
+              }}
             />
           </Input>
         </Box>

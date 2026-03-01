@@ -2,8 +2,10 @@ import { useMutation } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 
-import { getErrorMessage } from '@/utils/errors';
+import { AppError, AppErrorCode } from '@/services/api/baseService';
 import { authService } from '@/services/api/authService';
+import { getErrorMessage } from '@/utils/errors';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface UseLoginReturn {
   login: (email: string, password: string) => Promise<void>;
@@ -12,6 +14,7 @@ interface UseLoginReturn {
 }
 
 export function useLogin(): UseLoginReturn {
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
 
   const loginMutation = useMutation({
@@ -29,7 +32,11 @@ export function useLogin(): UseLoginReturn {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
     onError: async (err: unknown) => {
-      setError(getErrorMessage(err, 'Inloggen mislukt. Probeer het opnieuw.'));
+      const message =
+        err instanceof AppError && err.code === AppErrorCode.AUTH_INVALID_CREDENTIALS
+          ? t('auth.invalidCredentials')
+          : getErrorMessage(err, t('auth.loginFailed'));
+      setError(message);
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });

@@ -27,6 +27,7 @@ interface RegisterAccountStepProps {
   setConfirmPasswordError: (value: string) => void;
   error: string | null;
   isLoading: boolean;
+  onSubmit?: () => void;
 }
 
 export function RegisterAccountStep({
@@ -48,6 +49,7 @@ export function RegisterAccountStep({
   setConfirmPasswordError,
   error,
   isLoading,
+  onSubmit,
 }: RegisterAccountStepProps) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -66,7 +68,7 @@ export function RegisterAccountStep({
 
   return (
     <Box
-      className="rounded-3xl p-8"
+      className="rounded-3xl p-6"
       style={{
         backgroundColor: theme.cardBg,
         borderWidth: 1,
@@ -89,7 +91,9 @@ export function RegisterAccountStep({
           focused={nameFocused}
           onFocus={() => setNameFocused(true)}
           onBlur={() => setNameFocused(false)}
-          onSubmitEditing={() => emailRef.current?.focus()}
+          onSubmitEditing={() =>
+            requestAnimationFrame(() => emailRef.current?.focus())
+          }
           icon="person-outline"
           keyboardType="default"
           autoCapitalize="words"
@@ -114,7 +118,9 @@ export function RegisterAccountStep({
           focused={emailFocused}
           onFocus={() => setEmailFocused(true)}
           onBlur={() => setEmailFocused(false)}
-          onSubmitEditing={() => passwordRef.current?.focus()}
+          onSubmitEditing={() =>
+            requestAnimationFrame(() => passwordRef.current?.focus())
+          }
           icon="mail-outline"
           keyboardType="email-address"
           autoComplete="username"
@@ -138,7 +144,9 @@ export function RegisterAccountStep({
           focused={passwordFocused}
           onFocus={() => setPasswordFocused(true)}
           onBlur={() => setPasswordFocused(false)}
-          onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+          onSubmitEditing={() =>
+            requestAnimationFrame(() => confirmPasswordRef.current?.focus())
+          }
           icon="lock-closed-outline"
           secureTextEntry
           showPassword={showPassword}
@@ -165,7 +173,7 @@ export function RegisterAccountStep({
           focused={confirmPasswordFocused}
           onFocus={() => setConfirmPasswordFocused(true)}
           onBlur={() => setConfirmPasswordFocused(false)}
-          onSubmitEditing={() => {}}
+          onSubmitEditing={() => onSubmit?.()}
           icon="lock-closed-outline"
           secureTextEntry
           showPassword={showConfirmPassword}

@@ -39,7 +39,10 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
     setEmailError(emailErr);
     setPasswordError(passwordErr);
     if (emailErr || passwordErr) return;
-    await onSubmit(email, password);
+    try {
+      await onSubmit(email, password);
+    } catch {
+    }
   };
 
   return (
