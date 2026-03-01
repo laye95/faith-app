@@ -28,6 +28,7 @@ import {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { bzzt, bzztWarning } from '@/utils/haptics';
 import { LockedLessonModal } from '@/app/(main)/bibleschool/(tabs)/modules/[id]/_components/LockedLessonModal';
+import { LockOverlay } from '@/components/common/LockOverlay';
 
 const MIN_PROGRESS_TO_COUNT_VIEW = 0.5;
 const NEXT_THUMBNAIL_WIDTH = 120;
@@ -258,15 +259,7 @@ function NextLessonCard({
                   <Ionicons name="play" size={18} color="#ffffff" />
                 </Box>
               </Box>
-              {isLocked ? (
-                <Box
-                  className="absolute inset-0 items-center justify-center"
-                  style={{ backgroundColor: theme.overlayBg }}
-                  pointerEvents="none"
-                >
-                  <Ionicons name="lock-closed" size={24} color="#ffffff" />
-                </Box>
-              ) : null}
+              <LockOverlay isLocked={isLocked} variant="thumbnail" />
             </Box>
           </Box>
           <Box className="flex-1 justify-center min-w-0">

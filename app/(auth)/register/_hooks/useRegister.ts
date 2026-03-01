@@ -10,13 +10,18 @@ import { getCurrentLanguage, isSupportedLocale } from '@/i18n';
 import { useTranslation } from '@/hooks/useTranslation';
 import { THEME_STORAGE_KEY } from '@/contexts/ThemeContext';
 import { authService } from '@/services/api/authService';
+import { userService } from '@/services/api/userService';
 import { userSettingsService } from '@/services/api/userSettingsService';
 
-interface RegisterData {
+export interface RegisterData {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
+  phone?: string;
+  birthdate?: string | null;
+  country?: string;
+  city?: string;
 }
 
 interface UseRegisterReturn {
@@ -32,11 +37,21 @@ export function useRegister(): UseRegisterReturn {
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      return authService.signUp({
+      const authData = await authService.signUp({
         email: data.email,
         password: data.password,
         fullName: data.name,
       });
+      if (authData?.user?.id) {
+        await userService.updateUser(authData.user.id, {
+          full_name: data.name,
+          phone: data.phone?.trim() || undefined,
+          birthdate: data.birthdate || undefined,
+          country: data.country?.trim() || undefined,
+          city: data.city?.trim() || undefined,
+        });
+      }
+      return authData;
     },
     onSuccess: async (authData) => {
       if (authData?.user?.id) {

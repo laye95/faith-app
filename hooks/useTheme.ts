@@ -3,6 +3,7 @@ import {
   decline,
   primary,
   primaryContrast,
+  quizCorrect,
   quizIncorrect,
   success,
 } from '@/constants/themeTokens';
@@ -30,6 +31,7 @@ export interface ThemeColors {
   badgeSuccess: string;
   badgeError: string;
   quizCorrect: string;
+  quizCorrectBg: string;
   quizIncorrect: string;
   quizIncorrectBg: string;
   badgeWarning: string;
@@ -65,7 +67,8 @@ const lightTheme: ThemeColors = {
   avatarWarning: '#fef3c7',
   badgeSuccess: '#dcfce7',
   badgeError: '#fee2e2',
-  quizCorrect: success,
+  quizCorrect: quizCorrect.light,
+  quizCorrectBg: quizCorrect.bgLight,
   quizIncorrect: quizIncorrect.light,
   quizIncorrectBg: quizIncorrect.bgLight,
   badgeWarning: '#fef3c7',
@@ -101,7 +104,8 @@ const darkTheme: ThemeColors = {
   avatarWarning: '#78350f',
   badgeSuccess: '#064e3b',
   badgeError: '#7f1d1d',
-  quizCorrect: success,
+  quizCorrect: quizCorrect.dark,
+  quizCorrectBg: quizCorrect.bgDark,
   quizIncorrect: quizIncorrect.dark,
   quizIncorrectBg: quizIncorrect.bgDark,
   badgeWarning: '#78350f',

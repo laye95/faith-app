@@ -25,11 +25,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    const AUTH_TIMEOUT_MS = 10000;
+    let cancelled = false;
+
+    const timeoutId = setTimeout(() => {
+      if (!cancelled) setIsLoading(false);
+    }, AUTH_TIMEOUT_MS);
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!cancelled) {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSession(null);
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          clearTimeout(timeoutId);
+          setIsLoading(false);
+        }
+      });
 
     const {
       data: { subscription },
@@ -58,7 +80,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, [queryClient]);
 
   const signOut = async () => {

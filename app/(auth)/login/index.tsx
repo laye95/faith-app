@@ -1,17 +1,20 @@
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslation } from "@/hooks/useTranslation";
 import { routes } from "@/constants/routes";
 import { bzzt } from "@/utils/haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { TouchableOpacity } from "react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import { TouchableOpacity, View } from "react-native";
+import Animated, { FadeIn, FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { AuthTopBar } from "../_components/AuthTopBar";
 
+import { AuthBackgroundDecor } from "../_components/AuthBackgroundDecor";
 import { AuthHeader } from "../_components/AuthHeader";
 import { LoginForm } from "./_components/LoginForm";
 import { useLogin } from "./_hooks/useLogin";
@@ -21,24 +24,44 @@ export default function LoginScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
 
+  const gradientColors = [
+    theme.pageBg,
+    theme.isDark ? theme.cardBg : theme.emptyBg,
+  ] as [string, string];
+
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.pageBg }}>
+    <LinearGradient
+      colors={gradientColors}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={{ flex: 1, backgroundColor: "transparent" }}>
+      <AuthBackgroundDecor />
       <AuthTopBar />
       <FormScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <Box className="flex-1 px-6 py-6 justify-center">
-            <Animated.View entering={FadeIn.duration(600)}>
-              <AuthHeader icon="book" titleKey="auth.welcomeBack" subtitleKey="auth.loginSubtitle" />
+        <Box className="flex-1 justify-center px-6 pt-4 pb-8">
+            <Animated.View entering={FadeIn.duration(700)}>
+              <AuthHeader showLogo titleKey="auth.welcomeBack" subtitleKey="auth.loginSubtitle" />
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(200).duration(600)}>
+            <Animated.View entering={FadeInUp.delay(200).duration(750)}>
               <LoginForm onSubmit={login} isLoading={isLoading} error={error} />
             </Animated.View>
 
             <Animated.View
-              entering={FadeInDown.delay(400).duration(600)}
-              className="mt-8 items-center"
+              entering={FadeInDown.delay(400).duration(700)}
+              className="mt-12 w-full items-center"
             >
-              <HStack className="items-center gap-2">
+              <VStack className="w-full items-center gap-4">
+                <View
+                  style={{
+                    width: '100%',
+                    height: 1,
+                    backgroundColor: theme.cardBorder,
+                  }}
+                />
+                <HStack className="items-center gap-2">
                 <Text
                   className="text-sm"
                   style={{ color: theme.textSecondary }}
@@ -61,9 +84,11 @@ export default function LoginScreen() {
                   </Text>
                 </TouchableOpacity>
               </HStack>
+              </VStack>
             </Animated.View>
         </Box>
       </FormScrollView>
     </SafeAreaView>
+    </LinearGradient>
   );
 }

@@ -4,20 +4,26 @@ import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { routes } from "@/constants/routes";
-import { useModules } from "@/hooks/useBibleschoolContent";
+import {
+  useIntroductionVimeoId,
+  useModules,
+} from "@/hooks/useBibleschoolContent";
 import { useLastWatchedLesson } from "@/hooks/useLastWatchedLesson";
+import { prefetchLessonThumbnailsForModule } from "@/hooks/usePrefetchLessonThumbnails";
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslation } from "@/hooks/useTranslation";
 import { bzzt } from "@/utils/haptics";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";
+import { InteractionManager } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ModuleCard } from "./_components/ModuleCard";
 import { useModuleProgress } from "./_hooks/useModuleProgress";
@@ -26,9 +32,25 @@ export default function BibleSchoolModulesScreen() {
   const theme = useTheme();
   const { t, locale } = useTranslation();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  const { data: introductionVimeoId } = useIntroductionVimeoId(locale);
   const { progressMap, attemptCountMap } = useModuleProgress();
-  const { data: modules, isLoading } = useModules(locale);
+  const { data: modules } = useModules(locale);
   const { module: currentModule } = useLastWatchedLesson();
+
+  const handleModulePress = useCallback(
+    (module: { id: string; lessons?: { videoId?: string; thumbnailUrl?: string }[] }) => {
+      bzzt();
+      prefetchLessonThumbnailsForModule(
+        queryClient,
+        module.id,
+        module.lessons ?? [],
+        introductionVimeoId ?? undefined,
+      );
+      router.push(routes.bibleschoolModule(module.id));
+    },
+    [queryClient, introductionVimeoId],
+  );
 
   const currentModuleData = useMemo(() => {
     if (!modules?.length || !currentModule) return undefined;
@@ -51,6 +73,29 @@ export default function BibleSchoolModulesScreen() {
       (m) => progressMap[m.id]?.status !== "completed",
     );
   }, [allModulesExcludingCurrent, progressMap]);
+
+  const moduleToPrefetch = useMemo(
+    () => currentModuleData ?? remainingModules[0],
+    [currentModuleData, remainingModules],
+  );
+
+  useEffect(() => {
+    if (!moduleToPrefetch || !modules?.length) return;
+    const task = InteractionManager.runAfterInteractions(() => {
+      prefetchLessonThumbnailsForModule(
+        queryClient,
+        moduleToPrefetch.id,
+        moduleToPrefetch.lessons ?? [],
+        introductionVimeoId ?? undefined,
+      );
+    });
+    return () => task.cancel();
+  }, [
+    moduleToPrefetch?.id,
+    queryClient,
+    introductionVimeoId,
+    modules?.length,
+  ]);
 
   const [completedModulesExpanded, setCompletedModulesExpanded] =
     useState(true);
@@ -133,10 +178,7 @@ export default function BibleSchoolModulesScreen() {
                 }}
                 progress={progressMap[currentModuleData.id] ?? null}
                 attemptCount={attemptCountMap[currentModuleData.id] ?? 0}
-                onPress={() => {
-                  bzzt();
-                  router.push(routes.bibleschoolModule(currentModuleData.id));
-                }}
+                onPress={() => handleModulePress(currentModuleData)}
               />
             </VStack>
           )}
@@ -157,10 +199,7 @@ export default function BibleSchoolModulesScreen() {
                   }}
                   progress={progressMap[module.id] ?? null}
                   attemptCount={attemptCountMap[module.id] ?? 0}
-                  onPress={() => {
-                    bzzt();
-                    router.push(routes.bibleschoolModule(module.id));
-                  }}
+                  onPress={() => handleModulePress(module)}
                 />
               ))}
             </CollapsibleSection>
@@ -181,10 +220,7 @@ export default function BibleSchoolModulesScreen() {
                     }}
                     progress={progressMap[module.id] ?? null}
                     attemptCount={attemptCountMap[module.id] ?? 0}
-                    onPress={() => {
-                      bzzt();
-                      router.push(routes.bibleschoolModule(module.id));
-                    }}
+                    onPress={() => handleModulePress(module)}
                   />
                 ))}
               </CollapsibleSection>

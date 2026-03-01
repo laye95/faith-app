@@ -36,3 +36,28 @@ export function validateConfirmPassword(
   if (value !== original) return t('auth.passwordsDoNotMatch');
   return '';
 }
+
+export function validatePhone(
+  value: string,
+  t: (key: string) => string,
+): string {
+  if (!value.trim()) return '';
+  const digits = value.replace(/\D/g, '');
+  if (digits.length < 8) return t('auth.phoneMinLength');
+  return '';
+}
+
+export function validateBirthdate(
+  value: string | null | undefined,
+  t: (key: string) => string,
+): string {
+  if (!value) return '';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return t('auth.birthdateInvalid');
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  if (date > today) return t('auth.birthdateNotFuture');
+  const minDate = new Date(1900, 0, 1);
+  if (date < minDate) return t('auth.birthdateInvalid');
+  return '';
+}

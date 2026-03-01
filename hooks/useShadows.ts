@@ -33,3 +33,14 @@ export function useCompactShadow(): ViewStyle {
     elevation: 2,
   };
 }
+
+export function useAuthCardShadow(): ViewStyle {
+  const theme = useTheme();
+  return {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: theme.isDark ? 0.35 : 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+  };
+}

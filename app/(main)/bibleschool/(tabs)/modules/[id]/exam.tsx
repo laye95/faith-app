@@ -416,7 +416,7 @@ export default function ExamScreen() {
             action="primary"
             variant="solid"
             size="lg"
-            className="h-14 cursor-pointer rounded-2xl min-w-[200]"
+            className="h-14 cursor-pointer rounded-full min-w-[200]"
             style={{
               backgroundColor: theme.buttonPrimary,
               ...buttonShadow,
@@ -550,7 +550,7 @@ export default function ExamScreen() {
                   action="primary"
                   variant="solid"
                   size="lg"
-                  className="h-14 cursor-pointer rounded-2xl"
+                  className="h-14 cursor-pointer rounded-full"
                   style={{
                     backgroundColor: theme.buttonPrimary,
                     ...buttonShadow,
@@ -597,7 +597,7 @@ export default function ExamScreen() {
                   variant="solid"
                   size="lg"
                   isDisabled={!allAnswered || submitMutation.isPending}
-                  className="h-14 cursor-pointer rounded-2xl"
+                  className="h-14 cursor-pointer rounded-full"
                   style={{
                     backgroundColor: theme.buttonPrimary,
                     ...buttonShadow,
@@ -741,7 +741,7 @@ function QuestionCard({
           let optionTextColor = theme.textSecondary;
           if (showFeedback) {
             if (showAsCorrect) {
-              optionBg = theme.quizCorrect;
+              optionBg = theme.quizCorrectBg;
               optionBorder = theme.quizCorrect;
               optionTextColor = theme.textPrimary;
             } else if (showAsIncorrect) {
@@ -792,7 +792,7 @@ function QuestionCard({
                   size={26}
                   color={
                     showAsCorrect
-                      ? theme.textPrimary
+                      ? theme.quizCorrect
                       : showAsIncorrect
                         ? theme.quizIncorrect
                         : theme.textTertiary

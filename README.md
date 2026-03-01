@@ -1,50 +1,94 @@
-# Welcome to your Expo app 👋
+# Faith Generation
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+React Native (Expo) app for the Faith Generation Bible school.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- Node.js 18+
+- npm
+- [Expo CLI](https://docs.expo.dev/get-started/installation/) (or use `npx`)
+- iOS: Xcode (for simulator) or physical device
+- Android: Android Studio (for emulator) or physical device
 
-   ```bash
-   npm install
-   ```
+## Getting Started
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Clone and install
 
 ```bash
-npm run reset-project
+git clone <repository-url>
+cd faith-app
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Environment variables
+
+Copy the example env file and fill in the values:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` with your values:
+
+| Variable | Description |
+|----------|-------------|
+| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `EXPO_PUBLIC_LOCAL_DEV_IP` | Your local IP (for dev builds connecting to local Supabase) |
+| `EXPO_PUBLIC_STORYBLOK_ACCESS_TOKEN` | Storyblok API token for content |
+| `EXPO_PUBLIC_VIMEO_ACCESS_TOKEN` | Vimeo API token for video playback |
+
+For local development with Supabase, run `supabase start` in the project root and use the URLs from `supabase status`.
+
+### 3. Start the app
+
+```bash
+npm start
+```
+
+Then press `i` for iOS simulator, `a` for Android emulator, or scan the QR code with Expo Go on a physical device.
+
+### 4. Run on device (development build)
+
+For a development build with native modules:
+
+```bash
+npm run ios
+# or
+npm run android
+```
+
+## Project structure
+
+- `app/` – File-based routes (Expo Router)
+- `components/` – Shared UI components
+- `hooks/` – Shared hooks
+- `services/` – API services (Supabase, Storyblok, Vimeo)
+- `types/` – TypeScript types
+- `constants/` – App constants
+- `i18n/` – Translations (en, nl, etc.)
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm start` | Start Expo dev server |
+| `npm run ios` | Run on iOS simulator/device |
+| `npm run android` | Run on Android emulator/device |
+| `npm run web` | Run web version |
+| `npm run lint` | Run ESLint |
+
+For build and version scripts, see [BUILD.md](./BUILD.md).
+
+## Supabase (local development)
+
+```bash
+supabase start
+supabase status   # Get URLs and keys
+supabase db reset # Reset DB and run migrations
+```
 
 ## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo documentation](https://docs.expo.dev/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)

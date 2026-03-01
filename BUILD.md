@@ -1,0 +1,106 @@
+# Build Guide
+
+How to create and submit builds for Faith Generation.
+
+## Prerequisites
+
+- [EAS CLI](https://docs.expo.dev/build/setup/) installed: `npm install -g eas-cli`
+- Expo account (paid plan for EAS Build)
+- Apple Developer account (for iOS)
+- Project linked to EAS: `eas init` (if not already done)
+
+## Version management
+
+The app version lives in **app.json** (`expo.version`). It is synced to `package.json` and `VERSION.md`.
+
+### Version scripts
+
+| Script | What it does |
+|--------|--------------|
+| `npm run version:sync` | Sync app.json → package.json, VERSION.md |
+| `npm run version:sync-to-app` | Sync package.json → app.json, VERSION.md |
+| `npm run version:bump:patch` | Bump patch (0.5.0 → 0.5.1) |
+| `npm run version:bump:minor` | Bump minor (0.5.0 → 0.6.0) |
+| `npm run version:bump:major` | Bump major (0.5.0 → 1.0.0) |
+
+Before each EAS build, `version:sync` runs automatically via `eas-build-pre-install`.
+
+### Build numbers
+
+Build numbers (iOS `CFBundleVersion`, Android `versionCode`) are managed by EAS remotely. You do not set them manually. EAS auto-increments on each build.
+
+## Creating a TestFlight build
+
+### 1. Bump the version (if releasing)
+
+```bash
+npm run version:bump:patch
+```
+
+Use `patch` for bug fixes, `minor` for new features, `major` for breaking changes.
+
+### 2. Run the build
+
+```bash
+npm run build:ios
+```
+
+This will:
+
+1. Run `version:sync` (ensures app.json, package.json, VERSION.md match)
+2. Build the iOS app on EAS
+3. Submit to TestFlight when the build finishes
+
+### 3. Wait for processing
+
+- Build typically takes 10–20 minutes
+- After upload, TestFlight processing can take another 5–15 minutes
+- Internal testers can install once processing is done
+
+## Build scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run build:ios` | iOS TestFlight build + auto-submit |
+| `npm run build:testflight` | Same as build:ios |
+| `npm run build:android` | Android preview build (internal APK) |
+| `npm run build:preview` | iOS + Android preview builds |
+
+## EAS configuration
+
+- **eas.json** – Build and submit profiles
+- **testflight** profile – Extends production, submits to TestFlight only (not App Store)
+- **production** profile – For when you release to the App Store
+
+## Environment variables for builds
+
+EAS builds need Supabase (and optionally other) env vars. Add them as EAS secrets:
+
+```bash
+eas secret:create --name EXPO_PUBLIC_SUPABASE_URL --value "https://your-project.supabase.co"
+eas secret:create --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "your-anon-key"
+eas secret:create --name EXPO_PUBLIC_STORYBLOK_ACCESS_TOKEN --value "your-token"
+eas secret:create --name EXPO_PUBLIC_VIMEO_ACCESS_TOKEN --value "your-token"
+```
+
+List existing secrets:
+
+```bash
+eas secret:list
+```
+
+## Credentials
+
+First-time setup or if credentials expire:
+
+```bash
+eas credentials --platform ios
+```
+
+Choose the `testflight` profile and let EAS manage credentials, or use your own.
+
+## Troubleshooting
+
+- **Bundle identifier mismatch** – Ensure `app.json` has `ios.bundleIdentifier: "com.tt.faithGeneration"` (must match App Store Connect)
+- **Build number already used** – EAS remote versioning should auto-increment; if not, run `eas build:version:set` to sync
+- **Invalid provisioning profile** – Run `eas credentials --platform ios` and regenerate

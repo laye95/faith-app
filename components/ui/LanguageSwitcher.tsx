@@ -21,13 +21,14 @@ interface LanguageSwitcherProps {
   variant?: 'default' | 'inline';
   fullWidth?: boolean;
   measureRef?: React.RefObject<View | null>;
+  matchDropdownToTrigger?: boolean;
 }
 
 export const LanguageSwitcher = forwardRef<
   LanguageSwitcherRef,
   LanguageSwitcherProps
 >(function LanguageSwitcher(
-  { variant = 'default', fullWidth = false, measureRef },
+  { variant = 'default', fullWidth = false, measureRef, matchDropdownToTrigger = false },
   ref,
 ) {
   const { locale, changeLanguage } = useTranslation();
@@ -46,6 +47,7 @@ export const LanguageSwitcher = forwardRef<
       measureRef={measureRef}
       fullWidth={fullWidth}
       variant={variant}
+      dropdownWidth={matchDropdownToTrigger ? 'matchTrigger' : 'full'}
     />
   );
 });

@@ -39,6 +39,9 @@ export function VideoThumbnail({
           source={{ uri: thumbnailUrl }}
           style={{ width, height }}
           contentFit="cover"
+          transition={200}
+          priority="high"
+          recyclingKey={thumbnailUrl}
         />
       ) : isLoading ? (
         <ActivityIndicator size="small" color={theme.textTertiary} />

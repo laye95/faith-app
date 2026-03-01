@@ -46,9 +46,6 @@ export async function getPlaybackUrl(
   const videoIdClean = parseVideoId(videoId);
   if (!videoIdClean) return null;
 
-  if (__DEV__) {
-    console.log('[Vimeo] fetching playback URL for videoId:', videoIdClean);
-  }
   const res = await fetch(
     `${VIMEO_API_BASE}/videos/${videoIdClean}?fields=play`,
     {
@@ -61,14 +58,10 @@ export async function getPlaybackUrl(
 
   if (!res.ok) {
     const text = await res.text();
-    if (__DEV__) console.log('[Vimeo] API error:', res.status, text);
     throw new Error(`Vimeo API error ${res.status}: ${text}`);
   }
 
   const data = (await res.json()) as VimeoPlayResponse;
-  if (__DEV__) {
-    console.log('[Vimeo] got play.progressive count:', data.play?.progressive?.length ?? 0);
-  }
   const progressive = data.play?.progressive ?? [];
   const hlsUrl = data.play?.hls?.link ?? null;
 

@@ -19,6 +19,10 @@ import { usePathname, router } from 'expo-router';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScrollView, TouchableOpacity } from 'react-native';
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/services/queryKeys';
+import { bibleschoolService } from '@/services/storyblok/bibleschoolService';
 
 const CONTENT_SECTIONS: Array<{
   name: string;
@@ -78,7 +82,15 @@ const buttonStyle = (theme: ReturnType<typeof useTheme>) => ({
 
 export function DrawerContent(props: DrawerContentComponentProps) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.bibleschool.category(locale),
+      queryFn: () => bibleschoolService.getBibleschoolCategory(locale),
+    });
+  }, [queryClient, locale]);
   const insets = useSafeAreaInsets();
   const isAdmin = useIsAdmin();
   const { user, signOut } = useAuth();
@@ -319,7 +331,7 @@ export function DrawerContent(props: DrawerContentComponentProps) {
             signOut();
           }}
           activeOpacity={0.7}
-          className="rounded-2xl py-4 px-6 cursor-pointer items-center justify-center"
+          className="rounded-full py-4 px-6 cursor-pointer items-center justify-center"
           style={{
             backgroundColor: theme.buttonDecline,
           }}

@@ -23,13 +23,7 @@ export const queryKeys = {
     thumbnailUrl: (videoId: string) => ['vimeo', 'thumbnailUrl', videoId] as const,
   },
   bibleschool: {
-    modules: (locale: string) => ['bibleschool', 'modules', locale] as const,
-    introductionVimeoId: (locale: string) =>
-      ['bibleschool', 'introductionVimeoId', locale] as const,
-    module: (id: string, locale: string) =>
-      ['bibleschool', 'module', id, locale] as const,
-    lesson: (moduleId: string, lessonId: string, locale: string) =>
-      ['bibleschool', 'lesson', moduleId, lessonId, locale] as const,
+    category: (locale: string) => ['bibleschool', 'category', locale] as const,
   },
   userSettings: {
     introWatched: (userId: string) =>

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "faith-app",
-    "slug": "faith-app",
-    "version": "1.0.0",
+    "name": "Faith Generation",
+    "slug": "faith-generation",
+    "version": "0.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo_icon.png",
     "scheme": "faithapp",
@@ -10,17 +10,19 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.alilas.faithapp"
+      "bundleIdentifier": "com.tt.faithGeneration",
+      "userInterfaceStyle": "automatic"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/logo_icon.png"
       },
+      "userInterfaceStyle": "automatic",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.alilas.faithapp"
+      "package": "com.trinixInteractive.faith_generation"
     },
     "web": {
       "output": "static",
@@ -53,6 +55,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2785d9c7-4b40-4e13-8474-c788ce872f6e"
+      }
+    },
+    "owner": "alilas"
   }
 }

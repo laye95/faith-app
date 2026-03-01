@@ -4,24 +4,48 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
+import { ColorMatrix, invert } from 'react-native-color-matrix-image-filters';
+
+import logoSource from '@/assets/images/logo_full.png';
 
 interface AuthHeaderProps {
   icon?: ComponentProps<typeof Ionicons>['name'];
-  titleKey: string;
-  subtitleKey: string;
+  showLogo?: boolean;
+  titleKey?: string;
+  subtitleKey?: string;
 }
 
-export function AuthHeader({ icon, titleKey, subtitleKey }: AuthHeaderProps) {
+export function AuthHeader({ icon, showLogo, titleKey, subtitleKey }: AuthHeaderProps) {
+  const hasTitleOrSubtitle = !!titleKey || !!subtitleKey;
   const theme = useTheme();
   const { t } = useTranslation();
 
+  const logoImage = (
+    <Image
+      source={logoSource}
+      style={{ width: 260, height: 82 }}
+      contentFit="contain"
+    />
+  );
+
   return (
     <VStack className="mb-10 items-center">
-      {icon ? (
+      {showLogo ? (
+        <Box className="mb-8 items-center justify-center">
+          {theme.isDark ? (
+            logoImage
+          ) : (
+            <ColorMatrix matrix={invert()}>
+              {logoImage}
+            </ColorMatrix>
+          )}
+        </Box>
+      ) : icon ? (
         <Box
-          className="mb-6 rounded-2xl p-5"
+          className="mb-8 rounded-2xl p-5"
           style={{
             backgroundColor: theme.avatarPrimary,
             width: 72,
@@ -33,26 +57,26 @@ export function AuthHeader({ icon, titleKey, subtitleKey }: AuthHeaderProps) {
           <Ionicons name={icon} size={36} color={theme.textPrimary} />
         </Box>
       ) : null}
-      <Text
-        className="mb-1 text-xs font-semibold uppercase tracking-widest"
-        style={{ color: theme.textSecondary }}
-      >
-        {t('common.faithGeneration')}
-      </Text>
-      <VStack className="items-center gap-3">
-        <Heading
-          className="text-center text-3xl font-bold"
-          style={{ color: theme.textPrimary }}
-        >
-          {t(titleKey)}
-        </Heading>
-        <Text
-          className="max-w-xs text-center text-base"
-          style={{ color: theme.textSecondary, lineHeight: 22 }}
-        >
-          {t(subtitleKey)}
-        </Text>
-      </VStack>
+      {hasTitleOrSubtitle && (
+        <VStack className="items-center gap-3">
+          {titleKey && (
+            <Heading
+              className="text-center text-3xl font-bold"
+              style={{ color: theme.textPrimary }}
+            >
+              {t(titleKey)}
+            </Heading>
+          )}
+          {subtitleKey && (
+            <Text
+              className="max-w-xs text-center text-base"
+              style={{ color: theme.textSecondary, lineHeight: 22 }}
+            >
+              {t(subtitleKey)}
+            </Text>
+          )}
+        </VStack>
+      )}
     </VStack>
   );
 }

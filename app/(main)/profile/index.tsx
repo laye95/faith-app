@@ -108,7 +108,7 @@ export default function ProfileScreen() {
             signOut();
           }}
           activeOpacity={0.7}
-          className="rounded-2xl py-3 px-5 cursor-pointer"
+          className="rounded-full py-3 px-5 cursor-pointer"
           style={{
             backgroundColor: theme.buttonDecline,
             alignItems: 'center',

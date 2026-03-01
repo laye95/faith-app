@@ -1,5 +1,10 @@
 import type { QuizQuestion } from './quiz';
 
+export interface BibleschoolCategory {
+  modules: BibleschoolModule[];
+  introductionVimeoId: string;
+}
+
 export interface BibleschoolModule {
   id: string;
   title: string;

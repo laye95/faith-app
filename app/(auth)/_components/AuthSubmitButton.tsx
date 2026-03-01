@@ -26,7 +26,7 @@ export function AuthSubmitButton({
         action="primary"
         variant="solid"
         size="lg"
-        className="h-14 cursor-pointer rounded-2xl"
+        className="h-14 cursor-pointer rounded-full"
         isDisabled={isLoading}
         style={{
           backgroundColor: theme.buttonPrimary,

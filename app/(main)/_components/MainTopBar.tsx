@@ -42,9 +42,14 @@ export function MainTopBar({
               onBack ? onBack() : router.back();
             }}
             activeOpacity={0.7}
-            className="flex-row items-center gap-2 cursor-pointer -ml-2"
+            className="flex-row items-center gap-2 cursor-pointer rounded-full pl-3 pr-4 py-2 -ml-2"
+            style={{
+              backgroundColor: theme.cardBg,
+              borderWidth: 1,
+              borderColor: theme.cardBorder,
+            }}
           >
-            <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
+            <Ionicons name="chevron-back" size={22} color={theme.textPrimary} />
             <Text
               className="text-base font-medium"
               style={{ color: theme.textPrimary }}
@@ -60,7 +65,7 @@ export function MainTopBar({
         pointerEvents="box-none"
       >
         <Text
-          className="text-lg font-semibold text-center"
+          className="text-xl font-semibold text-center"
           style={{ color: theme.textPrimary }}
           numberOfLines={1}
         >

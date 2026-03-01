@@ -30,8 +30,8 @@ export default function BibleSchoolScreen() {
     useCallback(() => {
       setActiveTab('index');
       queryClient.prefetchQuery({
-        queryKey: queryKeys.bibleschool.modules(locale),
-        queryFn: () => bibleschoolService.getModules(locale),
+        queryKey: queryKeys.bibleschool.category(locale),
+        queryFn: () => bibleschoolService.getBibleschoolCategory(locale),
       });
     }, [setActiveTab, queryClient, locale])
   );

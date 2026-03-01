@@ -2,6 +2,7 @@ import { Box } from "@/components/ui/box";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { FormControl } from "@/components/ui/form-control";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { ProfileFieldsForm } from "@/components/common/ProfileFieldsForm";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
@@ -13,14 +14,14 @@ import { userService } from "@/services/api/userService";
 import { queryKeys } from "@/services/queryKeys";
 import { bzzt } from "@/utils/haptics";
 import { getErrorMessage } from "@/utils/errors";
-import { validateName } from "@/utils/validators";
+import { validateBirthdate, validateName, validatePhone } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
+import { MainTopBar } from "@/app/(main)/_components/MainTopBar";
 
 export default function ProfileInformationScreen() {
   const { user } = useAuth();
@@ -30,21 +31,38 @@ export default function ProfileInformationScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { data: profile, isLoading: profileLoading } = useUserProfile(user?.id);
+
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
+  const [phone, setPhone] = useState(profile?.phone ?? "");
+  const [birthdate, setBirthdate] = useState<string | null>(profile?.birthdate ?? null);
+  const [country, setCountry] = useState(profile?.country ?? "");
+  const [city, setCity] = useState(profile?.city ?? "");
+
   const [nameError, setNameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [birthdateError, setBirthdateError] = useState("");
   const [nameFocused, setNameFocused] = useState(false);
 
   const isDark = theme.isDark;
+
   const hasChanges = useMemo(
-    () => fullName.trim() !== (profile?.full_name ?? "").trim(),
-    [fullName, profile?.full_name],
+    () =>
+      fullName.trim() !== (profile?.full_name ?? "").trim() ||
+      phone.trim() !== (profile?.phone ?? "").trim() ||
+      birthdate !== (profile?.birthdate ?? null) ||
+      country.trim() !== (profile?.country ?? "").trim() ||
+      city.trim() !== (profile?.city ?? "").trim(),
+    [fullName, phone, birthdate, country, city, profile],
   );
 
   const updateMutation = useMutation({
-    mutationFn: (name: string) =>
-      userService.updateUser(profile!.id, {
-        full_name: name.trim() || undefined,
-      }),
+    mutationFn: (updates: {
+      full_name: string;
+      phone?: string | null;
+      birthdate?: string | null;
+      country?: string | null;
+      city?: string | null;
+    }) => userService.updateUser(profile!.id, updates),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKeys.users.detail(updated.id), updated);
       bzzt();
@@ -53,18 +71,32 @@ export default function ProfileInformationScreen() {
 
   const handleSave = () => {
     bzzt();
-    const err = validateName(fullName, t);
-    setNameError(err);
-    if (err) return;
+    const nameErr = validateName(fullName, t);
+    const phoneErr = validatePhone(phone, t);
+    const birthdateErr = validateBirthdate(birthdate, t);
+    setNameError(nameErr);
+    setPhoneError(phoneErr);
+    setBirthdateError(birthdateErr);
+    if (nameErr || phoneErr || birthdateErr) return;
     if (!hasChanges || !profile?.id) return;
-    updateMutation.mutate(fullName);
+    updateMutation.mutate({
+      full_name: fullName.trim() || (profile?.full_name ?? ''),
+      phone: phone.trim() || null,
+      birthdate: birthdate || null,
+      country: country.trim() || null,
+      city: city.trim() || null,
+    });
   };
 
   useEffect(() => {
-    if (profile?.full_name != null) {
-      setFullName(profile.full_name);
+    if (profile) {
+      setFullName(profile.full_name ?? "");
+      setPhone(profile.phone ?? "");
+      setBirthdate(profile.birthdate ?? null);
+      setCountry(profile.country ?? "");
+      setCity(profile.city ?? "");
     }
-  }, [profile?.full_name]);
+  }, [profile?.id, profile?.full_name, profile?.phone, profile?.birthdate, profile?.country, profile?.city]);
 
   if (profileLoading && user?.id) {
     return <LoadingScreen message={t("loading.section.profile")} />;
@@ -198,13 +230,33 @@ export default function ProfileInformationScreen() {
                 </Box>
               </VStack>
 
+              <ProfileFieldsForm
+                phone={phone}
+                birthdate={birthdate}
+                country={country}
+                city={city}
+                onPhoneChange={(v) => {
+                  setPhone(v);
+                  if (phoneError) setPhoneError("");
+                }}
+                onBirthdateChange={(v) => {
+                  setBirthdate(v);
+                  if (birthdateError) setBirthdateError("");
+                }}
+                onCountryChange={setCountry}
+                onCityChange={setCity}
+                phoneError={phoneError}
+                birthdateError={birthdateError}
+                editable={!updateMutation.isPending}
+              />
+
               {hasChanges && (
                 <Button
                   onPress={handleSave}
                   action="primary"
                   variant="solid"
                   size="lg"
-                  className="h-14 cursor-pointer rounded-2xl mt-2"
+                  className="h-14 cursor-pointer rounded-full mt-2"
                   isDisabled={updateMutation.isPending}
                   style={{
                     backgroundColor: theme.buttonPrimary,

@@ -35,6 +35,7 @@ interface SettingsDropdownProps<T> {
   fullWidth?: boolean;
   isLoading?: boolean;
   variant?: 'default' | 'inline';
+  dropdownWidth?: 'full' | 'matchTrigger';
 }
 
 function SettingsDropdownInner<T extends string>(
@@ -46,6 +47,7 @@ function SettingsDropdownInner<T extends string>(
     fullWidth = false,
     isLoading = false,
     variant = 'default',
+    dropdownWidth = 'full',
   }: SettingsDropdownProps<T>,
   ref: React.ForwardedRef<SettingsDropdownRef>,
 ) {
@@ -168,8 +170,9 @@ function SettingsDropdownInner<T extends string>(
             <View
               style={{
                 position: 'absolute',
-                left: 24,
-                right: 24,
+                ...(dropdownWidth === 'matchTrigger'
+                  ? { left: layout.x, width: layout.width }
+                  : { left: 24, right: 24 }),
                 top: layout.y + layout.height + 4,
                 zIndex: 9999,
               }}

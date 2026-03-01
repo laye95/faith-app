@@ -64,7 +64,7 @@ export function ConfirmModal({
           action="primary"
           variant="solid"
           size="md"
-          className="w-full h-11 cursor-pointer rounded-xl"
+          className="w-full h-11 cursor-pointer rounded-full"
           style={{ backgroundColor: confirmBg }}
         >
           <ButtonText
@@ -82,7 +82,7 @@ export function ConfirmModal({
             }}
             variant="outline"
             size="md"
-            className="w-full h-11 cursor-pointer rounded-xl"
+            className="w-full h-11 cursor-pointer rounded-full"
             style={{
               borderColor: theme.cardBorder,
             }}

@@ -1,90 +1,87 @@
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
-import { useCardShadow } from '@/hooks/useShadows';
+import { useAuthCardShadow } from '@/hooks/useShadows';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import { bzzt } from '@/utils/haptics';
-import {
-  validateConfirmPassword,
-  validateEmail,
-  validateName,
-  validatePassword,
-} from '@/utils/validators';
 import { useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import { AuthErrorBox } from '../../_components/AuthErrorBox';
 import { AuthInputField } from '../../_components/AuthInputField';
-import { AuthSubmitButton } from '../../_components/AuthSubmitButton';
 
-interface RegisterFormProps {
-  onSubmit: (data: {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => Promise<void>;
-  isLoading: boolean;
+interface RegisterAccountStepProps {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  onNameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onConfirmPasswordChange: (value: string) => void;
+  nameError: string;
+  emailError: string;
+  passwordError: string;
+  confirmPasswordError: string;
+  setNameError: (value: string) => void;
+  setEmailError: (value: string) => void;
+  setPasswordError: (value: string) => void;
+  setConfirmPasswordError: (value: string) => void;
   error: string | null;
+  isLoading: boolean;
 }
 
-export function RegisterForm({
-  onSubmit,
-  isLoading,
+export function RegisterAccountStep({
+  name,
+  email,
+  password,
+  confirmPassword,
+  onNameChange,
+  onEmailChange,
+  onPasswordChange,
+  onConfirmPasswordChange,
+  nameError,
+  emailError,
+  passwordError,
+  confirmPasswordError,
+  setNameError,
+  setEmailError,
+  setPasswordError,
+  setConfirmPasswordError,
   error,
-}: RegisterFormProps) {
+  isLoading,
+}: RegisterAccountStepProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const cardShadow = useCardShadow();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [nameError, setNameError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const cardShadow = useAuthCardShadow();
   const [nameFocused, setNameFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const nameRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
-  const handleSubmit = async () => {
-    bzzt();
-    const nameErr = validateName(name, t);
-    const emailErr = validateEmail(email, t);
-    const passwordErr = validatePassword(password, t);
-    const confirmErr = validateConfirmPassword(confirmPassword, password, t);
-    setNameError(nameErr);
-    setEmailError(emailErr);
-    setPasswordError(passwordErr);
-    setConfirmPasswordError(confirmErr);
-    if (nameErr || emailErr || passwordErr || confirmErr) return;
-    await onSubmit({ name, email, password, confirmPassword });
-  };
-
   return (
     <Box
       className="rounded-3xl p-8"
       style={{
         backgroundColor: theme.cardBg,
+        borderWidth: 1,
+        borderColor: theme.cardBorder,
         ...cardShadow,
       }}
     >
-      <VStack className="gap-6">
+      <VStack className="gap-5">
         <AuthInputField
           ref={nameRef}
           label={t('auth.fullName')}
           placeholder={t('auth.fullNamePlaceholder')}
           value={name}
           onChangeText={(text) => {
-            setName(text);
+            onNameChange(text);
             if (nameError) setNameError('');
           }}
           error={nameError}
@@ -97,6 +94,7 @@ export function RegisterForm({
           keyboardType="default"
           autoCapitalize="words"
           autoComplete="name"
+          textContentType="name"
           returnKeyType="next"
           blurOnSubmit={false}
           editable={!isLoading}
@@ -108,7 +106,7 @@ export function RegisterForm({
           placeholder={t('auth.emailPlaceholder')}
           value={email}
           onChangeText={(text) => {
-            setEmail(text);
+            onEmailChange(text);
             if (emailError) setEmailError('');
           }}
           error={emailError}
@@ -119,7 +117,8 @@ export function RegisterForm({
           onSubmitEditing={() => passwordRef.current?.focus()}
           icon="mail-outline"
           keyboardType="email-address"
-          autoComplete="email"
+          autoComplete="username"
+          textContentType="username"
           returnKeyType="next"
           blurOnSubmit={false}
           editable={!isLoading}
@@ -131,7 +130,7 @@ export function RegisterForm({
           placeholder={t('auth.createPasswordPlaceholder')}
           value={password}
           onChangeText={(text) => {
-            setPassword(text);
+            onPasswordChange(text);
             if (passwordError) setPasswordError('');
           }}
           error={passwordError}
@@ -146,6 +145,7 @@ export function RegisterForm({
           onTogglePassword={() => setShowPassword(!showPassword)}
           keyboardType="default"
           autoComplete="new-password"
+          textContentType="newPassword"
           returnKeyType="next"
           blurOnSubmit={false}
           editable={!isLoading}
@@ -157,7 +157,7 @@ export function RegisterForm({
           placeholder={t('auth.confirmPasswordPlaceholder')}
           value={confirmPassword}
           onChangeText={(text) => {
-            setConfirmPassword(text);
+            onConfirmPasswordChange(text);
             if (confirmPasswordError) setConfirmPasswordError('');
           }}
           error={confirmPasswordError}
@@ -165,26 +165,20 @@ export function RegisterForm({
           focused={confirmPasswordFocused}
           onFocus={() => setConfirmPasswordFocused(true)}
           onBlur={() => setConfirmPasswordFocused(false)}
-          onSubmitEditing={handleSubmit}
+          onSubmitEditing={() => {}}
           icon="lock-closed-outline"
           secureTextEntry
           showPassword={showConfirmPassword}
           onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
           keyboardType="default"
           autoComplete="new-password"
+          textContentType="newPassword"
           returnKeyType="done"
           blurOnSubmit
           editable={!isLoading}
         />
 
         {error && <AuthErrorBox message={error} />}
-
-        <AuthSubmitButton
-          label={t('auth.createAccount')}
-          loadingLabel={t('auth.creating')}
-          isLoading={isLoading}
-          onPress={handleSubmit}
-        />
       </VStack>
     </Box>
   );

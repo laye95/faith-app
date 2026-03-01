@@ -11,9 +11,15 @@ class UserService extends BaseService {
 
   async updateUser(
     id: string,
-    updates: { full_name?: string },
+    updates: {
+      full_name?: string;
+      phone?: string | null;
+      birthdate?: string | null;
+      country?: string | null;
+      city?: string | null;
+    },
   ): Promise<User> {
-    return super.update<User, { full_name?: string }>(id, updates);
+    return super.update(id, updates);
   }
 }
 

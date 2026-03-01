@@ -50,6 +50,13 @@ export const quizIncorrect = {
   bgDark: '#450a0a',
 } as const;
 
+export const quizCorrect = {
+  light: '#4d7c59',
+  dark: '#4d7c59',
+  bgLight: '#dcfce7',
+  bgDark: '#064e3b',
+} as const;
+
 export const primaryScaleLight = {
   400: '115 115 115',
   500: primary.lightRgb,

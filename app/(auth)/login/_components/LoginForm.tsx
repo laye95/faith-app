@@ -1,6 +1,6 @@
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
-import { useCardShadow } from '@/hooks/useShadows';
+import { useAuthCardShadow } from '@/hooks/useShadows';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { bzzt } from '@/utils/haptics';
@@ -20,7 +20,7 @@ interface LoginFormProps {
 export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const cardShadow = useCardShadow();
+  const cardShadow = useAuthCardShadow();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -47,11 +47,13 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
       className="rounded-3xl p-8"
       style={{
         backgroundColor: theme.cardBg,
+        borderWidth: 1,
+        borderColor: theme.cardBorder,
         ...cardShadow,
       }}
     >
       <VStack className="gap-6">
-        <VStack className="gap-6">
+        <VStack className="gap-5">
           <AuthInputField
             ref={emailRef}
             label={t('auth.email')}
@@ -70,6 +72,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
             icon="mail-outline"
             keyboardType="email-address"
             autoComplete="email"
+            textContentType="emailAddress"
             returnKeyType="next"
             blurOnSubmit={false}
             editable={!isLoading}
@@ -95,7 +98,8 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
             showPassword={showPassword}
             onTogglePassword={() => setShowPassword(!showPassword)}
             keyboardType="default"
-            autoComplete="password"
+            autoComplete="current-password"
+            textContentType="password"
             returnKeyType="done"
             blurOnSubmit
             editable={!isLoading}

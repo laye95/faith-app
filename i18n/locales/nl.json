@@ -33,7 +33,23 @@
     "nameMinLength": "Naam moet minimaal 2 tekens lang zijn",
     "confirmPasswordRequired": "Bevestig uw wachtwoord",
     "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
-    "registrationFailed": "Registreren mislukt. Probeer het opnieuw."
+    "registrationFailed": "Registreren mislukt. Probeer het opnieuw.",
+    "next": "Volgende",
+    "stepOf": "Stap {{current}} van {{total}}",
+    "step1Title": "Account",
+    "step2Title": "Profiel",
+    "phone": "Telefoonnummer",
+    "phonePlaceholder": "Optioneel",
+    "phoneMinLength": "Telefoonnummer moet minimaal 8 cijfers bevatten",
+    "birthdate": "Geboortedatum",
+    "birthdatePlaceholder": "Optioneel",
+    "birthdateInvalid": "Voer een geldige datum in",
+    "birthdateNotFuture": "Geboortedatum kan niet in de toekomst liggen",
+    "country": "Land",
+    "countryPlaceholder": "Optioneel",
+    "countrySearchPlaceholder": "Zoek landen",
+    "city": "Stad",
+    "cityPlaceholder": "Optioneel"
   },
   "streak": {
     "days": "{{count}} dagen"
@@ -48,6 +64,7 @@
     "signOut": "Uitloggen"
   },
   "common": {
+    "done": "Klaar",
     "loading": "Laden...",
     "authenticating": "Authentiseren...",
     "redirecting": "Doorverwijzen...",
@@ -258,7 +275,7 @@
     "introPageLockedMessage": "Bekijk de video hierboven af om de eerste les te ontgrendelen",
     "watchIntro": "Bekijk introductie",
     "lockedModalTitle": "Les vergrendeld","lockedModalMessage": "Voltooi eerst les {{number}} om verder te gaan.","lockedModalMessageWithModule": "Voltooi eerst les {{number}} van {{module}} om verder te gaan.","lockedModalMessageModuleLesson": "Voltooi eerst module {{moduleNumber}} les {{number}} om verder te gaan.","lockedModalMessageExamModule": "Behaal eerst het examen van module {{moduleNumber}} om deze les te ontgrendelen.","lockedModalMessageExamWithModule": "Behaal eerst het examen van {{module}} om deze les te ontgrendelen.","lockedModalMessageFirstLesson": "Behaal eerst het examen van de vorige module om deze les te ontgrendelen.","lockedModalOk": "Sluiten","lockedModalGoToLesson": "Ga naar les {{number}}","lockedModalGoToLessonModule": "Ga naar module {{moduleNumber}} les {{number}}","lockedModalGoToExam": "Ga naar examen","lockedModalGoToExamModule": "Ga naar examen van module {{moduleNumber}}","modules":{"1":{"1":"Wat is geloof?","2":"Het voorwerp van geloof","3":"Groeien in geloof","4":"Geloof en werken","5":"Leven door geloof"},"2":{"1":"Gods hart voor genezing","2":"Bijbelse fundamenten van genezing","3":"Genezing ontvangen","4":"Genezing bedienen","5":"Getuigenissen van genezing"},"3":{"1":"Slavernij begrijpen","2":"De autoriteit van Christus","3":"Stappen naar vrijheid","4":"Wandelen in bevrijding","5":"Anderen helpen vrijheid vinden"},"4":{"1":"De kracht van lofprijs","2":"Lofprijs vs. aanbidding","3":"Zijn tegenwoordigheid binnengaan","4":"Aanbidden in geest en waarheid","5":"Een levensstijl van lofprijs"},"5":{"1":"De hemel: ons eeuwige thuis","2":"De hel begrijpen","3":"Het laatste oordeel","4":"Leven met eeuwig perspectief","5":"Voorbereiden op de eeuwigheid"},"6":{"1":"Je gaven ontdekken","2":"De gave van profetie","3":"Woorden van kennis en wijsheid","4":"Gaven van geloof en genezing","5":"Geestelijke gaven beheren"},"7":{"1":"Geschapen voor een doel","2":"Je roeping ontdekken","3":"Obstakels voor je roeping","4":"Wandelen in je bestemming","5":"Goed afronden"},"8":{"1":"De kracht van gebed","2":"Bidden met Gods Woord","3":"Basissen van voorbede","4":"Bidden voor je stad","5":"Een gebedsleven ontwikkelen"},"9":{"1":"Wie is de Heilige Geest?","2":"Doop in de Geest","3":"De vrucht van de Geest","4":"De Geest horen","5":"Dagelijks in de Geest wandelen"},"10":{"1":"Geloof voorbij woorden","2":"Geloof dat bergen verzet","3":"Twijfel overwinnen","4":"Geloof in beproevingen","5":"Erfenis van geloof"},"11":{"1":"Het levende Woord","2":"Schrift bestuderen","3":"Mediteren over Gods Woord","4":"Schrift toepassen","5":"Het Woord in je leven"},"12":{"1":"Gods ontwerp voor relaties","2":"Huwelijk en gezin","3":"Vriendschap en gemeenschap","4":"Conflictoplossing","5":"Verbroken relaties herstellen"},"13":{"1":"Dienend leiderschap","2":"Leiden door voorbeeld","3":"Anderen empoweren","4":"Verantwoordelijkheid dragen","5":"Leiderschap onder druk"},"14":{"1":"De Grote Opdracht","2":"Je persoonlijke getuigenis","3":"Met moed delen","4":"Je wereld bereiken","5":"Discipelen maken"},"15":{"1":"Wie je bent in Christus","2":"Valse identiteiten doorbreken","3":"Zonen en dochters","4":"Leven vanuit identiteit","5":"Je koninklijke erfenis"},"16":{"1":"Angst begrijpen","2":"Angst vs. geloof","3":"Gods volmaakte liefde","4":"Veelvoorkomende angsten overwinnen","5":"Vrijheid van angst"},"17":{"1":"De vreugde van geven","2":"Bijbelse principes van geven","3":"Tienden en offers","4":"Vrijgevigheid als aanbidding","5":"Oogsten wat je zaait"},"18":{"1":"Het sabbatprincipe","2":"Rust in God","3":"Je tijd beheren","4":"Herstel door rust","5":"Een ritme van rust"},"19":{"1":"Burgers van de hemel","2":"Koninkrijkswaarden","3":"Eerst het koninkrijk zoeken","4":"Koninkrijksinvloed","5":"Leven voor de Koning"},"20":{"1":"Overzicht: je reis","2":"Kernlessen samenvatting","3":"Volgende stappen","4":"Afsluitingsviering","5":"De reis vervolgen"}}},
-  "lessonsPage": {"title": "Lessen", "empty": "Geen lessen in deze module", "lessonsCount": "{{count}} lessen"},
+  "lessonsPage": {"title": "Lessen", "empty": "Geen lessen in deze module", "lessonsCount": "{{count}} lessen", "currentLesson": "Huidige les", "otherLessons": "Lessen"},
   "handouts": {"title": "Handouts","lesson": "Leshandout","module": "Modulehandout"},
   "quiz": {"title": "Module-examen","loading": "Examen laden...","intro": "Beantwoord alle vragen. Je hebt minstens {{minCorrect}} van {{total}} goed nodig om te slagen.","submit": "Versturen","submitError": "Er is iets misgegaan. Probeer het opnieuw.","pass": "Gefeliciteerd! Je bent geslaagd.","fail": "Nog niet. Je hebt minstens {{minCorrect}} van {{total}} goed nodig om te slagen.","retry": "Opnieuw proberen","answerAll": "Beantwoord alle vragen","correct": "Correct","incorrect": "Incorrect","scoreSummary": "{{score}}% - {{correct}}/{{total}} goed","questionProgress": "{{current}} van {{total}} beantwoord","questionOf": "Vraag {{current}} van {{total}}","submitConfirmTitle": "Antwoorden versturen?","submitConfirmMessage": "Je kunt je antwoorden niet meer wijzigen na het versturen.","cancel": "Annuleren","leaveConfirmTitle": "Examen verlaten?","leaveConfirmMessage": "Je voortgang is opgeslagen.","attemptNumber": "Poging {{number}}","continue": "Doorgaan","backToModule": "Terug naar module","modules":{"1":{"questions":{"1":{"question":"Wat is geloof?","a":"Vertrouwen in wat we verwachten","b":"Een gevoel","c":"Een religie","d":"Een emotie"},"2":{"question":"Geloof komt van:","a":"Onze ouders","b":"Het Woord van God horen","c":"Opleiding","d":"Ervaring"},"3":{"question":"Zonder geloof is het onmogelijk te:","a":"Werken","b":"Rusten","c":"God behagen","d":"Eten"}}}}},
   "exam": {"takeExam": "Examen maken","unlockHint": "Voltooi alle lessen om te ontgrendelen","readyHint": "Alle lessen voltooid","passed": "Examen behaald","passedHint": "Je hebt het examen van deze module afgerond","failedScore": "{{score}}% - {{correct}}/{{total}} goed","retryHint": "Tik om opnieuw te proberen","retryHintWithAttempt": "Poging {{count}} - Tik om opnieuw te proberen","alreadyPassed": "Je hebt dit examen al behaald"}

@@ -64,6 +64,37 @@ export type NextUnlockedTarget =
   | { type: 'lesson'; lesson: Lesson; module: (typeof MODULES)[0] }
   | { type: 'exam'; module: (typeof MODULES)[0] };
 
+export type CurrentTargetForModule =
+  | { type: 'intro' }
+  | { type: 'lesson'; lesson: { id: string; moduleId: string; order: number } }
+  | { type: 'exam' };
+
+export function getCurrentTargetForModule(
+  moduleId: string,
+  lessons: { id: string; order: number }[],
+  completedLessonIds: Set<string>,
+  passedModuleIds: Set<string>,
+  introVideoWatched: boolean,
+  examUnlocked: boolean,
+  examPassed: boolean,
+): CurrentTargetForModule | null {
+  if (moduleId === 'module-1' && !introVideoWatched) {
+    return { type: 'intro' };
+  }
+  const allLessonsDone = lessons.length > 0 && lessons.every((l) => completedLessonIds.has(l.id));
+  if (allLessonsDone && examUnlocked && !examPassed) {
+    return { type: 'exam' };
+  }
+  for (const lesson of lessons) {
+    if (completedLessonIds.has(lesson.id)) continue;
+    if (isLessonUnlocked(moduleId, { ...lesson, moduleId }, completedLessonIds, passedModuleIds, introVideoWatched)) {
+      return { type: 'lesson', lesson: { ...lesson, moduleId } };
+    }
+    return null;
+  }
+  return null;
+}
+
 export function getNextUnlockedTarget(
   completedLessonIds: Set<string>,
   passedModuleIds: Set<string>,

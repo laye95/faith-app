@@ -36,8 +36,17 @@ import {
 } from 'react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 import { LockedLessonModal } from '@/app/(main)/bibleschool/(tabs)/modules/[id]/_components/LockedLessonModal';
+import { LockOverlay } from '@/components/common/LockOverlay';
 
 interface LessonVideoPlayerProps {
   videoUrl: string;
@@ -378,6 +387,27 @@ function NextLessonCard({
   const thumbnailUrl = nextLesson.thumbnailUrl ?? vimeoThumbnail ?? undefined;
   const thumbnailLoading = !!videoIdForThumb && isLoading && !thumbnailUrl;
 
+  const cardOpacity = useSharedValue(isLocked ? 0.6 : 1);
+  const cardScale = useSharedValue(1);
+
+  useEffect(() => {
+    if (!isLocked) {
+      cardOpacity.value = withSpring(1, { damping: 18, stiffness: 100 });
+      cardScale.value = withDelay(
+        2400,
+        withSequence(withSpring(1.03, { damping: 15, stiffness: 120 }), withSpring(1, { damping: 15, stiffness: 120 }))
+      );
+    } else {
+      cardOpacity.value = 0.6;
+      cardScale.value = 1;
+    }
+  }, [isLocked]);
+
+  const cardAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }));
+
   const handlePress = () => {
     if (isLocked) {
       onLockedPress?.();
@@ -391,12 +421,12 @@ function NextLessonCard({
   const showNumberSeparately = !titleStr.trim().toLowerCase().startsWith(lessonNumberStr.trim().toLowerCase());
 
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      activeOpacity={0.7}
-      className="cursor-pointer"
-      style={isLocked ? { opacity: 0.6 } : undefined}
-    >
+    <Animated.View style={cardAnimatedStyle}>
+      <TouchableOpacity
+        onPress={handlePress}
+        activeOpacity={0.7}
+        className="cursor-pointer"
+      >
       <Box
         className="rounded-2xl overflow-hidden"
         style={{
@@ -419,15 +449,7 @@ function NextLessonCard({
                 theme={theme}
                 isLoading={thumbnailLoading}
               />
-              {isLocked ? (
-                <Box
-                  className="absolute inset-0 items-center justify-center rounded-xl overflow-hidden"
-                  style={{ backgroundColor: theme.overlayBg }}
-                  pointerEvents="none"
-                >
-                  <Ionicons name="lock-closed" size={24} color="#ffffff" />
-                </Box>
-              ) : null}
+              <LockOverlay isLocked={isLocked} variant="thumbnail" />
             </Box>
           </Box>
           <Box className="flex-1 justify-center min-w-0">
@@ -448,24 +470,29 @@ function NextLessonCard({
             </Text>
           </Box>
           {isLocked ? (
-            <Box
-              className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
-              style={{ backgroundColor: theme.cardBorder }}
-            >
-              <Ionicons name="lock-closed" size={14} color={theme.textSecondary} />
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: theme.textSecondary }}
+            <Animated.View exiting={FadeOut.duration(250)}>
+              <Box
+                className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
+                style={{ backgroundColor: theme.cardBorder }}
               >
-                {t('lessons.locked')}
-              </Text>
-            </Box>
+                <Ionicons name="lock-closed" size={14} color={theme.textSecondary} />
+                <Text
+                  className="text-xs font-semibold"
+                  style={{ color: theme.textSecondary }}
+                >
+                  {t('lessons.locked')}
+                </Text>
+              </Box>
+            </Animated.View>
           ) : (
-            <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
+            <Animated.View entering={FadeIn.duration(300).delay(100)}>
+              <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
+            </Animated.View>
           )}
         </Box>
       </Box>
     </TouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -482,6 +509,27 @@ function StartExamCard({
   isLocked: boolean;
   onLockedPress?: () => void;
 }) {
+  const cardOpacity = useSharedValue(isLocked ? 0.6 : 1);
+  const cardScale = useSharedValue(1);
+
+  useEffect(() => {
+    if (!isLocked) {
+      cardOpacity.value = withSpring(1, { damping: 18, stiffness: 100 });
+      cardScale.value = withDelay(
+        2400,
+        withSequence(withSpring(1.03, { damping: 15, stiffness: 120 }), withSpring(1, { damping: 15, stiffness: 120 }))
+      );
+    } else {
+      cardOpacity.value = 0.6;
+      cardScale.value = 1;
+    }
+  }, [isLocked]);
+
+  const cardAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }));
+
   const handlePress = () => {
     if (isLocked) {
       onLockedPress?.();
@@ -492,12 +540,12 @@ function StartExamCard({
   };
 
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      activeOpacity={0.7}
-      className="cursor-pointer"
-      style={isLocked ? { opacity: 0.6 } : undefined}
-    >
+    <Animated.View style={cardAnimatedStyle}>
+      <TouchableOpacity
+        onPress={handlePress}
+        activeOpacity={0.7}
+        className="cursor-pointer"
+      >
       <Box
         className="rounded-2xl overflow-hidden flex-row items-center p-4"
         style={{
@@ -514,15 +562,7 @@ function StartExamCard({
           }}
         >
           <Ionicons name="document-text" size={24} color={theme.textPrimary} />
-          {isLocked ? (
-            <Box
-              className="absolute inset-0 items-center justify-center rounded-xl overflow-hidden"
-              style={{ backgroundColor: theme.overlayBg }}
-              pointerEvents="none"
-            >
-              <Ionicons name="lock-closed" size={24} color="#ffffff" />
-            </Box>
-          ) : null}
+          <LockOverlay isLocked={isLocked} variant="thumbnail" />
         </Box>
         <Box className="flex-1 min-w-0">
           <Text
@@ -539,23 +579,28 @@ function StartExamCard({
           </Text>
         </Box>
         {isLocked ? (
-          <Box
-            className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
-            style={{ backgroundColor: theme.cardBorder }}
-          >
-            <Ionicons name="lock-closed" size={14} color={theme.textSecondary} />
-            <Text
-              className="text-xs font-semibold"
-              style={{ color: theme.textSecondary }}
+          <Animated.View exiting={FadeOut.duration(250)}>
+            <Box
+              className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
+              style={{ backgroundColor: theme.cardBorder }}
             >
-              {t('lessons.locked')}
-            </Text>
-          </Box>
+              <Ionicons name="lock-closed" size={14} color={theme.textSecondary} />
+              <Text
+                className="text-xs font-semibold"
+                style={{ color: theme.textSecondary }}
+              >
+                {t('lessons.locked')}
+              </Text>
+            </Box>
+          </Animated.View>
         ) : (
-          <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
+          <Animated.View entering={FadeIn.duration(300).delay(100)}>
+            <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
+          </Animated.View>
         )}
       </Box>
     </TouchableOpacity>
+    </Animated.View>
   );
 }
 

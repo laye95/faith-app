@@ -7,7 +7,7 @@ import { VStack } from '@/components/ui/vstack';
 import { useTheme } from '@/hooks/useTheme';
 import { Ionicons as Ion } from '@expo/vector-icons';
 import { forwardRef } from 'react';
-import type { TextInput } from 'react-native';
+import { View, type TextInput } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 type IoniconName = keyof typeof Ion.glyphMap;
@@ -29,7 +29,9 @@ interface AuthInputFieldProps {
   onTogglePassword?: () => void;
   keyboardType?: 'default' | 'email-address';
   autoCapitalize?: 'none' | 'words';
-  autoComplete?: 'email' | 'password' | 'new-password' | 'name';
+  autoComplete?: 'email' | 'username' | 'password' | 'current-password' | 'new-password' | 'name';
+  textContentType?: 'emailAddress' | 'username' | 'password' | 'newPassword' | 'name';
+  importantForAutofill?: 'auto' | 'yes' | 'no';
   returnKeyType?: 'next' | 'done';
   blurOnSubmit?: boolean;
   editable?: boolean;
@@ -55,6 +57,8 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
       keyboardType = 'default',
       autoCapitalize = 'none',
       autoComplete = 'email',
+      textContentType,
+      importantForAutofill = 'yes',
       returnKeyType = 'next',
       blurOnSubmit = false,
       editable = true,
@@ -121,20 +125,26 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
                 keyboardType={keyboardType}
                 autoCapitalize={autoCapitalize}
                 autoComplete={autoComplete}
+                textContentType={textContentType}
+                importantForAutofill={importantForAutofill}
                 editable={editable}
                 placeholderTextColor={theme.textTertiary}
                 className="pl-3 pr-3 text-base"
                 style={{ color: theme.textPrimary }}
               />
               {showToggle && (
-                <InputSlot onPress={onTogglePassword} className="cursor-pointer pr-5">
-                  <InputIcon>
+                <InputSlot
+                  onPress={onTogglePassword}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  className="cursor-pointer min-w-12 items-center justify-center pr-5"
+                >
+                  <View className="items-center justify-center">
                     <Ion
                       name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                      size={22}
-                      color={theme.textTertiary}
+                      size={24}
+                      color={theme.textSecondary}
                     />
-                  </InputIcon>
+                  </View>
                 </InputSlot>
               )}
             </Input>

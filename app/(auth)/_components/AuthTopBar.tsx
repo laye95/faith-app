@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
+import { useCompactShadow } from '@/hooks/useShadows';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { bzzt } from '@/utils/haptics';
@@ -19,12 +20,13 @@ interface AuthTopBarProps {
 export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const containerShadow = useCompactShadow();
 
   return (
     <Box
       className="w-full px-6 py-4"
       style={{
-        backgroundColor: theme.pageBg,
+        backgroundColor: 'transparent',
       }}
     >
       <HStack className="items-center justify-between">
@@ -35,17 +37,20 @@ export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
               onBack();
             }}
             activeOpacity={0.7}
-            className="cursor-pointer"
+            className="flex-row items-center gap-2 cursor-pointer rounded-full pl-3 pr-4 py-2"
+            style={{
+              backgroundColor: theme.cardBg,
+              borderWidth: 1,
+              borderColor: theme.cardBorder,
+            }}
           >
-            <HStack className="items-center gap-2">
-              <Ionicons name="arrow-back" size={22} color={theme.buttonPrimary} />
-              <Text
-                className="text-sm font-semibold"
-                style={{ color: theme.buttonPrimary }}
-              >
-                {t('auth.back')}
-              </Text>
-            </HStack>
+            <Ionicons name="arrow-back" size={20} color={theme.buttonPrimary} />
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: theme.buttonPrimary }}
+            >
+              {t('auth.back')}
+            </Text>
           </TouchableOpacity>
         ) : (
           <Box />
@@ -59,6 +64,7 @@ export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
             borderColor: theme.cardBorder,
             borderRadius: 12,
             overflow: 'hidden',
+            ...containerShadow,
           }}
         >
           <ThemeToggleIcon />
@@ -69,7 +75,7 @@ export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
               backgroundColor: theme.cardBorder,
             }}
           />
-          <LanguageSwitcher variant="inline" />
+          <LanguageSwitcher variant="inline" matchDropdownToTrigger />
         </View>
       </HStack>
     </Box>

@@ -1,5 +1,9 @@
 import type { SupportedLocale } from '@/i18n';
-import type { BibleschoolLesson, BibleschoolModule } from '@/types/bibleschool';
+import type {
+  BibleschoolCategory,
+  BibleschoolLesson,
+  BibleschoolModule,
+} from '@/types/bibleschool';
 import type { QuizQuestion } from '@/types/quiz';
 import { fetchStory } from './client';
 
@@ -153,13 +157,9 @@ function mapOldModuleToBibleschool(
   };
 }
 
-let cachedModules: BibleschoolModule[] | null = null;
-let cachedLocale: SupportedLocale | null = null;
-let cachedIntroductionVimeoId: string | null = null;
-
-export async function getModules(
+export async function getBibleschoolCategory(
   locale: SupportedLocale,
-): Promise<BibleschoolModule[]> {
+): Promise<BibleschoolCategory> {
   const slug = getCategorySlug(locale);
   const path = `categories/${slug}`;
 
@@ -168,52 +168,26 @@ export async function getModules(
   });
 
   const raw = story.content?.introduction_vimeo_id;
-  cachedIntroductionVimeoId = parseIntroductionVimeoId(raw) ?? INTRO_VIDEO_FALLBACK_ID;
+  const introductionVimeoId =
+    parseIntroductionVimeoId(raw) ?? INTRO_VIDEO_FALLBACK_ID;
 
   const rawModules = story.content?.modules ?? [];
   const modules = rawModules.map((m, idx) =>
     mapOldModuleToBibleschool(m, idx),
   );
 
-  cachedModules = modules;
-  cachedLocale = locale;
-  return modules;
-}
-
-export async function getIntroductionVimeoId(
-  locale: SupportedLocale,
-): Promise<string> {
-  if (cachedLocale === locale && cachedIntroductionVimeoId) {
-    return cachedIntroductionVimeoId;
-  }
-  await getModules(locale);
-  return cachedIntroductionVimeoId ?? INTRO_VIDEO_FALLBACK_ID;
+  return { modules, introductionVimeoId };
 }
 
 export async function getModule(
   id: string,
   locale: SupportedLocale,
 ): Promise<BibleschoolModule | null> {
-  const modules =
-    cachedModules && cachedLocale === locale
-      ? cachedModules
-      : await getModules(locale);
+  const { modules } = await getBibleschoolCategory(locale);
   return modules.find((m) => m.id === id) ?? null;
 }
 
-export async function getLesson(
-  moduleId: string,
-  lessonId: string,
-  locale: SupportedLocale,
-): Promise<BibleschoolLesson | null> {
-  const module = await getModule(moduleId, locale);
-  if (!module) return null;
-  return module.lessons.find((l) => l.id === lessonId) ?? null;
-}
-
 export const bibleschoolService = {
-  getModules,
+  getBibleschoolCategory,
   getModule,
-  getLesson,
-  getIntroductionVimeoId,
 };
