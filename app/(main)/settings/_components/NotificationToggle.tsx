@@ -28,3 +28,7 @@ export function NotificationToggle({ settingKey }: NotificationToggleProps) {
     />
   );
 }
+
+const __expoRouterPrivateRoute_NotificationToggle = () => null;
+
+export default __expoRouterPrivateRoute_NotificationToggle;

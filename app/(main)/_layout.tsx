@@ -67,7 +67,7 @@ function MainLayoutContent() {
         <Drawer.Screen name="faith-business-school" />
         <Drawer.Screen name="hub-teaser" />
         <Drawer.Screen name="profile" />
-        <Drawer.Screen name="badges" />
+        <Drawer.Screen name="badges/index" />
         <Drawer.Screen name="settings" />
       </Drawer>
       {showLoadingOverlay && (

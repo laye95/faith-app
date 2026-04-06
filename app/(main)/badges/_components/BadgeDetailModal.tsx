@@ -135,3 +135,7 @@ export function BadgeDetailModal({
     </BaseModal>
   );
 }
+
+const __expoRouterPrivateRoute_BadgeDetailModal = () => null;
+
+export default __expoRouterPrivateRoute_BadgeDetailModal;

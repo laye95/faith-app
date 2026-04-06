@@ -174,3 +174,7 @@ export function ModuleCard({
     </TouchableOpacity>
   );
 }
+
+const __expoRouterPrivateRoute_ModuleCard = () => null;
+
+export default __expoRouterPrivateRoute_ModuleCard;

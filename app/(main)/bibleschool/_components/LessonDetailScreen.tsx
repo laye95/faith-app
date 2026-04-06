@@ -259,3 +259,7 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_LessonDetailScreen = () => null;
+
+export default __expoRouterPrivateRoute_LessonDetailScreen;

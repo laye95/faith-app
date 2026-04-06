@@ -45,3 +45,7 @@ export function AuthSubmitButton({
     </VStack>
   );
 }
+
+const __expoRouterPrivateRoute_AuthSubmitButton = () => null;
+
+export default __expoRouterPrivateRoute_AuthSubmitButton;

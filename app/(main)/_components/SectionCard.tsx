@@ -40,3 +40,7 @@ export function SectionCard({
     </Card>
   );
 }
+
+const __expoRouterPrivateRoute_SectionCard = () => null;
+
+export default __expoRouterPrivateRoute_SectionCard;

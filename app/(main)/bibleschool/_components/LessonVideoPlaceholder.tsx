@@ -20,3 +20,7 @@ export function LessonVideoPlaceholder({ theme }: { theme: ThemeColors }) {
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_LessonVideoPlaceholder = () => null;
+
+export default __expoRouterPrivateRoute_LessonVideoPlaceholder;

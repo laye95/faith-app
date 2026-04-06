@@ -65,3 +65,7 @@ export function RegisterProfileStep({
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_RegisterProfileStep = () => null;
+
+export default __expoRouterPrivateRoute_RegisterProfileStep;

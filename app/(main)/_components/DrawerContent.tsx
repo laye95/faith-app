@@ -375,3 +375,7 @@ export function DrawerContent(props: DrawerContentComponentProps) {
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_DrawerContent = () => null;
+
+export default __expoRouterPrivateRoute_DrawerContent;

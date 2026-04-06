@@ -930,3 +930,7 @@ export function AdminBibleschoolAnalytics() {
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_AdminBibleschoolAnalytics = () => null;
+
+export default __expoRouterPrivateRoute_AdminBibleschoolAnalytics;

@@ -209,3 +209,7 @@ export function LessonRow({
     </TouchableOpacity>
   );
 }
+
+const __expoRouterPrivateRoute_LessonRow = () => null;
+
+export default __expoRouterPrivateRoute_LessonRow;

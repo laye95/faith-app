@@ -78,3 +78,7 @@ export function ComingSoonOrAdminScreen({
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_ComingSoonOrAdminScreen = () => null;
+
+export default __expoRouterPrivateRoute_ComingSoonOrAdminScreen;

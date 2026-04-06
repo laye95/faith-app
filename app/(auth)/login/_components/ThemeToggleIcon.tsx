@@ -43,3 +43,7 @@ export function ThemeToggleIcon() {
     </TouchableOpacity>
   );
 }
+
+const __expoRouterPrivateRoute_ThemeToggleIcon = () => null;
+
+export default __expoRouterPrivateRoute_ThemeToggleIcon;

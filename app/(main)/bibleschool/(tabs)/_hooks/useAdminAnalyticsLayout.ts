@@ -137,3 +137,7 @@ export function useAdminAnalyticsLayout() {
     isLoaded,
   };
 }
+
+const __expoRouterPrivateRoute_useAdminAnalyticsLayout = () => null;
+
+export default __expoRouterPrivateRoute_useAdminAnalyticsLayout;

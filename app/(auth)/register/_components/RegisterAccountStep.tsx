@@ -191,3 +191,7 @@ export function RegisterAccountStep({
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_RegisterAccountStep = () => null;
+
+export default __expoRouterPrivateRoute_RegisterAccountStep;

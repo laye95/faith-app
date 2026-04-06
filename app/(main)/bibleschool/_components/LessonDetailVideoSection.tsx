@@ -64,3 +64,7 @@ export function LessonDetailVideoSection({
   }
   return <LessonVideoPlaceholder theme={theme} />;
 }
+
+const __expoRouterPrivateRoute_LessonDetailVideoSection = () => null;
+
+export default __expoRouterPrivateRoute_LessonDetailVideoSection;

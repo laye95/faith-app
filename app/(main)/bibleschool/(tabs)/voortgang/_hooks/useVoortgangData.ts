@@ -148,3 +148,7 @@ export function useVoortgangData() {
     onRefresh,
   };
 }
+
+const __expoRouterPrivateRoute_useVoortgangData = () => null;
+
+export default __expoRouterPrivateRoute_useVoortgangData;

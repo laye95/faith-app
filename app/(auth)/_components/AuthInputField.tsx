@@ -169,3 +169,7 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
 );
 
 AuthInputField.displayName = 'AuthInputField';
+
+const __expoRouterPrivateRoute_AuthInputField = () => null;
+
+export default __expoRouterPrivateRoute_AuthInputField;

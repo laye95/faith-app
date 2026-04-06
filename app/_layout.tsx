@@ -1,3 +1,4 @@
+import "@/utils/ignoreWarnings";
 import "@/global.css";
 import {
   Poppins_400Regular,
@@ -20,7 +21,10 @@ import { ToastProvider } from "@/contexts/ToastContext";
 import { TypographyProvider } from "@/contexts/TypographyContext";
 import { BrandedSplashScreen } from "@/components/ui/BrandedSplashScreen";
 import { QueryProvider } from "@/providers/QueryProvider";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  initialWindowMetrics,
+} from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -40,29 +44,31 @@ export default function RootLayout() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <BrandedSplashScreen useSystemFonts />
       </SafeAreaProvider>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <KeyboardProvider>
-        <TypographyProvider>
-          <QueryProvider>
-            <AuthProvider>
-              <ThemeProvider>
-                <LanguageProvider>
-                  <ToastProvider>
-                    <ThemeLayout />
-                  </ToastProvider>
-                </LanguageProvider>
-              </ThemeProvider>
-            </AuthProvider>
-          </QueryProvider>
-        </TypographyProvider>
-      </KeyboardProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <KeyboardProvider>
+          <TypographyProvider>
+            <QueryProvider>
+              <AuthProvider>
+                <ThemeProvider>
+                  <LanguageProvider>
+                    <ToastProvider>
+                      <ThemeLayout />
+                    </ToastProvider>
+                  </LanguageProvider>
+                </ThemeProvider>
+              </AuthProvider>
+            </QueryProvider>
+          </TypographyProvider>
+        </KeyboardProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

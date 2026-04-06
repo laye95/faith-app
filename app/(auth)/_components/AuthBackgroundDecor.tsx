@@ -42,3 +42,7 @@ export function AuthBackgroundDecor() {
     </View>
   );
 }
+
+const __expoRouterPrivateRoute_AuthBackgroundDecor = () => null;
+
+export default __expoRouterPrivateRoute_AuthBackgroundDecor;

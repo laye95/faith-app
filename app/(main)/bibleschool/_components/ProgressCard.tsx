@@ -81,3 +81,7 @@ export function ProgressCard() {
     </OverviewCard>
   );
 }
+
+const __expoRouterPrivateRoute_ProgressCard = () => null;
+
+export default __expoRouterPrivateRoute_ProgressCard;

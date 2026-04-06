@@ -7,3 +7,7 @@ export function NextLessonPreloader({ videoUrl }: { videoUrl: string }) {
   });
   return null;
 }
+
+const __expoRouterPrivateRoute_NextLessonPreloader = () => null;
+
+export default __expoRouterPrivateRoute_NextLessonPreloader;

@@ -239,3 +239,7 @@ export function LessonVideoPlayer({
     </View>
   );
 }
+
+const __expoRouterPrivateRoute_LessonVideoPlayer = () => null;
+
+export default __expoRouterPrivateRoute_LessonVideoPlayer;

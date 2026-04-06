@@ -55,3 +55,7 @@ export function ModulesSearchBar({ value, onChangeText }: ModulesSearchBarProps)
     </View>
   );
 }
+
+const __expoRouterPrivateRoute_ModulesSearchBar = () => null;
+
+export default __expoRouterPrivateRoute_ModulesSearchBar;

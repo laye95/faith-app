@@ -135,3 +135,7 @@ export function ModuleLessonList({
     </VStack>
   );
 }
+
+const __expoRouterPrivateRoute_ModuleLessonList = () => null;
+
+export default __expoRouterPrivateRoute_ModuleLessonList;

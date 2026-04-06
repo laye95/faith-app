@@ -46,3 +46,7 @@ export function NextLessonThumbnail({
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_NextLessonThumbnail = () => null;
+
+export default __expoRouterPrivateRoute_NextLessonThumbnail;

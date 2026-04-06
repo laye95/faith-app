@@ -39,3 +39,7 @@ export function AuthErrorBox({ message }: AuthErrorBoxProps) {
     </Animated.View>
   );
 }
+
+const __expoRouterPrivateRoute_AuthErrorBox = () => null;
+
+export default __expoRouterPrivateRoute_AuthErrorBox;

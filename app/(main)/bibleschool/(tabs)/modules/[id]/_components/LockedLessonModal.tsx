@@ -106,3 +106,7 @@ export function LockedLessonModal({
     </BaseModal>
   );
 }
+
+const __expoRouterPrivateRoute_LockedLessonModal = () => null;
+
+export default __expoRouterPrivateRoute_LockedLessonModal;

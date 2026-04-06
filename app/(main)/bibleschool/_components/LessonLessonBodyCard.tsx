@@ -70,3 +70,7 @@ export function LessonLessonBodyCard({
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_LessonLessonBodyCard = () => null;
+
+export default __expoRouterPrivateRoute_LessonLessonBodyCard;

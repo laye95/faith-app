@@ -111,3 +111,7 @@ export function MainTopBar({
     </HStack>
   );
 }
+
+const __expoRouterPrivateRoute_MainTopBar = () => null;
+
+export default __expoRouterPrivateRoute_MainTopBar;

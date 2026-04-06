@@ -85,3 +85,7 @@ export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_AuthTopBar = () => null;
+
+export default __expoRouterPrivateRoute_AuthTopBar;

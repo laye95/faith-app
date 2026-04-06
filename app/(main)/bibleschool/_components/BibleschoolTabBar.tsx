@@ -164,3 +164,7 @@ function BibleschoolTabBarInner() {
 }
 
 export const BibleschoolTabBar = memo(BibleschoolTabBarInner);
+
+const __expoRouterPrivateRoute_BibleschoolTabBar = () => null;
+
+export default __expoRouterPrivateRoute_BibleschoolTabBar;

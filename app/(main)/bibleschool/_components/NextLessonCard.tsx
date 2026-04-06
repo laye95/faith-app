@@ -145,3 +145,7 @@ export function NextLessonCard({
     </Animated.View>
   );
 }
+
+const __expoRouterPrivateRoute_NextLessonCard = () => null;
+
+export default __expoRouterPrivateRoute_NextLessonCard;

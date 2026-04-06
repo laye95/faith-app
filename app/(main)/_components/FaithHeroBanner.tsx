@@ -12,3 +12,7 @@ export function FaithHeroBanner() {
     </View>
   );
 }
+
+const __expoRouterPrivateRoute_FaithHeroBanner = () => null;
+
+export default __expoRouterPrivateRoute_FaithHeroBanner;

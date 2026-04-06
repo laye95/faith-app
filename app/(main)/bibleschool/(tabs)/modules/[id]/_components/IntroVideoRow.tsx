@@ -79,3 +79,7 @@ export function IntroVideoRow({
     </TouchableOpacity>
   );
 }
+
+const __expoRouterPrivateRoute_IntroVideoRow = () => null;
+
+export default __expoRouterPrivateRoute_IntroVideoRow;

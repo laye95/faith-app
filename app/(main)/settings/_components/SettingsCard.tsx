@@ -82,3 +82,7 @@ export function SettingsCard({
     </Card>
   );
 }
+
+const __expoRouterPrivateRoute_SettingsCard = () => null;
+
+export default __expoRouterPrivateRoute_SettingsCard;

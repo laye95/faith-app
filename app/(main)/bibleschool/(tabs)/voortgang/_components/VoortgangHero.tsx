@@ -130,3 +130,7 @@ export function VoortgangHero({
     </View>
   );
 }
+
+const __expoRouterPrivateRoute_VoortgangHero = () => null;
+
+export default __expoRouterPrivateRoute_VoortgangHero;

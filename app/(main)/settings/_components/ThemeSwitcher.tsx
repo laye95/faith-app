@@ -48,3 +48,7 @@ export const ThemeSwitcher = forwardRef<ThemeSwitcherRef, ThemeSwitcherProps>(
     );
   },
 );
+
+const __expoRouterPrivateRoute_ThemeSwitcher = () => null;
+
+export default __expoRouterPrivateRoute_ThemeSwitcher;

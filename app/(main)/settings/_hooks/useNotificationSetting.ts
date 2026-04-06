@@ -54,3 +54,7 @@ export function useNotificationSetting(
 
   return [value, setValue, isLoading];
 }
+
+const __expoRouterPrivateRoute_useNotificationSetting = () => null;
+
+export default __expoRouterPrivateRoute_useNotificationSetting;

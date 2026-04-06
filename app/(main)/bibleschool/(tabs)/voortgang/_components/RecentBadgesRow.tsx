@@ -79,3 +79,7 @@ export function RecentBadgesRow({ recentBadges, allBadges }: RecentBadgesRowProp
     </View>
   );
 }
+
+const __expoRouterPrivateRoute_RecentBadgesRow = () => null;
+
+export default __expoRouterPrivateRoute_RecentBadgesRow;

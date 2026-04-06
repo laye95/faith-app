@@ -114,3 +114,7 @@ export const SETTINGS_SECTIONS: SettingsSectionConfig[] = [
     ],
   },
 ];
+
+const __expoRouterPrivateRoute_settingsSections = () => null;
+
+export default __expoRouterPrivateRoute_settingsSections;

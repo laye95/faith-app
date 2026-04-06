@@ -109,3 +109,7 @@ export function ModulesCatalogSections({
     </VStack>
   );
 }
+
+const __expoRouterPrivateRoute_ModulesCatalogSections = () => null;
+
+export default __expoRouterPrivateRoute_ModulesCatalogSections;

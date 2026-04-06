@@ -66,3 +66,7 @@ export const VideoQualitySelector = forwardRef(
 ) as React.ForwardRefExoticComponent<
   VideoQualitySelectorProps & React.RefAttributes<VideoQualitySelectorRef>
 >;
+
+const __expoRouterPrivateRoute_VideoQualitySelector = () => null;
+
+export default __expoRouterPrivateRoute_VideoQualitySelector;

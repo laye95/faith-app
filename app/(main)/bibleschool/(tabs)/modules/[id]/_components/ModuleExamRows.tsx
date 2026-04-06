@@ -97,3 +97,7 @@ export function ModuleExamPassedRow() {
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_ModuleExamRows = () => null;
+
+export default __expoRouterPrivateRoute_ModuleExamRows;

@@ -118,3 +118,7 @@ export function ContinueLearningCard() {
     </OverviewCard>
   );
 }
+
+const __expoRouterPrivateRoute_ContinueLearningCard = () => null;
+
+export default __expoRouterPrivateRoute_ContinueLearningCard;

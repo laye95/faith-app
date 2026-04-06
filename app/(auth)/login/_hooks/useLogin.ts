@@ -52,3 +52,7 @@ export function useLogin(): UseLoginReturn {
     error,
   };
 }
+
+const __expoRouterPrivateRoute_useLogin = () => null;
+
+export default __expoRouterPrivateRoute_useLogin;

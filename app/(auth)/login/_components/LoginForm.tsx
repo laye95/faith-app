@@ -121,3 +121,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
     </Box>
   );
 }
+
+const __expoRouterPrivateRoute_LoginForm = () => null;
+
+export default __expoRouterPrivateRoute_LoginForm;

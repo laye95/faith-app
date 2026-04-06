@@ -118,3 +118,7 @@ export function useRegister(): UseRegisterReturn {
     error,
   };
 }
+
+const __expoRouterPrivateRoute_useRegister = () => null;
+
+export default __expoRouterPrivateRoute_useRegister;

@@ -87,3 +87,7 @@ export function AuthHeader({
     </VStack>
   );
 }
+
+const __expoRouterPrivateRoute_AuthHeader = () => null;
+
+export default __expoRouterPrivateRoute_AuthHeader;

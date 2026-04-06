@@ -36,3 +36,7 @@ export function LessonVideoLoadError({
     </TouchableOpacity>
   );
 }
+
+const __expoRouterPrivateRoute_LessonVideoLoadError = () => null;
+
+export default __expoRouterPrivateRoute_LessonVideoLoadError;

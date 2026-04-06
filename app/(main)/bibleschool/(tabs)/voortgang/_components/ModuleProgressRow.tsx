@@ -318,3 +318,7 @@ export function ModuleProgressRow({ data, onPress, isFirstActive = false }: Modu
   }
   return <ActiveRow data={data} onPress={onPress} isFirstActive={isFirstActive} />;
 }
+
+const __expoRouterPrivateRoute_ModuleProgressRow = () => null;
+
+export default __expoRouterPrivateRoute_ModuleProgressRow;

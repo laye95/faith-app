@@ -149,3 +149,7 @@ export function CurrentVideoCard() {
     </OverviewCard>
   );
 }
+
+const __expoRouterPrivateRoute_CurrentVideoCard = () => null;
+
+export default __expoRouterPrivateRoute_CurrentVideoCard;

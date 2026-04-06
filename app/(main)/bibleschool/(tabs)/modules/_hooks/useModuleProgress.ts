@@ -59,3 +59,7 @@ export function useModuleProgress() {
     isLoading,
   };
 }
+
+const __expoRouterPrivateRoute_useModuleProgress = () => null;
+
+export default __expoRouterPrivateRoute_useModuleProgress;

@@ -36,3 +36,7 @@ export function SettingRow({
     </Row>
   );
 }
+
+const __expoRouterPrivateRoute_SettingRow = () => null;
+
+export default __expoRouterPrivateRoute_SettingRow;

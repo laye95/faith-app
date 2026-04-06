@@ -118,3 +118,7 @@ export function StartExamCard({
     </Animated.View>
   );
 }
+
+const __expoRouterPrivateRoute_StartExamCard = () => null;
+
+export default __expoRouterPrivateRoute_StartExamCard;

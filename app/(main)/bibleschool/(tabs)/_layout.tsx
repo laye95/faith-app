@@ -23,7 +23,7 @@ export default function BibleSchoolTabsLayout() {
     <Stack screenOptions={baseOptions}>
       <Stack.Screen name="index" options={rootScreenOptions({ title: 'Overview' })} />
       <Stack.Screen name="modules" options={{ title: 'Modules', animation: modulesAnimation }} />
-      <Stack.Screen name="voortgang" options={{ title: 'Voortgang' }} />
+      <Stack.Screen name="voortgang/index" options={{ title: 'Voortgang' }} />
     </Stack>
   );
 }

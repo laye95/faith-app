@@ -218,3 +218,7 @@ export function CustomTabBar({ state, descriptors, navigation, section }: Custom
     </View>
   );
 }
+
+const __expoRouterPrivateRoute_CustomTabBar = () => null;
+
+export default __expoRouterPrivateRoute_CustomTabBar;

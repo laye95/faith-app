@@ -108,3 +108,7 @@ export function ComingSoonSection({
     </ScrollView>
   );
 }
+
+const __expoRouterPrivateRoute_ComingSoonSection = () => null;
+
+export default __expoRouterPrivateRoute_ComingSoonSection;

@@ -44,3 +44,7 @@ export function HandoutButton({
     </TouchableOpacity>
   );
 }
+
+const __expoRouterPrivateRoute_HandoutButton = () => null;
+
+export default __expoRouterPrivateRoute_HandoutButton;

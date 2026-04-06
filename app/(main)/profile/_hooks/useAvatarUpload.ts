@@ -61,3 +61,7 @@ export function useAvatarUpload(userId: string | undefined) {
 
   return { pickAndUpload, isUploading };
 }
+
+const __expoRouterPrivateRoute_useAvatarUpload = () => null;
+
+export default __expoRouterPrivateRoute_useAvatarUpload;

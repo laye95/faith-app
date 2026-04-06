@@ -102,3 +102,7 @@ export function LessonDetailScrollContent({
     </>
   );
 }
+
+const __expoRouterPrivateRoute_LessonDetailScrollContent = () => null;
+
+export default __expoRouterPrivateRoute_LessonDetailScrollContent;

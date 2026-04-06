@@ -52,3 +52,7 @@ export function CollapsibleOverviewCard({
     </OverviewCard>
   );
 }
+
+const __expoRouterPrivateRoute_CollapsibleOverviewCard = () => null;
+
+export default __expoRouterPrivateRoute_CollapsibleOverviewCard;
