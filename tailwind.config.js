@@ -175,14 +175,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        heading: undefined,
-        body: undefined,
-        mono: undefined,
-        jakarta: ['var(--font-plus-jakarta-sans)'],
-        roboto: ['var(--font-roboto)'],
-        code: ['var(--font-source-code-pro)'],
-        inter: ['var(--font-inter)'],
-        'space-mono': ['var(--font-space-mono)'],
+        heading: ['Poppins_700Bold'],
+        body: ['Poppins_400Regular'],
+        mono: ['Poppins_400Regular'],
       },
       fontWeight: {
         extrablack: '950',

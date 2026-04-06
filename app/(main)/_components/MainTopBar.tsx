@@ -60,14 +60,21 @@ export function MainTopBar({
         ) : null}
       </Box>
       <Box
-        className="flex-1 items-center justify-center px-4"
-        style={{ position: 'absolute', left: 0, right: 0 }}
+        className="flex-1 items-center justify-center px-2"
+        style={{
+          position: 'absolute',
+          left: showBackButton ? 118 : 88,
+          right: 100,
+          top: 0,
+          bottom: 0,
+        }}
         pointerEvents="box-none"
       >
         <Text
           className="text-xl font-semibold text-center"
           style={{ color: theme.textPrimary }}
           numberOfLines={1}
+          ellipsizeMode="tail"
         >
           {title}
         </Text>

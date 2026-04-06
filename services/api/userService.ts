@@ -1,6 +1,6 @@
 import type { User } from '@/types/user';
 
-import { BaseService } from './baseService';
+import { AppError, AppErrorCode, BaseService } from './baseService';
 
 class UserService extends BaseService {
   protected tableName = 'users';
@@ -21,6 +21,20 @@ class UserService extends BaseService {
   ): Promise<User> {
     return super.update(id, updates);
   }
+
+  async updateAvatarUrl(id: string, avatarUrl: string): Promise<User> {
+    return super.update(id, { avatar_url: avatarUrl });
+  }
 }
 
 export const userService = new UserService();
+
+/**
+ * True when the profile row is missing (e.g. PostgREST PGRST116 → DATABASE_NOT_FOUND).
+ * Use instead of parsing error messages in UI.
+ */
+export function isUserProfileNotFoundError(error: unknown): boolean {
+  return (
+    error instanceof AppError && error.code === AppErrorCode.DATABASE_NOT_FOUND
+  );
+}

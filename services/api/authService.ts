@@ -39,6 +39,18 @@ function normalizeAuthError(error: AuthError): AppError {
     );
   }
 
+  if (
+    error.status === 502 ||
+    error.status === 503 ||
+    error.status === 504
+  ) {
+    return new AppError(
+      'De authenticatieservice reageert niet (gateway). Controleer of Supabase draait (lokaal: supabase start) en probeer opnieuw.',
+      AppErrorCode.NETWORK,
+      error,
+    );
+  }
+
   return new AppError(message, AppErrorCode.UNKNOWN, error);
 }
 
@@ -122,6 +134,21 @@ export const authService = {
         'message' in err
       ) {
         throw normalizeAuthError(err as AuthError);
+      }
+      const msg =
+        err instanceof Error ? err.message.toLowerCase() : String(err);
+      if (
+        msg.includes('network') ||
+        msg.includes('fetch failed') ||
+        msg.includes('request failed') ||
+        msg.includes('connection') ||
+        msg.includes('timeout') ||
+        msg.includes('econnrefused') ||
+        msg.includes('enotfound')
+      ) {
+        throw new Error(
+          'Geen verbinding met de server. Controleer je internet en of je apparaat op hetzelfde netwerk zit als je computer.',
+        );
       }
       throw err;
     }

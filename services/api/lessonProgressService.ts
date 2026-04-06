@@ -78,6 +78,26 @@ class LessonProgressService extends BaseService {
   ): Promise<LessonProgress> {
     return this.create<LessonProgress, CreateLessonProgressInput>(input);
   }
+
+  async saveLessonProgressRpc(params: {
+    lessonId: string;
+    moduleId: string;
+    lessonCount: number;
+    videoPositionSeconds: number;
+    completed?: boolean;
+    completedAt?: string | null;
+  }): Promise<void> {
+    const userId = await this.getCurrentUserId();
+    await this.executeRpc<void>('save_lesson_progress', {
+      p_user_id: userId,
+      p_lesson_id: params.lessonId,
+      p_module_id: params.moduleId,
+      p_video_position_seconds: params.videoPositionSeconds,
+      p_completed: params.completed ?? false,
+      p_completed_at: params.completedAt ?? null,
+      p_lesson_count: params.lessonCount,
+    });
+  }
 }
 
 export const lessonProgressService = new LessonProgressService();

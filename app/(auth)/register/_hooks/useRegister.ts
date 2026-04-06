@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 
 import { routes } from '@/constants/routes';
+import { REGISTRATION_ONBOARDING_SECTIONS } from '@/constants/onboarding';
 import { getErrorMessage } from '@/utils/errors';
 import { getCurrentLanguage, isSupportedLocale } from '@/i18n';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -85,9 +86,20 @@ export function useRegister(): UseRegisterReturn {
         } catch {
           //
         }
+        for (const section of REGISTRATION_ONBOARDING_SECTIONS) {
+          try {
+            await userSettingsService.setSetting(
+              userId,
+              `onboarding_${section}_completed`,
+              false,
+            );
+          } catch {
+            //
+          }
+        }
       }
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace(routes.main());
+      router.replace('/onboarding?section=home' as never);
     },
     onError: async (err: unknown) => {
       setError(getErrorMessage(err, t('auth.registrationFailed')));

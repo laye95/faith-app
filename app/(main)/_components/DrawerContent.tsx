@@ -15,6 +15,7 @@ import { saveProfileReturnHref } from '@/hooks/useLastSectionRestore';
 import { APP_VERSION } from '@/constants/version';
 import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { usePathname, router } from 'expo-router';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -186,15 +187,24 @@ export function DrawerContent(props: DrawerContentComponentProps) {
       >
         <HStack className="items-center gap-3">
           <Box
-            className="rounded-full w-12 h-12 items-center justify-center"
+            className="rounded-full w-12 h-12 items-center justify-center overflow-hidden"
             style={{ backgroundColor: theme.avatarPrimary }}
           >
-            <Text
-              className="text-base font-semibold"
-              style={{ color: theme.textSecondary }}
-            >
-              {initials}
-            </Text>
+            {profile?.avatar_url ? (
+              <Image
+                source={{ uri: profile.avatar_url }}
+                style={{ width: 48, height: 48 }}
+                contentFit="cover"
+                accessibilityLabel={displayName}
+              />
+            ) : (
+              <Text
+                className="text-base font-semibold"
+                style={{ color: theme.textSecondary }}
+              >
+                {initials}
+              </Text>
+            )}
           </Box>
           <VStack className="flex-1 min-w-0">
             <Text

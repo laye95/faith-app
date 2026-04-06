@@ -1,15 +1,15 @@
-import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { BrandedSplashScreen } from '@/components/ui/BrandedSplashScreen';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLastSectionHref } from '@/hooks/useLastSectionRestore';
+import { useOnboardingSection } from '@/hooks/useOnboardingSection';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useTranslation } from '@/hooks/useTranslation';
+import { isUserProfileNotFoundError } from '@/services/api/userService';
 import type { Href } from 'expo-router';
 import { Redirect, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 export default function Index() {
   const { session, isLoading: authLoading, user, signOut } = useAuth();
-  const { t } = useTranslation();
   const router = useRouter();
   const [mainHref, setMainHref] = useState<Href | null>(null);
   const userId = user?.id ?? session?.user?.id;
@@ -19,18 +19,13 @@ export default function Index() {
     isFetching,
     error: profileError,
   } = useUserProfile(userId);
+  const { onboardingCompleted, isLoading: onboardingLoading } = useOnboardingSection('home');
 
   useEffect(() => {
     const handleProfileNotFound = async () => {
       if (!profileError || !session) return;
 
-      const errorMessage = (profileError?.message ?? '').toLowerCase();
-      const isNotFound =
-        errorMessage.includes('record') ||
-        errorMessage.includes('not found') ||
-        errorMessage.includes('pgrst116');
-
-      if (isNotFound) {
+      if (isUserProfileNotFoundError(profileError)) {
         try {
           await signOut();
         } finally {
@@ -43,14 +38,9 @@ export default function Index() {
   }, [profileError, session, signOut, router]);
 
   useEffect(() => {
-    if (!session || profileLoading || isFetching || !profile) return;
+    if (!session || profileLoading || isFetching || !profile || onboardingLoading) return;
 
-    const errorMessage = (profileError?.message ?? '').toLowerCase();
-    const isNotFound =
-      errorMessage.includes('record') ||
-      errorMessage.includes('not found') ||
-      (profileError && 'code' in profileError && (profileError as { code?: string }).code === 'PGRST116');
-    if (isNotFound) return;
+    if (profileError && isUserProfileNotFoundError(profileError)) return;
 
     let cancelled = false;
     getLastSectionHref().then((href) => {
@@ -59,10 +49,10 @@ export default function Index() {
     return () => {
       cancelled = true;
     };
-  }, [session, profile, profileLoading, isFetching, profileError]);
+  }, [session, profile, profileLoading, isFetching, profileError, onboardingLoading]);
 
   if (authLoading) {
-    return <LoadingScreen message={t('common.authenticating')} />;
+    return <BrandedSplashScreen />;
   }
 
   if (!session) {
@@ -70,29 +60,30 @@ export default function Index() {
   }
 
   if (session && (profileLoading || isFetching)) {
-    return <LoadingScreen message={t('common.loading')} />;
+    return <BrandedSplashScreen />;
   }
 
-  const errorMessage = (profileError?.message ?? '').toLowerCase();
-  const errorCode =
-    profileError && 'code' in profileError
-      ? (profileError as { code?: string }).code
-      : undefined;
   const isProfileNotFound =
-    errorMessage.includes('record') ||
-    errorMessage.includes('not found') ||
-    errorCode === 'PGRST116';
+    !!profileError && isUserProfileNotFoundError(profileError);
 
   if (isProfileNotFound) {
-    return <LoadingScreen message={t('common.redirecting')} />;
+    return <BrandedSplashScreen />;
   }
 
   if (!profile) {
-    return <LoadingScreen message={t('common.settingUp')} />;
+    return <BrandedSplashScreen />;
+  }
+
+  if (onboardingLoading) {
+    return <BrandedSplashScreen />;
+  }
+
+  if (onboardingCompleted === false) {
+    return <Redirect href={'/onboarding?section=home' as Href} />;
   }
 
   if (mainHref === null) {
-    return <LoadingScreen message={t('common.loading')} />;
+    return <BrandedSplashScreen />;
   }
 
   return <Redirect href={mainHref} />;

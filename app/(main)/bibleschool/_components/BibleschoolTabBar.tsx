@@ -14,13 +14,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const TABS = [
   { route: 'index' as const, href: () => routes.bibleschool(), icon: 'home' as const, labelKey: 'navbar.overview' },
   { route: 'modules' as const, href: () => routes.bibleschoolModules(), icon: 'library' as const, labelKey: 'navbar.modules' },
+  { route: 'voortgang' as const, href: () => routes.bibleschoolVoortgang(), icon: 'stats-chart' as const, labelKey: 'navbar.voortgang' },
 ];
 
 function BibleschoolTabBarInner() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { t } = useTranslation();
-  const { activeTab, setActiveTab } = useBibleschoolTab();
+  const { activeTab, setActiveTab, setNavigationDirection } = useBibleschoolTab();
   const isDark = theme.isDark;
   const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
   const inactiveIconColor = theme.tabInactiveText;
@@ -60,6 +61,9 @@ function BibleschoolTabBarInner() {
 
           const onPress = () => {
             bzzt();
+            const currentIndex = TABS.findIndex((t) => t.route === activeTab);
+            const targetIndex = TABS.findIndex((t) => t.route === tab.route);
+            setNavigationDirection(targetIndex < currentIndex ? 'left' : 'right');
             setActiveTab(tab.route);
             router.navigate(tab.href());
           };

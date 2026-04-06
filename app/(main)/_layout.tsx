@@ -1,3 +1,4 @@
+import { BrandedSplashScreen } from "@/components/ui/BrandedSplashScreen";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -64,6 +65,7 @@ function MainLayoutContent() {
         <Drawer.Screen name="podcasts" />
         <Drawer.Screen name="sermons" />
         <Drawer.Screen name="faith-business-school" />
+        <Drawer.Screen name="hub-teaser" />
         <Drawer.Screen name="profile" />
         <Drawer.Screen name="badges" />
         <Drawer.Screen name="settings" />
@@ -88,10 +90,9 @@ function MainLayoutContent() {
 
 export default function MainLayout() {
   const { session, isLoading } = useAuth();
-  const { t } = useTranslation();
 
   if (isLoading) {
-    return <LoadingScreen message={t("common.authenticating")} />;
+    return <BrandedSplashScreen />;
   }
   if (!session) return <Redirect href="/(auth)/login" />;
 

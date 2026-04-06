@@ -1,0 +1,312 @@
+---
+description: "Apply when writing, editing, or reviewing service files, data fetching hooks, TanStack Query usage, Supabase queries, Storyblok fetches, Vimeo integration, queryKeys, or any data layer code."
+globs:
+  - "services/**/*.ts"
+  - "hooks/**/*.ts"
+  - "**/_hooks/**/*.ts"
+  - "providers/**/*.tsx"
+  - "contexts/**/*.tsx"
+alwaysApply: false
+---
+
+# Data Layer — Services, Queries & Hooks
+
+## Architecture Overview
+
+```
+UI Component
+  └─ Custom Hook (useQuery / useMutation)
+       └─ queryKeys.ts (typed cache keys)
+       └─ Service (extends BaseService)
+            └─ Supabase client  /  Storyblok client  /  Vimeo API
+```
+
+Never call services or Supabase directly from a component. Always go through TanStack Query.
+
+## BaseService Cheat Sheet
+
+Import from `@/services/api/baseService`:
+
+```typescript
+import { BaseService, AppError, AppErrorCode } from '@/services/api/baseService';
+import type { PaginatedResponse, FilterParam, QueryOptions } from '@/services/api/baseService';
+```
+
+### Creating a new service
+
+```typescript
+export class ExampleService extends BaseService {
+  protected tableName = 'example_table';
+
+  // Simple list with filters
+  async getByUser(userId: string): Promise<Example[]> {
+    return this.list<Example>({
+      filters: [{ field: 'user_id', operator: 'eq', value: userId }],
+      sort: [{ field: 'created_at', ascending: false }],
+    });
+  }
+
+  // Single record
+  async getById(id: string): Promise<Example> {
+    return this.get<Example>(id);
+  }
+
+  // Insert with auto user_id injection
+  async create(data: Omit<Example, 'id' | 'user_id' | 'created_at'>): Promise<Example> {
+    return this.createWithUser<Example, typeof data>(data);
+  }
+
+  // Upsert on conflict
+  async upsert(data: ExampleInput): Promise<Example> {
+    return this.upsertWithConflict<Example, ExampleInput>(data, {
+      onConflict: 'user_id,some_id',
+    });
+  }
+
+  // RPC call
+  async callMyRpc(userId: string): Promise<RpcResult> {
+    return this.executeRpc<RpcResult>('my_rpc_name', { p_user_id: userId });
+  }
+
+  // Paginated
+  async listPaged(page: number): Promise<PaginatedResponse<Example>> {
+    return this.listPaginated<Example>({
+      pagination: { page, limit: 20 },
+      sort: [{ field: 'created_at', ascending: false }],
+    });
+  }
+}
+
+export const exampleService = new ExampleService();
+```
+
+### Filter operators
+
+`eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `like`, `ilike`, `in`, `is`
+
+## queryKeys — Always Use the Factory
+
+File: `services/queryKeys.ts`
+
+```typescript
+import { queryKeys } from '@/services/queryKeys';
+
+// Existing key groups:
+queryKeys.auth.session
+queryKeys.auth.user
+queryKeys.users.all
+queryKeys.users.detail(userId)
+queryKeys.admin.bibleschoolAnalytics(from?, to?)
+queryKeys.admin.quizAnalytics(from?, to?)
+queryKeys.admin.timeAnalytics(from?, to?)
+queryKeys.admin.users(limit, offset, search?)
+queryKeys.admin.userDetail(userId)
+queryKeys.vimeo.meta(videoId)
+queryKeys.bibleschool.category(locale)
+queryKeys.userSettings.introWatched(userId)
+queryKeys.userSettings.introPosition(userId)
+queryKeys.badges.all
+queryKeys.badges.userBadges(userId)
+queryKeys.notifications.list(userId)
+queryKeys.progress.overview(userId)
+queryKeys.progress.lesson(userId, lessonId)
+queryKeys.progress.module(userId, moduleId)
+queryKeys.progress.quizAttempts(userId, moduleId)
+queryKeys.progress.lessonProgress.byUserLesson(userId, lessonId)
+queryKeys.progress.lessonProgress.byUserModule(userId, moduleId)
+queryKeys.progress.lessonProgress.completedByUser(userId)
+queryKeys.progress.lessonProgress.lastWatchedByUser(userId)
+queryKeys.progress.moduleProgress.byUserModule(userId, moduleId)
+queryKeys.progress.moduleProgress.overview(userId)
+```
+
+**When adding new queries:** extend the `queryKeys` object in `services/queryKeys.ts`. Never use raw arrays for query keys.
+
+## TanStack Query Patterns
+
+### useQuery (read operations)
+
+```typescript
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/services/queryKeys';
+import { lessonProgressService } from '@/services/api/lessonProgressService';
+
+const { data, isLoading, error } = useQuery({
+  queryKey: queryKeys.progress.lessonProgress.byUserLesson(userId, lessonId),
+  queryFn: () => lessonProgressService.getByUserLesson(userId, lessonId),
+  enabled: !!userId && !!lessonId,
+  staleTime: 5 * 60 * 1000,    // 5 minutes
+});
+```
+
+### useMutation (write operations)
+
+```typescript
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+const queryClient = useQueryClient();
+const { t } = useTranslation();
+const toast = useToast();
+
+const saveMutation = useMutation({
+  mutationFn: (input: SaveInput) => myService.save(input),
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.progress.lessonProgress.byUserLesson(userId, lessonId),
+    });
+    toast.success(t('common.saved'));
+  },
+  onError: (err) => {
+    toast.error(err instanceof AppError ? err.message : t('common.error'));
+  },
+});
+
+// Calling: saveMutation.mutate(input)
+// State: saveMutation.isPending, saveMutation.isError
+```
+
+### Optimistic updates (when UX requires it)
+
+```typescript
+const mutation = useMutation({
+  mutationFn: updateFn,
+  onMutate: async (newData) => {
+    await queryClient.cancelQueries({ queryKey: myKey });
+    const prev = queryClient.getQueryData(myKey);
+    queryClient.setQueryData(myKey, newData);
+    return { prev };
+  },
+  onError: (_err, _vars, context) => {
+    queryClient.setQueryData(myKey, context?.prev);
+  },
+  onSettled: () => queryClient.invalidateQueries({ queryKey: myKey }),
+});
+```
+
+## Cache Configuration
+
+QueryProvider in `providers/QueryProvider.tsx` uses `PersistQueryClientProvider` with AsyncStorage key `FAITH_QUERY_CACHE`.
+
+Default stale times:
+- Short-lived (notifications, streak): `60 * 1000` (1 min)
+- Standard (progress, profile): `5 * 60 * 1000` (5 min)
+- Long-lived (content, badges): `60 * 60 * 1000` (1 hour)
+- Very stable (CMS content): `24 * 60 * 60 * 1000` (24 hours)
+
+## Auth Context Usage
+
+```typescript
+import { useAuth } from '@/contexts/AuthContext';
+
+const { session, user, isLoading, signOut } = useAuth();
+// user.id — current user UUID
+// session — Supabase session (has .access_token etc.)
+```
+
+The `AuthProvider` calls `supabase.auth.getSession()` on mount with a 10-second timeout fallback. It listens to `onAuthStateChange` and clears the TanStack Query cache on sign-in/sign-out.
+
+## User Settings Pattern
+
+User settings use a key-value pattern in `user_settings` table:
+
+```typescript
+import { userSettingsService } from '@/services/api/userSettingsService';
+
+// Get a setting
+const value = await userSettingsService.getSetting<string>(userId, 'language');
+
+// Set a setting
+await userSettingsService.setSetting(userId, 'theme', 'dark');
+```
+
+Used for: `language`, `theme`, `intro_watched`, `intro_position`, `video_quality`.
+
+## Storyblok Content Fetching
+
+```typescript
+import { storyblokClient } from '@/services/storyblok/client';
+
+// Hook: useBibleschoolContent (hooks/useBibleschoolContent.ts)
+// Fetches bibleschool category for the current locale
+const { data, isLoading } = useBibleschoolContent();
+
+// data.modules[] — array of modules with lessons
+// Each lesson has: id, title, vimeo_id, handout data
+```
+
+Storyblok stories use slugs as `lesson_id` and `module_id` in Supabase progress tables.
+
+## Vimeo Integration
+
+One Vimeo API response (`play`, `pictures.sizes`, `duration`) is cached under `queryKeys.vimeo.meta(videoId)`. Hooks `useVimeoPlaybackUrl` and `useVimeoThumbnail` use the same key with `select` to derive playback URL (with network quality options) or thumbnail URL.
+
+```typescript
+// useVimeoPlaybackUrl / useVimeoThumbnail — shared cache key queryKeys.vimeo.meta(vimeoId)
+// Raw fetch: vimeoService.getVimeoVideoMetaRaw(vimeoId)
+```
+
+The `EXPO_PUBLIC_VIMEO_ACCESS_TOKEN` env var must be set for Vimeo API calls.
+
+## Progress Tracking Pattern
+
+When a user watches a lesson video, track position and completion:
+
+```typescript
+// Track video position (debounced, called frequently)
+saveMutation.mutate({
+  lesson_id: lessonId,
+  module_id: moduleId,
+  video_position_seconds: position,
+  completed: false,
+});
+
+// Mark lesson complete
+saveMutation.mutate({
+  lesson_id: lessonId,
+  module_id: moduleId,
+  video_position_seconds: position,
+  completed: true,
+  completed_at: new Date().toISOString(),
+});
+```
+
+After saving lesson progress, invalidate module progress to trigger recalculation:
+```typescript
+queryClient.invalidateQueries({ queryKey: queryKeys.progress.moduleProgress.byUserModule(userId, moduleId) });
+```
+
+## Error Handling in Hooks
+
+```typescript
+import { AppError, AppErrorCode } from '@/services/api/baseService';
+
+// In onError callback:
+onError: (err) => {
+  if (err instanceof AppError) {
+    if (err.code === AppErrorCode.AUTH_SESSION_MISSING) {
+      // Redirect to login
+    } else {
+      toast.error(err.message);
+    }
+  } else {
+    toast.error(t('common.error'));
+  }
+}
+```
+
+## Supabase RLS Note
+
+All tables enforce `auth.uid() = user_id`. The Supabase client in `services/supabase/client.ts` is pre-configured and handles the session token automatically. Never pass userId to queries that are protected by RLS — they use `auth.uid()` server-side.
+
+However, for efficiency, always filter by `user_id` client-side too to avoid fetching other users' data before RLS blocks it.
+
+## Admin Services
+
+Admin-only operations use `adminAnalyticsService` which calls Postgres RPCs. Always guard with `useIsAdmin()` before rendering admin UI or calling admin services:
+
+```typescript
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+
+const isAdmin = useIsAdmin();
+if (!isAdmin) return null;
+```

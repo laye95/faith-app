@@ -16,9 +16,16 @@ interface AuthHeaderProps {
   showLogo?: boolean;
   titleKey?: string;
   subtitleKey?: string;
+  titleClassName?: string;
 }
 
-export function AuthHeader({ icon, showLogo, titleKey, subtitleKey }: AuthHeaderProps) {
+export function AuthHeader({
+  icon,
+  showLogo,
+  titleKey,
+  subtitleKey,
+  titleClassName,
+}: AuthHeaderProps) {
   const hasTitleOrSubtitle = !!titleKey || !!subtitleKey;
   const theme = useTheme();
   const { t } = useTranslation();
@@ -61,7 +68,7 @@ export function AuthHeader({ icon, showLogo, titleKey, subtitleKey }: AuthHeader
         <VStack className="items-center gap-3">
           {titleKey && (
             <Heading
-              className="text-center text-3xl font-bold"
+              className={titleClassName ?? 'text-center text-3xl font-bold'}
               style={{ color: theme.textPrimary }}
             >
               {t(titleKey)}

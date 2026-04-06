@@ -1,4 +1,13 @@
 import "@/global.css";
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import "react-native-reanimated";
@@ -8,23 +17,51 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { TypographyProvider } from "@/contexts/TypographyContext";
+import { BrandedSplashScreen } from "@/components/ui/BrandedSplashScreen";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return (
+      <SafeAreaProvider>
+        <BrandedSplashScreen useSystemFonts />
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
-        <QueryProvider>
-          <AuthProvider>
-            <ThemeProvider>
-              <LanguageProvider>
-                <ToastProvider>
-                  <ThemeLayout />
-                </ToastProvider>
-              </LanguageProvider>
-            </ThemeProvider>
-          </AuthProvider>
-        </QueryProvider>
+        <TypographyProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <ThemeProvider>
+                <LanguageProvider>
+                  <ToastProvider>
+                    <ThemeLayout />
+                  </ToastProvider>
+                </LanguageProvider>
+              </ThemeProvider>
+            </AuthProvider>
+          </QueryProvider>
+        </TypographyProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );

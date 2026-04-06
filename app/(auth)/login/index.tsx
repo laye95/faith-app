@@ -42,7 +42,11 @@ export default function LoginScreen() {
       <FormScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <Box className="flex-1 justify-center px-6 pt-4 pb-8">
             <Animated.View entering={FadeIn.duration(700)}>
-              <AuthHeader showLogo titleKey="auth.welcomeBack" subtitleKey="auth.loginSubtitle" />
+              <AuthHeader
+                showLogo
+                titleKey="auth.loginBrandTitle"
+                titleClassName="text-center text-xl font-bold tracking-wide px-2"
+              />
             </Animated.View>
 
             <Animated.View entering={FadeInUp.delay(200).duration(750)}>

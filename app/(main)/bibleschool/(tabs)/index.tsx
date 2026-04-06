@@ -1,10 +1,7 @@
 import { Box } from '@/components/ui/box';
-import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { useAuth } from '@/contexts/AuthContext';
 import { useBibleschoolTab } from '@/contexts/BibleschoolTabContext';
-import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
@@ -35,11 +32,9 @@ export default function BibleSchoolScreen() {
       });
     }, [setActiveTab, queryClient, locale])
   );
-  const { user } = useAuth();
   const theme = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { data: profile, isLoading: profileLoading } = useUserProfile(user?.id);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -52,10 +47,6 @@ export default function BibleSchoolScreen() {
     });
     setRefreshing(false);
   }, [queryClient, locale]);
-
-  if (profileLoading && user?.id) {
-    return <LoadingScreen message={t('loading.section.bibleschool')} />;
-  }
 
   return (
     <Box
@@ -88,14 +79,7 @@ export default function BibleSchoolScreen() {
       >
         <VStack className="gap-6">
           <Text
-            className="text-2xl font-bold"
-            style={{ color: theme.textPrimary }}
-          >
-            {t('home.welcome')}{profile?.full_name ? `, ${profile.full_name}` : ''}
-          </Text>
-
-          <Text
-            className="text-xs font-semibold uppercase tracking-wider mt-4"
+            className="text-xs font-semibold uppercase tracking-wider"
             style={{ color: theme.textSecondary }}
           >
             {t('overview.sectionTitle')}

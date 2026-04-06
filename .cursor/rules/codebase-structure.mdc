@@ -1,0 +1,227 @@
+---
+alwaysApply: true
+---
+
+# Faith Generation — Codebase Map
+
+Use this file to instantly locate any file or pattern without guessing paths.
+
+## Screens & Pages
+
+| What | Path |
+|---|---|
+| Root layout (providers) | `app/_layout.tsx` |
+| Entry redirect (auth check) | `app/index.tsx` |
+| Auth layout | `app/(auth)/_layout.tsx` |
+| Login screen | `app/(auth)/login/index.tsx` |
+| Register screen | `app/(auth)/register/index.tsx` |
+| Main (Drawer) layout | `app/(main)/_layout.tsx` |
+| Home / "Jouw Overzicht" | `app/(main)/index.tsx` |
+| Bibleschool layout | `app/(main)/bibleschool/_layout.tsx` |
+| Bibleschool intro video | `app/(main)/bibleschool/intro.tsx` |
+| Bibleschool tabs layout | `app/(main)/bibleschool/(tabs)/_layout.tsx` |
+| Bibleschool overview tab | `app/(main)/bibleschool/(tabs)/index.tsx` |
+| Module list | `app/(main)/bibleschool/(tabs)/modules/index.tsx` |
+| Module detail | `app/(main)/bibleschool/(tabs)/modules/[id]/index.tsx` |
+| Lesson player | `app/(main)/bibleschool/(tabs)/modules/[id]/[lessonId].tsx` |
+| Module exam / quiz | `app/(main)/bibleschool/(tabs)/modules/[id]/exam.tsx` |
+| Admin index | `app/(main)/admin/index.tsx` |
+| Admin users list | `app/(main)/admin/users/index.tsx` |
+| Admin user detail | `app/(main)/admin/users/[id].tsx` |
+| Admin analytics | `app/(main)/admin/analytics/index.tsx` |
+| Profile home | `app/(main)/profile/index.tsx` |
+| Profile information | `app/(main)/profile/information.tsx` |
+| Badges | `app/(main)/badges/index.tsx` |
+| Settings home | `app/(main)/settings/index.tsx` |
+| Settings preferences | `app/(main)/settings/preferences.tsx` |
+| Settings video | `app/(main)/settings/video.tsx` |
+| Settings notifications | `app/(main)/settings/notifications.tsx` |
+| Podcasts | `app/(main)/podcasts/index.tsx` |
+| Sermons | `app/(main)/sermons/index.tsx` |
+| Faith Business School | `app/(main)/faith-business-school/index.tsx` |
+
+## Page-Specific Components (`_components/`)
+
+| Folder | Notable files |
+|---|---|
+| `app/(auth)/_components/` | `AuthHeader`, `AuthTopBar`, `AuthBackgroundDecor`, `AuthErrorBox`, `AuthInputField`, `AuthSubmitButton` |
+| `app/(main)/_components/` | `DrawerContent`, `MainTopBar`, `CustomTabBar`, `SectionCard`, `FaithHeroBanner`, `ComingSoonSection`, `ComingSoonOrAdminScreen` |
+| `app/(main)/bibleschool/_components/` | `OverviewCard`, `ProgressCard`, `ContinueLearningCard`, `CurrentVideoCard`, `BibleschoolTabBar`, `CollapsibleOverviewCard`, `LessonDetailScreen` |
+| `app/(main)/bibleschool/(tabs)/_components/` | `AdminBibleschoolAnalytics`, `AdminAnalyticsGraphPicker` |
+| `app/(main)/bibleschool/(tabs)/modules/_components/` | `ModuleCard` |
+| `app/(main)/bibleschool/(tabs)/modules/[id]/_components/` | `LockedLessonModal` |
+| `app/(main)/badges/_components/` | `BadgeDetailModal` |
+| `app/(main)/settings/_components/` | `SettingsCard`, `SettingRow`, `NotificationToggle`, `VideoQualitySelector`, `ThemeSwitcher` |
+| `app/(main)/settings/_config/` | `settingsSections.tsx` |
+
+## Shared Components (`components/`)
+
+| Path | Purpose |
+|---|---|
+| `components/ThemeLayout.tsx` | Root navigation Stack (wraps all routes) |
+| `components/ui/LoadingScreen.tsx` | Full-screen loading with ActivityIndicator |
+| `components/ui/LoadingSpinner.tsx` | Inline spinner |
+| `components/ui/BrandedSplashScreen.tsx` | Branded loading screen during font load |
+| `components/ui/FormScrollView.tsx` | KeyboardAwareScrollView for forms |
+| `components/ui/LanguageSwitcher.tsx` | Language picker UI |
+| `components/ui/SettingsDropdown.tsx` | Dropdown for settings options |
+| `components/ui/BaseModal.tsx` | Base modal component |
+| `components/ui/ConfirmModal.tsx` | Confirm/cancel modal |
+| `components/ui/Card.tsx` | Card surface with theme border/bg |
+| `components/ui/CollapsibleSection.tsx` | Expandable section |
+| `components/ui/ProgressBar.tsx` | Linear progress indicator |
+| `components/ui/VideoThumbnail.tsx` | Vimeo/video thumbnail image |
+| `components/ui/DropdownShell.tsx` | Dropdown shell (no content) |
+| `components/ui/StepManager.tsx` | Multi-step flow manager |
+| `components/ui/Badge.tsx` | Badge pill component |
+| `components/ui/BadgePill.tsx` | Condensed badge indicator |
+| `components/ui/StreakPill.tsx` | Streak count pill |
+| `components/ui/Toggle.tsx` | Toggle switch |
+| `components/ui/UnlockAnimationOverlay.tsx` | Lottie unlock animation |
+| `components/ui/NotificationDropdown.tsx` | Notification list dropdown |
+| `components/ui/heading.tsx` | Themed heading text |
+| `components/ui/text.tsx` | Themed body text |
+| `components/ui/box.tsx` | Box container |
+| `components/ui/hstack.tsx` | Horizontal stack |
+| `components/ui/vstack.tsx` | Vertical stack |
+| `components/ui/button/index.tsx` | Themed button |
+| `components/ui/input/index.tsx` | Themed text input |
+| `components/ui/form-control/index.tsx` | Form control wrapper |
+| `components/ui/gluestack-ui-provider/` | Gluestack provider + config |
+| `components/common/ScreenContainer.tsx` | Screen wrapper with safe area |
+| `components/common/NavigationRow.tsx` | Nav item row |
+| `components/common/Row.tsx` | Generic row layout |
+| `components/common/LockOverlay.tsx` | Locked content overlay |
+| `components/common/ProfileFieldsForm.tsx` | Shared profile form fields |
+
+## Hooks (`hooks/`)
+
+| Hook | Purpose |
+|---|---|
+| `useTheme` | Returns full `ThemeColors` object |
+| `useTranslation` | Returns `{ t, locale, changeLanguage }` |
+| `useToast` | Re-exports toast API from `ToastContext` |
+| `useAuth` (via AuthContext) | `{ session, user, isLoading, signOut }` |
+| `useBibleschoolContent` | Fetches Storyblok bibleschool category |
+| `useCompletedLessons` | Lesson completion data for a user |
+| `useIntroVideoPosition` | Persists intro video position |
+| `useIntroVideoWatched` | Whether user has watched intro |
+| `useIsAdmin` | Admin role check |
+| `useLastSectionRestore` | Restores last visited drawer section |
+| `useLastWatchedLesson` | Last watched lesson data |
+| `useLessonUnlocks` | Which lessons are unlocked |
+| `useNetworkQuality` | Network quality info |
+| `useNotifications` | User notifications list |
+| `usePrefetchLessonThumbnails` | Pre-fetches Vimeo thumbnails |
+| `useShadows` | Shadow style helper (light/dark aware) |
+| `useStepManager` | Multi-step form/flow state |
+| `useStreak` | User learning streak data |
+| `useUnlockAnimation` | Unlock animation state |
+| `useUserBadges` | User earned badges |
+| `useUserProfile` | Current user profile (from Supabase) |
+| `useVideoSetting` | User video quality preference |
+| `useVimeoPlaybackUrl` | Vimeo playback URL for a video ID |
+| `useVimeoThumbnail` | Vimeo thumbnail URL for a video ID |
+| `use-color-scheme` | System color scheme (RN Appearance) |
+
+## Services (`services/`)
+
+| Service | File | Singleton export |
+|---|---|---|
+| Auth | `services/api/authService.ts` | `authService` |
+| User profiles | `services/api/userService.ts` | `userService` |
+| Lesson progress | `services/api/lessonProgressService.ts` | `lessonProgressService` |
+| Module progress | `services/api/moduleProgressService.ts` | `moduleProgressService` |
+| Quiz attempts | `services/api/quizAttemptService.ts` | `quizAttemptService` |
+| User settings | `services/api/userSettingsService.ts` | `userSettingsService` |
+| Badges | `services/api/badgeService.ts` | `badgeService` |
+| Streaks | `services/api/streakService.ts` | `streakService` |
+| Notifications | `services/api/notificationService.ts` | `notificationService` |
+| Admin analytics | `services/api/adminAnalyticsService.ts` | `adminAnalyticsService` |
+| Storyblok | `services/storyblok/client.ts` | `storyblokClient` |
+| Supabase | `services/supabase/client.ts` | `supabase` |
+| Vimeo | `services/vimeo/vimeoService.ts` | `vimeoService` |
+| Quiz content | `services/quizContentService.ts` | `quizContentService` |
+| Query keys | `services/queryKeys.ts` | `queryKeys` |
+
+## Types (`types/`)
+
+| File | Key types |
+|---|---|
+| `types/auth.ts` | Auth-related types |
+| `types/user.ts` | `UserProfile`, user data |
+| `types/progress.ts` | `LessonProgress`, `ModuleProgress`, `QuizAttempt`, `ModuleStatus` |
+| `types/quiz.ts` | Quiz question and answer types |
+| `types/bibleschool.ts` | Storyblok content types (modules, lessons) |
+| `types/badge.ts` | `Badge`, `UserBadge` |
+| `types/notification.ts` | `UserNotification` |
+| `types/userSettings.ts` | User settings key-value types |
+| `types/analytics.ts` | Admin analytics response types |
+
+## Constants (`constants/`)
+
+| File | Exports |
+|---|---|
+| `constants/routes.ts` | `routes` — typed route builder functions |
+| `constants/themeTokens.ts` | Raw color tokens (primary, decline, accept, etc.) |
+| `constants/version.ts` | App version |
+| `constants/video.ts` | Video quality constants |
+| `constants/screenAnimationOptions.ts` | Expo Router screen animation presets |
+| `constants/countries.ts` | Country list for profile forms |
+| `constants/modules.ts` | Static module metadata |
+| `constants/quizQuestions.ts` | Quiz question data |
+
+## Utils (`utils/`)
+
+| File | Purpose |
+|---|---|
+| `utils/formatters.ts` | Date, number, string formatters |
+| `utils/validators.ts` | Input validation helpers |
+| (additional utils as added) | |
+
+## i18n
+
+| File | Purpose |
+|---|---|
+| `i18n/index.ts` | i18n-js instance, registers all 5 locales |
+| `i18n/localeConfig.ts` | `LANGUAGES`, `SUPPORTED_LOCALES`, `LANGUAGES_FOR_UI` |
+| `i18n/locales/en.json` | English (fallback, ~371 keys) |
+| `i18n/locales/nl.json` | Dutch (~371 keys) |
+| `i18n/locales/bg.json` | Bulgarian (~655 keys — most complete) |
+| `i18n/locales/hi.json` | Hindi (~371 keys) |
+| `i18n/locales/id.json` | Indonesian (~371 keys) |
+
+## Providers
+
+| File | Purpose |
+|---|---|
+| `providers/QueryProvider.tsx` | TanStack Query client + AsyncStorage persistence (key: `FAITH_QUERY_CACHE`) |
+
+## Config Files (root)
+
+| File | Purpose |
+|---|---|
+| `app.json` | Expo config (name, slug, version, icons, splash) |
+| `tailwind.config.js` | Tailwind/NativeWind config |
+| `tsconfig.json` | TypeScript config (strict, path alias `@/`) |
+| `babel.config.js` | Babel (expo preset) |
+| `metro.config.js` | Metro bundler config |
+| `eslint.config.js` | ESLint (expo config) |
+| `global.css` | NativeWind global CSS import |
+| `.env.example` | Required env vars template |
+| `eas.json` | EAS build profiles (preview, testflight) |
+
+## Supabase Local
+
+| Path | Purpose |
+|---|---|
+| `supabase/config.toml` | Local Supabase config (`project_id = "faith-app"`) |
+| `supabase/migrations/` | SQL migration files (order by filename YYYYMMDDHHMMSS) |
+| `supabase/seed.sql` | Dev seed data |
+| `supabase/scripts/` | Helper scripts |
+
+Current migrations (in order):
+1. `20260218120000_initial_schema.sql` — profiles, progress, quiz, user_settings, RPCs, RLS
+2. `20260218140000_badges.sql` — badges, user_badges, user_streaks
+3. `20260218150000_user_notifications.sql` — user_notifications, RLS, realtime
+4. `20260218160000_user_notifications_delete_policy.sql` — DELETE policy

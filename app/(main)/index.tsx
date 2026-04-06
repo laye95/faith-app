@@ -15,6 +15,7 @@ import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
+import { FaithHeroBanner } from './_components/FaithHeroBanner';
 import { SectionCard } from './_components/SectionCard';
 
 export default function HubScreen() {
@@ -58,13 +59,8 @@ export default function HubScreen() {
           title={t('navbar.home')}
           currentSection="index"
         />
-        <VStack className="gap-6 pt-6">
-          <Text
-            className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: theme.textSecondary }}
-          >
-            {t('common.faithGeneration')}
-          </Text>
+        <VStack className="gap-4 pt-4">
+          <FaithHeroBanner />
           <Text
             className="text-2xl font-bold"
             style={{ color: theme.textPrimary }}
@@ -101,57 +97,49 @@ export default function HubScreen() {
               icon="heart"
               title={t('hub.healingSchool')}
               subtitle={t('hub.healingSchoolSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.hubTeaser('healing-school'))}
             />
             <SectionCard
               icon="videocam"
               title={t('hub.sermons')}
               subtitle={t('hub.sermonsSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.sermons())}
             />
             <SectionCard
               icon="mic"
               title={t('hub.podcasts')}
               subtitle={t('hub.podcastsSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.podcasts())}
             />
             <SectionCard
               icon="book"
               title={t('hub.bibleVersesLearn')}
               subtitle={t('hub.bibleVersesLearnSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.hubTeaser('bible-verses-learn'))}
             />
             <SectionCard
               icon="headset"
               title={t('hub.audiobooks')}
               subtitle={t('hub.audiobooksSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.hubTeaser('audiobooks'))}
             />
             <SectionCard
               icon="gift"
               title={t('hub.giving')}
               subtitle={t('hub.givingSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.hubTeaser('giving'))}
             />
             <SectionCard
               icon="sparkles"
               title={t('hub.miracles')}
               subtitle={t('hub.miraclesSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.hubTeaser('miracles'))}
             />
             <SectionCard
               icon="calendar"
               title={t('hub.bibleReadingSchedule')}
               subtitle={t('hub.bibleReadingScheduleSubtitle')}
-              onPress={() => {}}
-              disabled
+              onPress={() => router.push(routes.hubTeaser('bible-reading-schedule'))}
             />
         </VStack>
       </ScrollView>
@@ -179,6 +167,7 @@ export default function HubScreen() {
           </Text>
         </Box>
       </Box>
+
     </Box>
   );
 }

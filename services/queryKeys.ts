@@ -1,3 +1,5 @@
+const progressKey = (userId: string) => ['progress', userId] as const;
+
 export const queryKeys = {
   auth: {
     session: ['auth', 'session'] as const,
@@ -19,8 +21,7 @@ export const queryKeys = {
     userDetail: (userId: string) => ['admin', 'userDetail', userId] as const,
   },
   vimeo: {
-    playbackUrl: (videoId: string) => ['vimeo', 'playbackUrl', videoId] as const,
-    thumbnailUrl: (videoId: string) => ['vimeo', 'thumbnailUrl', videoId] as const,
+    meta: (videoId: string) => ['vimeo', 'meta', videoId] as const,
   },
   bibleschool: {
     category: (locale: string) => ['bibleschool', 'category', locale] as const,
@@ -30,6 +31,8 @@ export const queryKeys = {
       ['userSettings', 'introWatched', userId] as const,
     introPosition: (userId: string) =>
       ['userSettings', 'introPosition', userId] as const,
+    onboardingSection: (userId: string, section: string) =>
+      ['userSettings', 'onboarding', section, userId] as const,
   },
   badges: {
     all: ['badges'] as const,
@@ -38,29 +41,37 @@ export const queryKeys = {
   notifications: {
     list: (userId: string) => ['notifications', 'list', userId] as const,
   },
+  streak: {
+    display: (userId: string) => ['streak', 'display', userId] as const,
+  },
   progress: {
-    overview: (userId: string) => ['progress', 'overview', userId] as const,
+    byUser: progressKey,
+    overview: (userId: string) => [...progressKey(userId), 'overview'] as const,
     lesson: (userId: string, lessonId: string) =>
-      ['progress', 'lesson', userId, lessonId] as const,
+      [...progressKey(userId), 'lesson', lessonId] as const,
     module: (userId: string, moduleId: string) =>
-      ['progress', 'module', userId, moduleId] as const,
+      [...progressKey(userId), 'module', moduleId] as const,
     quizAttempts: (userId: string, moduleId: string) =>
-      ['progress', 'quizAttempts', userId, moduleId] as const,
+      [...progressKey(userId), 'quizAttempts', 'module', moduleId] as const,
+    allQuizAttempts: (userId: string) =>
+      [...progressKey(userId), 'quizAttempts', 'all'] as const,
     lessonProgress: {
+      byUser: (userId: string) => [...progressKey(userId), 'lessonProgress'] as const,
       byUserLesson: (userId: string, lessonId: string) =>
-        ['progress', 'lessonProgress', userId, lessonId] as const,
+        [...progressKey(userId), 'lessonProgress', 'lesson', lessonId] as const,
       byUserModule: (userId: string, moduleId: string) =>
-        ['progress', 'lessonProgress', userId, moduleId] as const,
+        [...progressKey(userId), 'lessonProgress', 'module', moduleId] as const,
       completedByUser: (userId: string) =>
-        ['progress', 'lessonProgress', 'completedByUser', userId] as const,
+        [...progressKey(userId), 'lessonProgress', 'completed'] as const,
       lastWatchedByUser: (userId: string) =>
-        ['progress', 'lessonProgress', 'lastWatchedByUser', userId] as const,
+        [...progressKey(userId), 'lessonProgress', 'lastWatched'] as const,
     },
     moduleProgress: {
+      byUser: (userId: string) => [...progressKey(userId), 'moduleProgress'] as const,
       byUserModule: (userId: string, moduleId: string) =>
-        ['progress', 'moduleProgress', userId, moduleId] as const,
+        [...progressKey(userId), 'moduleProgress', 'module', moduleId] as const,
       overview: (userId: string) =>
-        ['progress', 'moduleProgress', 'overview', userId] as const,
+        [...progressKey(userId), 'moduleProgress', 'overview'] as const,
     },
   },
 } as const;

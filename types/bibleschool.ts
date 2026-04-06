@@ -31,6 +31,17 @@ export interface BibleschoolLesson {
   moduleHandoutUrl?: string;
 }
 
+/** Minimal lesson shape for module lists and lesson rows (Storyblok may omit fields). */
+export type LessonLike = {
+  id: string;
+  order: number;
+  title?: string;
+  titleKey?: string;
+  thumbnailUrl?: string;
+  videoUrl?: string;
+  videoId?: string;
+};
+
 export interface StoryblokStory<T = Record<string, unknown>> {
   uuid: string;
   id: number;

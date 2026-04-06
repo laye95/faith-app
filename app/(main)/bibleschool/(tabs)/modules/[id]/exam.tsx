@@ -18,8 +18,10 @@ import { moduleProgressService } from "@/services/api/moduleProgressService";
 import { quizAttemptService } from "@/services/api/quizAttemptService";
 import { queryKeys } from "@/services/queryKeys";
 import { quizContentService } from "@/services/quizContentService";
+import type { ModuleProgress, QuizAttempt } from "@/types/progress";
 import type { QuizQuestion } from "@/types/quiz";
 import { bzzt } from "@/utils/haptics";
+import { recordStreakActivity } from "@/utils/streakActivity";
 import { didPassExam, getMinCorrectRequired } from "@/utils/unlockLogic";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -36,6 +38,32 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const EXAM_PROGRESS_KEY = (userId: string, moduleId: string) =>
   `@faith_app:exam_progress:${userId}:${moduleId}`;
+
+function upsertQuizAttemptList(
+  current: QuizAttempt[],
+  nextAttempt: QuizAttempt,
+): QuizAttempt[] {
+  return [...current.filter((item) => item.id !== nextAttempt.id), nextAttempt].sort((a, b) => {
+    if (a.module_id === b.module_id) {
+      return b.attempt_number - a.attempt_number;
+    }
+
+    return a.module_id.localeCompare(b.module_id);
+  });
+}
+
+function upsertModuleProgressList(
+  current: ModuleProgress[],
+  nextProgress: ModuleProgress,
+): ModuleProgress[] {
+  const existingIndex = current.findIndex((item) => item.module_id === nextProgress.module_id);
+
+  if (existingIndex === -1) {
+    return [...current, nextProgress];
+  }
+
+  return current.map((item, index) => (index === existingIndex ? nextProgress : item));
+}
 
 export default function ExamScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -62,9 +90,14 @@ export default function ExamScreen() {
   });
 
   const { data: attempts } = useQuery({
-    queryKey: queryKeys.progress.quizAttempts(user?.id ?? "", id ?? ""),
-    queryFn: () => quizAttemptService.listByUserAndModule(user!.id, id!),
+    queryKey: queryKeys.progress.allQuizAttempts(user?.id ?? ""),
+    queryFn: () => quizAttemptService.listAllByUser(user!.id),
     enabled: !!user?.id && !!id,
+    staleTime: 5 * 60 * 1000,
+    select: (all) =>
+      all
+        .filter((a) => a.module_id === id)
+        .sort((a, b) => b.attempt_number - a.attempt_number),
   });
 
   const [selectedAnswers, setSelectedAnswers] = useState<
@@ -168,7 +201,7 @@ export default function ExamScreen() {
       ).length;
       const score = Math.round((correct / questions.length) * 100);
       const passed = didPassExam(correct, questions.length);
-      await quizAttemptService.createAttempt(user.id, id, {
+      const attempt = await quizAttemptService.createAttempt(user.id, id, {
         attempt_number: attemptNumber,
         score_percentage: score,
         passed,
@@ -176,21 +209,52 @@ export default function ExamScreen() {
         correct_count: correct,
         total_count: questions.length,
       });
+      let moduleProgress: ModuleProgress | undefined;
+
       if (passed) {
-        await moduleProgressService.markCompleted(user.id, id);
+        moduleProgress = await moduleProgressService.markCompleted(user.id, id);
       }
-      return { passed, score, correct, total: questions.length };
+
+      return { attempt, moduleProgress, passed, score, correct, total: questions.length };
     },
     onSuccess: async (result) => {
       if (!result) return;
-      queryClient.invalidateQueries({ queryKey: ["progress"] });
+      if (user?.id) {
+        const allAttemptsKey = queryKeys.progress.allQuizAttempts(user.id);
+        const cachedAttempts = queryClient.getQueryData<QuizAttempt[] | undefined>(allAttemptsKey);
+
+        if (Array.isArray(cachedAttempts)) {
+          queryClient.setQueryData(allAttemptsKey, upsertQuizAttemptList(cachedAttempts, result.attempt));
+        } else {
+          queryClient.invalidateQueries({ queryKey: allAttemptsKey });
+        }
+
+        if (result.moduleProgress) {
+          queryClient.setQueryData(
+            queryKeys.progress.moduleProgress.byUserModule(user.id, id!),
+            result.moduleProgress,
+          );
+          queryClient.setQueryData<ModuleProgress[] | undefined>(
+            queryKeys.progress.moduleProgress.overview(user.id),
+            (current) =>
+              Array.isArray(current)
+                ? upsertModuleProgressList(current, result.moduleProgress!)
+                : current,
+          );
+        }
+
+        await recordStreakActivity(user.id).catch(() => {});
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.streak.display(user.id),
+        });
+        await checkAndAwardBadges(user.id).catch(() => []);
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.badges.userBadges(user.id),
+        });
+      }
       if (result.passed) {
         if (user?.id && id) {
           await AsyncStorage.removeItem(EXAM_PROGRESS_KEY(user.id, id));
-        }
-        if (user?.id) {
-          await checkAndAwardBadges(user.id).catch(() => []);
-          queryClient.invalidateQueries({ queryKey: queryKeys.badges.userBadges(user.id) });
         }
         setPassedResult({
           score: result.score,
@@ -329,7 +393,7 @@ export default function ExamScreen() {
       }}
     >
       <MainTopBar
-        title={t("quiz.title")}
+        title={t('quiz.examTopBarTitle')}
         currentSection="bibleschool"
         showBackButton
         onBack={() => navigation.goBack()}
@@ -463,6 +527,22 @@ export default function ExamScreen() {
                 introHeightRef.current = e.nativeEvent.layout.height;
               }}
             >
+              {module ? (
+                <VStack className="mb-4 items-center px-2">
+                  <Text
+                    className="text-xs font-semibold uppercase tracking-wider text-center mb-1.5"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {t('overview.moduleWithNumber', { number: module.order })}
+                  </Text>
+                  <Text
+                    className="text-lg font-semibold text-center"
+                    style={{ color: theme.textPrimary }}
+                  >
+                    {t(module.titleKey as never)}
+                  </Text>
+                </VStack>
+              ) : null}
               <Text
                 className="text-sm mb-4"
                 style={{ color: theme.textSecondary }}
@@ -734,7 +814,8 @@ function QuestionCard({
         {question.question ?? t(question.questionKey as never)}
       </Text>
       <VStack className="gap-2">
-        {question.options.map((opt) => {
+        {question.options.map((opt, optionIndex) => {
+          const letterLabel = String.fromCharCode(65 + optionIndex);
           const isCorrectOption = opt.correct;
           const isUserSelection = selectedId === opt.id;
           const showAsCorrect = showFeedback && isCorrectOption;
@@ -779,12 +860,24 @@ function QuestionCard({
                 borderColor: optionBorder,
               }}
             >
-              <Text
-                className="text-sm flex-1"
-                style={{ color: optionTextColor }}
-              >
-                {opt.answer ?? t(opt.key as never)}
-              </Text>
+              <Box className="flex-1 flex-row items-start gap-2">
+                <Text
+                  className="text-sm font-bold"
+                  style={{
+                    color: optionTextColor,
+                    minWidth: 22,
+                    paddingTop: 1,
+                  }}
+                >
+                  {letterLabel}.
+                </Text>
+                <Text
+                  className="text-sm flex-1"
+                  style={{ color: optionTextColor }}
+                >
+                  {opt.answer ?? t(opt.key as never)}
+                </Text>
+              </Box>
               {showFeedback && (
                 <Ionicons
                   name={

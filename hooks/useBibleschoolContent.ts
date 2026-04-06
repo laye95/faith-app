@@ -10,9 +10,9 @@ import {
 import { useTranslation } from '@/hooks/useTranslation';
 
 const baseOptions = {
-  staleTime: 5 * 60 * 1000,
+  staleTime: 60 * 60 * 1000,
+  gcTime: 24 * 60 * 60 * 1000,
   retry: 1,
-  refetchOnMount: 'always' as const,
 };
 
 export function useModules(locale: SupportedLocale) {

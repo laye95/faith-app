@@ -3,12 +3,11 @@ import { Image } from 'expo-image';
 import { useEffect } from 'react';
 import { InteractionManager } from 'react-native';
 import { queryKeys } from '@/services/queryKeys';
-import { vimeoService } from '@/services/vimeo/vimeoService';
-
-type LessonLike = {
-  videoId?: string;
-  thumbnailUrl?: string;
-};
+import {
+  pickThumbnailUrlFromPictures,
+  vimeoService,
+} from '@/services/vimeo/vimeoService';
+import type { LessonLike } from '@/types/bibleschool';
 
 function collectVideoIds(
   moduleId: string,
@@ -37,14 +36,19 @@ export async function prefetchLessonThumbnailsForModule(
   await Promise.all(
     videoIds.map((videoId) =>
       queryClient.prefetchQuery({
-        queryKey: queryKeys.vimeo.thumbnailUrl(videoId),
-        queryFn: () => vimeoService.getThumbnailUrl(videoId),
+        queryKey: queryKeys.vimeo.meta(videoId),
+        queryFn: () => vimeoService.getVimeoVideoMetaRaw(videoId),
       }),
     ),
   );
 
   const urls = videoIds
-    .map((id) => queryClient.getQueryData<string | null>(queryKeys.vimeo.thumbnailUrl(id)))
+    .map((id) => {
+      const raw = queryClient.getQueryData<Awaited<
+        ReturnType<typeof vimeoService.getVimeoVideoMetaRaw>
+      >>(queryKeys.vimeo.meta(id));
+      return raw ? pickThumbnailUrlFromPictures(raw.pictures) : null;
+    })
     .filter((url): url is string => typeof url === 'string' && url.length > 0);
 
   if (urls.length > 0) {

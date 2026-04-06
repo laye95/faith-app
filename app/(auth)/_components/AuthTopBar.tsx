@@ -75,7 +75,11 @@ export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
               backgroundColor: theme.cardBorder,
             }}
           />
-          <LanguageSwitcher variant="inline" matchDropdownToTrigger />
+          <LanguageSwitcher
+            variant="inline"
+            matchDropdownToTrigger
+            showTriggerLabel={false}
+          />
         </View>
       </HStack>
     </Box>

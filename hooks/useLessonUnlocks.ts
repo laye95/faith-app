@@ -2,7 +2,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { MODULES } from '@/constants/modules';
 import { useCompletedLessons } from '@/hooks/useCompletedLessons';
 import { useIntroVideoWatched } from '@/hooks/useIntroVideoWatched';
-import { quizAttemptService } from '@/services/api/quizAttemptService';
+import {
+  groupQuizAttemptsByModuleId,
+  quizAttemptService,
+} from '@/services/api/quizAttemptService';
 import { queryKeys } from '@/services/queryKeys';
 import {
   getNextUnlockedLesson,
@@ -10,8 +13,10 @@ import {
   isExamUnlocked,
   isLessonUnlocked,
 } from '@/utils/unlockLogic';
-import { useQueries } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+
+const QUIZ_ATTEMPTS_STALE_MS = 5 * 60 * 1000;
 
 export interface ExamStatusForModule {
   passed: boolean;
@@ -26,14 +31,17 @@ export function useLessonUnlocks() {
   const { hasWatched: introVideoWatched, isLoading: introLoading } =
     useIntroVideoWatched();
 
-  const quizQueries = useQueries({
-    queries: MODULES.map((m) => ({
-      queryKey: queryKeys.progress.quizAttempts(user?.id ?? '', m.id),
-      queryFn: () =>
-        quizAttemptService.listByUserAndModule(user!.id, m.id),
-      enabled: !!user?.id,
-    })),
+  const { data: allQuizAttempts, isLoading: quizAttemptsLoading } = useQuery({
+    queryKey: queryKeys.progress.allQuizAttempts(user?.id ?? ''),
+    queryFn: () => quizAttemptService.listAllByUser(user!.id),
+    enabled: !!user?.id,
+    staleTime: QUIZ_ATTEMPTS_STALE_MS,
   });
+
+  const attemptsByModuleId = useMemo(
+    () => groupQuizAttemptsByModuleId(allQuizAttempts),
+    [allQuizAttempts],
+  );
 
   const completedLessonIds = useMemo(() => {
     if (!completedLessons) return new Set<string>();
@@ -42,15 +50,15 @@ export function useLessonUnlocks() {
 
   const passedModuleIds = useMemo(() => {
     const set = new Set<string>();
-    MODULES.forEach((m, i) => {
-      const attempts = quizQueries[i]?.data ?? [];
+    MODULES.forEach((m) => {
+      const attempts = attemptsByModuleId.get(m.id) ?? [];
       const passed = attempts.some((a) => a.passed);
       if (passed) set.add(m.id);
     });
     return set;
-  }, [quizQueries]);
+  }, [attemptsByModuleId]);
 
-  const isLoading = completedLoading || introLoading || quizQueries.some((q) => q.isLoading);
+  const isLoading = completedLoading || introLoading || quizAttemptsLoading;
 
   const checkLessonUnlocked = useMemo(
     () => (moduleId: string, lesson: { id: string; moduleId: string; order: number }) =>
@@ -77,8 +85,7 @@ export function useLessonUnlocks() {
   const getExamStatusForModule = useMemo(
     () => (moduleId: string): ExamStatusForModule => {
       const passed = passedModuleIds.has(moduleId);
-      const moduleIndex = MODULES.findIndex((m) => m.id === moduleId);
-      const attempts = quizQueries[moduleIndex]?.data ?? [];
+      const attempts = attemptsByModuleId.get(moduleId) ?? [];
       const latestAttempt = attempts[0];
       if (passed) {
         return { passed, attemptCount: attempts.length };
@@ -102,7 +109,7 @@ export function useLessonUnlocks() {
         },
       };
     },
-    [passedModuleIds, quizQueries],
+    [passedModuleIds, attemptsByModuleId],
   );
 
   return {

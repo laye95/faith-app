@@ -1,175 +1,48 @@
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
-import { VideoThumbnail } from '@/components/ui/VideoThumbnail';
-import { VStack } from '@/components/ui/vstack';
 import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { useIntroductionVimeoId, useModule, useModules } from '@/hooks/useBibleschoolContent';
 import { useIntroVideoWatched } from '@/hooks/useIntroVideoWatched';
 import { usePrefetchLessonThumbnails } from '@/hooks/usePrefetchLessonThumbnails';
-import { useVimeoThumbnail } from '@/hooks/useVimeoThumbnail';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Ionicons } from '@expo/vector-icons';
-import { routes } from '@/constants/routes';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLocalSearchParams, useNavigation, router } from 'expo-router';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { bzzt, bzztWarning } from '@/utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useCallback, useEffect, useState } from 'react';
-import { useNetworkQuality } from '@/hooks/useNetworkQuality';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { queryKeys } from '@/services/queryKeys';
 import { vimeoService } from '@/services/vimeo/vimeoService';
-import { RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
+import { lessonProgressService } from '@/services/api/lessonProgressService';
+import { Image } from 'expo-image';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { useLessonUnlocks } from '@/hooks/useLessonUnlocks';
 import { getCurrentTargetForModule } from '@/utils/unlockLogic';
 import { LockedLessonModal } from './_components/LockedLessonModal';
-import { LockOverlay } from '@/components/common/LockOverlay';
+import { ModuleLessonList } from './_components/ModuleLessonList';
+import type { BibleschoolModule, LessonLike } from '@/types/bibleschool';
+import { routes } from '@/constants/routes';
 
-function IntroRowThumbnail({
-  introductionVimeoId,
-}: {
-  introductionVimeoId: string;
-}) {
-  const { data: vimeoThumbnail, isLoading } = useVimeoThumbnail(introductionVimeoId);
+function ModuleHeroBanner({ module }: { module: BibleschoolModule }) {
+  if (!module.backgroundImageUrl) return null;
   return (
-    <VideoThumbnail
-      thumbnailUrl={vimeoThumbnail ?? undefined}
-      isLoading={isLoading}
+    <Image
+      source={{ uri: module.backgroundImageUrl }}
+      style={heroStyles.image}
+      contentFit="cover"
     />
   );
 }
 
-type LessonLike = {
-  id: string;
-  order: number;
-  title?: string;
-  titleKey?: string;
-  thumbnailUrl?: string;
-  videoId?: string;
-};
-
-function LessonRow({
-  lesson,
-  theme,
-  t,
-  isCompleted,
-  isLocked,
-  onPress,
-  onLockedPress,
-}: {
-  lesson: LessonLike;
-  theme: ReturnType<typeof useTheme>;
-  t: (key: string, params?: Record<string, string | number>) => string;
-  isCompleted: boolean;
-  isLocked: boolean;
-  onPress: () => void;
-  onLockedPress?: (lesson: LessonLike) => void;
-}) {
-  const videoIdForThumb = !lesson.thumbnailUrl && lesson.videoId ? lesson.videoId : undefined;
-  const { data: vimeoThumbnail, isLoading } = useVimeoThumbnail(videoIdForThumb);
-  const thumbnailUrl = lesson.thumbnailUrl ?? vimeoThumbnail ?? undefined;
-  const thumbnailLoading = !!videoIdForThumb && isLoading && !thumbnailUrl;
-
-  const handlePress = () => {
-    if (isLocked) {
-      onLockedPress?.(lesson);
-    } else {
-      onPress();
-    }
-  };
-
-  return (
-    <TouchableOpacity
-      onPress={handlePress}
-      activeOpacity={0.7}
-      className="cursor-pointer"
-      style={isLocked ? { opacity: 0.6 } : undefined}
-    >
-      <Box
-        className="rounded-2xl overflow-hidden"
-        style={{
-          backgroundColor: theme.cardBg,
-          borderWidth: 1,
-          borderColor: theme.cardBorder,
-        }}
-      >
-        <Box className="flex-row items-center py-3 pr-4">
-          <Box className="pl-3 mr-4">
-            <Box
-              style={{
-                position: 'relative',
-                borderRadius: 12,
-                overflow: 'hidden',
-              }}
-            >
-              <VideoThumbnail
-                thumbnailUrl={thumbnailUrl}
-                isLoading={thumbnailLoading}
-              />
-              <LockOverlay isLocked={isLocked} variant="thumbnail" />
-            </Box>
-          </Box>
-          <Box className="flex-1 justify-center min-w-0">
-            {(() => {
-              const lessonNumberStr = t('lessons.lessonNumber', { number: lesson.order });
-              const titleStr = lesson.title ?? (lesson.titleKey ? t(lesson.titleKey as never) : '');
-              const showNumberSeparately = !titleStr.trim().toLowerCase().startsWith(lessonNumberStr.trim().toLowerCase());
-              return (
-                <>
-                  {showNumberSeparately && (
-                    <Text
-                      className="text-xs font-medium mb-0.5"
-                      style={{ color: theme.textSecondary }}
-                    >
-                      {lessonNumberStr}
-                    </Text>
-                  )}
-                  <Text
-                    className="text-base font-medium"
-                    style={{ color: theme.textPrimary }}
-                    numberOfLines={2}
-                  >
-                    {titleStr}
-                  </Text>
-                </>
-              );
-            })()}
-          </Box>
-          {isLocked ? (
-            <Box
-              className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
-              style={{ backgroundColor: theme.cardBorder }}
-            >
-              <Ionicons name="lock-closed" size={14} color={theme.textSecondary} />
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: theme.textSecondary }}
-              >
-                {t('lessons.locked')}
-              </Text>
-            </Box>
-          ) : isCompleted ? (
-            <Box
-              className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
-              style={{ backgroundColor: theme.badgeSuccess }}
-            >
-              <Ionicons name="checkmark-circle" size={16} color={theme.textPrimary} />
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: theme.textPrimary }}
-              >
-                {t('lessons.completed')}
-              </Text>
-            </Box>
-          ) : null}
-          {!isLocked ? (
-            <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
-          ) : null}
-        </Box>
-      </Box>
-    </TouchableOpacity>
-  );
-}
+const heroStyles = StyleSheet.create({
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 20,
+    marginBottom: 24,
+  },
+});
 
 export default function ModuleLessonsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -177,10 +50,12 @@ export default function ModuleLessonsScreen() {
   const theme = useTheme();
   const { t, locale } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const { data: module } = useModule(id, locale);
   const { data: modules } = useModules(locale);
-  const lessons = module?.lessons ?? [];
+  const lessons = useMemo(() => module?.lessons ?? [], [module]);
   const {
     isLessonUnlocked,
     isExamUnlocked,
@@ -189,6 +64,23 @@ export default function ModuleLessonsScreen() {
     passedModuleIds,
     nextUnlockedTarget,
   } = useLessonUnlocks();
+
+  const { data: moduleLessonProgress } = useQuery({
+    queryKey: queryKeys.progress.lessonProgress.byUserModule(userId ?? '', id ?? ''),
+    queryFn: () => lessonProgressService.listByUserAndModule(userId!, id!),
+    enabled: !!userId && !!id,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const lessonPositionMap = useMemo(() => {
+    const map = new Map<string, number>();
+    moduleLessonProgress?.forEach((p) => {
+      if (!p.completed && p.video_position_seconds > 0) {
+        map.set(p.lesson_id, p.video_position_seconds);
+      }
+    });
+    return map;
+  }, [moduleLessonProgress]);
 
   const examStatus = getExamStatusForModule(id!);
   const [lockedModal, setLockedModal] = useState<{
@@ -205,17 +97,75 @@ export default function ModuleLessonsScreen() {
   const { hasWatched: introWatched } = useIntroVideoWatched();
   const { data: introductionVimeoId } = useIntroductionVimeoId(locale);
   const queryClient = useQueryClient();
-  const networkQuality = useNetworkQuality();
   const [refreshing, setRefreshing] = useState(false);
+
+  const examUnlocked = isExamUnlocked(id!);
+
+  const currentTarget = useMemo(
+    () =>
+      getCurrentTargetForModule(
+        id!,
+        lessons,
+        completedLessonIds,
+        passedModuleIds,
+        introWatched,
+        examUnlocked,
+        examStatus.passed,
+      ),
+    [
+      id,
+      lessons,
+      completedLessonIds,
+      passedModuleIds,
+      introWatched,
+      examUnlocked,
+      examStatus.passed,
+    ],
+  );
+
+  const currentLessonId =
+    currentTarget?.type === 'lesson' ? currentTarget.lesson.id : null;
+
+  const showIntroInOther =
+    id === 'module-1' &&
+    !!introductionVimeoId &&
+    currentTarget?.type !== 'intro';
+
+  const otherLessons = useMemo(
+    () => lessons.filter((l) => l.id !== currentLessonId),
+    [lessons, currentLessonId],
+  );
+
+  const showExamInOther = examUnlocked && currentTarget?.type !== 'exam';
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['progress'] });
-    await queryClient.invalidateQueries({
-      queryKey: queryKeys.bibleschool.category(locale),
-    });
-    setRefreshing(false);
-  }, [queryClient, locale]);
+    try {
+      const refreshTasks = [
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.bibleschool.category(locale),
+        }),
+      ];
+
+      if (userId && id) {
+        refreshTasks.push(
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.progress.lessonProgress.byUserModule(userId, id),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.progress.lessonProgress.completedByUser(userId),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.progress.allQuizAttempts(userId),
+          }),
+        );
+      }
+
+      await Promise.all(refreshTasks);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [id, locale, queryClient, userId]);
 
   usePrefetchLessonThumbnails(id ?? '', lessons, introductionVimeoId ?? undefined);
 
@@ -230,11 +180,11 @@ export default function ModuleLessonsScreen() {
       .forEach((l) => ids.add(l.videoId!));
     ids.forEach((videoId) => {
       queryClient.prefetchQuery({
-        queryKey: [...queryKeys.vimeo.playbackUrl(videoId), 'adaptive', networkQuality.maxWidth, networkQuality.preferHls],
-        queryFn: () => vimeoService.getPlaybackUrl(videoId, networkQuality),
+        queryKey: queryKeys.vimeo.meta(videoId),
+        queryFn: () => vimeoService.getVimeoVideoMetaRaw(videoId),
       });
     });
-  }, [id, lessons, introductionVimeoId, queryClient, networkQuality.maxWidth, networkQuality.preferHls]);
+  }, [id, lessons, introductionVimeoId, queryClient]);
 
   const handleLockedPress = (lesson?: LessonLike) => {
     bzztWarning();
@@ -307,7 +257,7 @@ export default function ModuleLessonsScreen() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: 24,
+          paddingTop: 16,
           paddingBottom: insets.bottom + 100,
         }}
         refreshControl={
@@ -318,6 +268,15 @@ export default function ModuleLessonsScreen() {
           />
         }
       >
+        <ModuleHeroBanner module={module} />
+        {module.description.trim() ? (
+          <Text
+            className="text-base mb-6"
+            style={{ color: theme.textSecondary }}
+          >
+            {module.description}
+          </Text>
+        ) : null}
         {lessons.length === 0 ? (
           <Box
             className="rounded-2xl p-8 items-center justify-center"
@@ -335,270 +294,21 @@ export default function ModuleLessonsScreen() {
             </Text>
           </Box>
         ) : (
-          <>
-            {(() => {
-              const examUnlocked = isExamUnlocked(id!);
-              const currentTarget = getCurrentTargetForModule(
-                id!,
-                lessons,
-                completedLessonIds,
-                passedModuleIds,
-                introWatched,
-                examUnlocked,
-                examStatus.passed,
-              );
-              const currentLessonId = currentTarget?.type === 'lesson' ? currentTarget.lesson.id : null;
-              const showIntroInOther = id === 'module-1' && introductionVimeoId && currentTarget?.type !== 'intro';
-              const otherLessons = lessons.filter((l) => l.id !== currentLessonId);
-              const showExamInOther = examUnlocked && currentTarget?.type !== 'exam';
-
-              return (
-                <VStack className="gap-6">
-                  {currentTarget ? (
-                    <VStack className="gap-3">
-                      <Text
-                        className="text-sm font-medium uppercase tracking-wider"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {t('lessonsPage.currentLesson')}
-                      </Text>
-                      {currentTarget.type === 'intro' && introductionVimeoId ? (
-                        <TouchableOpacity
-                          onPress={() => {
-                            bzzt();
-                            router.push(routes.bibleschoolIntro());
-                          }}
-                          activeOpacity={0.7}
-                          className="cursor-pointer"
-                        >
-                          <Box
-                            className="rounded-2xl overflow-hidden"
-                            style={{
-                              backgroundColor: theme.cardBg,
-                              borderWidth: 1,
-                              borderColor: theme.cardBorder,
-                            }}
-                          >
-                            <Box className="flex-row items-center py-3 pr-4">
-                              <Box className="pl-3 mr-4">
-                                <IntroRowThumbnail introductionVimeoId={introductionVimeoId} />
-                              </Box>
-                              <Box className="flex-1 justify-center min-w-0">
-                                <Text className="text-base font-medium" style={{ color: theme.textPrimary }} numberOfLines={2}>
-                                  {t('overview.introVideoTitle')}
-                                </Text>
-                                <Text className="text-xs font-medium mt-0.5" style={{ color: theme.textSecondary }}>
-                                  {t('overview.introVideoSubtitle')}
-                                </Text>
-                              </Box>
-                              <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
-                            </Box>
-                          </Box>
-                        </TouchableOpacity>
-                      ) : currentTarget.type === 'lesson' ? (
-                        (() => {
-                          const lesson = lessons.find((l) => l.id === currentTarget.lesson.id);
-                          return lesson ? (
-                            <LessonRow
-                              lesson={lesson}
-                              theme={theme}
-                              t={t}
-                              isCompleted={completedLessonIds.has(lesson.id)}
-                              isLocked={false}
-                              onPress={() => {
-                                bzzt();
-                                router.push(routes.bibleschoolModuleLesson(id!, lesson.id));
-                              }}
-                            />
-                          ) : null;
-                        })()
-                      ) : currentTarget.type === 'exam' ? (
-                        <TouchableOpacity
-                          onPress={() => {
-                            bzzt();
-                            router.push(routes.bibleschoolModuleExam(id!));
-                          }}
-                          activeOpacity={0.7}
-                          className="cursor-pointer"
-                        >
-                          <Box
-                            className="rounded-2xl flex-row items-center py-4 px-4"
-                            style={{
-                              backgroundColor: theme.cardBg,
-                              borderWidth: 1,
-                              borderColor: theme.cardBorder,
-                            }}
-                          >
-                            <Box className="rounded-full p-2.5 mr-3" style={{ backgroundColor: theme.avatarPrimary }}>
-                              <Ionicons name="document-text" size={24} color={theme.textPrimary} />
-                            </Box>
-                            <Box className="flex-1">
-                              <Text className="text-base font-semibold" style={{ color: theme.textPrimary }}>
-                                {examStatus.latestFailedAttempt
-                                  ? t('exam.failedScore', {
-                                      score: examStatus.latestFailedAttempt.score,
-                                      correct: examStatus.latestFailedAttempt.correct,
-                                      total: examStatus.latestFailedAttempt.total,
-                                    })
-                                  : t('exam.takeExam')}
-                              </Text>
-                              <Text className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                                {examStatus.latestFailedAttempt
-                                  ? (examStatus.attemptCount
-                                      ? t('exam.retryHintWithAttempt', { count: examStatus.attemptCount })
-                                      : t('exam.retryHint'))
-                                  : t('exam.readyHint')}
-                              </Text>
-                            </Box>
-                            <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
-                          </Box>
-                        </TouchableOpacity>
-                      ) : null}
-                    </VStack>
-                  ) : null}
-                  {(showIntroInOther || otherLessons.length > 0 || showExamInOther) ? (
-                    <VStack className="gap-3">
-                      <Text
-                        className="text-sm font-medium uppercase tracking-wider"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {t('lessonsPage.otherLessons')}
-                      </Text>
-                      <VStack className="gap-3">
-                        {showIntroInOther && introductionVimeoId ? (
-                          <TouchableOpacity
-                            onPress={() => {
-                              bzzt();
-                              router.push(routes.bibleschoolIntro());
-                            }}
-                            activeOpacity={0.7}
-                            className="cursor-pointer"
-                          >
-                            <Box
-                              className="rounded-2xl overflow-hidden"
-                              style={{
-                                backgroundColor: theme.cardBg,
-                                borderWidth: 1,
-                                borderColor: theme.cardBorder,
-                              }}
-                            >
-                              <Box className="flex-row items-center py-3 pr-4">
-                                <Box className="pl-3 mr-4">
-                                  <IntroRowThumbnail introductionVimeoId={introductionVimeoId} />
-                                </Box>
-                                <Box className="flex-1 justify-center min-w-0">
-                                  <Text className="text-base font-medium" style={{ color: theme.textPrimary }} numberOfLines={2}>
-                                    {t('overview.introVideoTitle')}
-                                  </Text>
-                                  <Text className="text-xs font-medium mt-0.5" style={{ color: theme.textSecondary }}>
-                                    {t('overview.introVideoSubtitle')}
-                                  </Text>
-                                </Box>
-                                {introWatched ? (
-                                  <Box
-                                    className="flex-row items-center gap-1.5 mr-2 rounded-lg px-2.5 py-1.5"
-                                    style={{ backgroundColor: theme.badgeSuccess }}
-                                  >
-                                    <Ionicons name="checkmark-circle" size={16} color={theme.textPrimary} />
-                                    <Text className="text-xs font-semibold" style={{ color: theme.textPrimary }}>
-                                      {t('lessons.completed')}
-                                    </Text>
-                                  </Box>
-                                ) : null}
-                                <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
-                              </Box>
-                            </Box>
-                          </TouchableOpacity>
-                        ) : null}
-                        {otherLessons.map((lesson) => (
-                          <LessonRow
-                            key={lesson.id}
-                            lesson={lesson}
-                            theme={theme}
-                            t={t}
-                            isCompleted={completedLessonIds.has(lesson.id)}
-                            isLocked={!isLessonUnlocked(id!, lesson)}
-                            onPress={() => {
-                              bzzt();
-                              router.push(routes.bibleschoolModuleLesson(id!, lesson.id));
-                            }}
-                            onLockedPress={(l) => handleLockedPress(l)}
-                          />
-                        ))}
-                        {showExamInOther ? (
-                          examStatus.passed ? (
-                            <Box
-                              className="rounded-2xl flex-row items-center py-4 px-4"
-                              style={{
-                                backgroundColor: theme.cardBg,
-                                borderWidth: 1,
-                                borderColor: theme.cardBorder,
-                                opacity: 0.7,
-                              }}
-                            >
-                              <Box className="rounded-full p-2.5 mr-3" style={{ backgroundColor: theme.badgeSuccess }}>
-                                <Ionicons name="checkmark-circle" size={24} color={theme.textPrimary} />
-                              </Box>
-                              <Box className="flex-1">
-                                <Text className="text-base font-semibold" style={{ color: theme.textPrimary }}>
-                                  {t('exam.passed')}
-                                </Text>
-                                <Text className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                                  {t('exam.passedHint')}
-                                </Text>
-                              </Box>
-                              <Ionicons name="lock-closed" size={20} color={theme.textSecondary} />
-                            </Box>
-                          ) : (
-                            <TouchableOpacity
-                              onPress={() => {
-                                bzzt();
-                                router.push(routes.bibleschoolModuleExam(id!));
-                              }}
-                              activeOpacity={0.7}
-                              className="cursor-pointer"
-                            >
-                              <Box
-                                className="rounded-2xl flex-row items-center py-4 px-4"
-                                style={{
-                                  backgroundColor: theme.cardBg,
-                                  borderWidth: 1,
-                                  borderColor: theme.cardBorder,
-                                }}
-                              >
-                                <Box className="rounded-full p-2.5 mr-3" style={{ backgroundColor: theme.avatarPrimary }}>
-                                  <Ionicons name="document-text" size={24} color={theme.textPrimary} />
-                                </Box>
-                                <Box className="flex-1">
-                                  <Text className="text-base font-semibold" style={{ color: theme.textPrimary }}>
-                                    {examStatus.latestFailedAttempt
-                                      ? t('exam.failedScore', {
-                                          score: examStatus.latestFailedAttempt.score,
-                                          correct: examStatus.latestFailedAttempt.correct,
-                                          total: examStatus.latestFailedAttempt.total,
-                                        })
-                                      : t('exam.takeExam')}
-                                  </Text>
-                                  <Text className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                                    {examStatus.latestFailedAttempt
-                                      ? (examStatus.attemptCount
-                                          ? t('exam.retryHintWithAttempt', { count: examStatus.attemptCount })
-                                          : t('exam.retryHint'))
-                                      : t('exam.readyHint')}
-                                  </Text>
-                                </Box>
-                                <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
-                              </Box>
-                            </TouchableOpacity>
-                          )
-                        ) : null}
-                      </VStack>
-                    </VStack>
-                  ) : null}
-                </VStack>
-              );
-            })()}
-          </>
+          <ModuleLessonList
+            moduleId={id!}
+            lessons={lessons}
+            introductionVimeoId={introductionVimeoId}
+            introWatched={introWatched}
+            examStatus={examStatus}
+            currentTarget={currentTarget}
+            showIntroInOther={showIntroInOther}
+            otherLessons={otherLessons}
+            showExamInOther={showExamInOther}
+            completedLessonIds={completedLessonIds}
+            lessonPositionMap={lessonPositionMap}
+            isLessonUnlocked={isLessonUnlocked}
+            onLockedPress={handleLockedPress}
+          />
         )}
       </ScrollView>
       <LockedLessonModal

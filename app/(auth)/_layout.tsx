@@ -1,3 +1,4 @@
+import { BrandedSplashScreen } from "@/components/ui/BrandedSplashScreen";
 import { useAuth } from "@/contexts/AuthContext";
 import { stackScreenOptions } from "@/constants/screenAnimationOptions";
 import { Redirect, Stack } from "expo-router";
@@ -6,7 +7,7 @@ export default function AuthLayout() {
   const { session, isLoading } = useAuth();
 
   if (isLoading) {
-    return null;
+    return <BrandedSplashScreen />;
   }
 
   if (session) {

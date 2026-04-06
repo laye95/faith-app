@@ -1,5 +1,7 @@
 const VIMEO_API_BASE = 'https://api.vimeo.com';
 
+const COMBINED_FIELDS = 'play,pictures.sizes,duration';
+
 function getToken(): string {
   const token = process.env.EXPO_PUBLIC_VIMEO_ACCESS_TOKEN;
   if (!token) {
@@ -24,6 +26,23 @@ interface VimeoPlayResponse {
   };
 }
 
+interface VimeoPictureSize {
+  width?: number;
+  height?: number;
+  link?: string;
+}
+
+interface VimeoPicturesResponse {
+  pictures?: {
+    base_link?: string;
+    sizes?: VimeoPictureSize[];
+  };
+}
+
+interface VimeoCombinedApiResponse extends VimeoPlayResponse, VimeoPicturesResponse {
+  duration?: number;
+}
+
 function parseVideoId(raw: string): string {
   const cleaned = String(raw).trim();
   const match = cleaned.match(/(?:vimeo\.com\/(?:video\/)?|^)(\d+)/);
@@ -38,32 +57,18 @@ export interface GetPlaybackUrlOptions {
   preferHls?: boolean;
 }
 
-export async function getPlaybackUrl(
-  videoId: string,
+export interface VimeoVideoMetaRaw {
+  play?: VimeoPlayResponse['play'];
+  pictures?: VimeoPicturesResponse['pictures'];
+  durationSeconds: number | null;
+}
+
+export function pickPlaybackUrlFromPlay(
+  play: VimeoPlayResponse['play'] | undefined,
   options?: GetPlaybackUrlOptions,
-): Promise<string | null> {
-  const token = getToken();
-  const videoIdClean = parseVideoId(videoId);
-  if (!videoIdClean) return null;
-
-  const res = await fetch(
-    `${VIMEO_API_BASE}/videos/${videoIdClean}?fields=play`,
-    {
-      headers: {
-        Authorization: `bearer ${token}`,
-        Accept: 'application/vnd.vimeo.*+json;version=3.4',
-      },
-    },
-  );
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Vimeo API error ${res.status}: ${text}`);
-  }
-
-  const data = (await res.json()) as VimeoPlayResponse;
-  const progressive = data.play?.progressive ?? [];
-  const hlsUrl = data.play?.hls?.link ?? null;
+): string | null {
+  const progressive = play?.progressive ?? [];
+  const hlsUrl = play?.hls?.link ?? null;
 
   if (options?.preferHls && hlsUrl) return hlsUrl;
 
@@ -89,38 +94,9 @@ export async function getPlaybackUrl(
   return hlsUrl;
 }
 
-interface VimeoPictureSize {
-  width?: number;
-  height?: number;
-  link?: string;
-}
-
-interface VimeoPicturesResponse {
-  pictures?: {
-    base_link?: string;
-    sizes?: VimeoPictureSize[];
-  };
-}
-
-export async function getThumbnailUrl(videoId: string): Promise<string | null> {
-  const token = getToken();
-  const videoIdClean = parseVideoId(videoId);
-  if (!videoIdClean) return null;
-
-  const res = await fetch(
-    `${VIMEO_API_BASE}/videos/${videoIdClean}?fields=pictures.sizes`,
-    {
-      headers: {
-        Authorization: `bearer ${token}`,
-        Accept: 'application/vnd.vimeo.*+json;version=3.4',
-      },
-    },
-  );
-
-  if (!res.ok) return null;
-
-  const data = (await res.json()) as VimeoPicturesResponse;
-  const pictures = data.pictures;
+export function pickThumbnailUrlFromPictures(
+  pictures: VimeoPicturesResponse['pictures'] | undefined,
+): string | null {
   if (!pictures) return null;
 
   const sizes = pictures.sizes ?? [];
@@ -137,7 +113,74 @@ export async function getThumbnailUrl(videoId: string): Promise<string | null> {
   return null;
 }
 
+export async function getVimeoVideoMetaRaw(videoId: string): Promise<VimeoVideoMetaRaw> {
+  const token = getToken();
+  const videoIdClean = parseVideoId(videoId);
+  if (!videoIdClean) {
+    return { durationSeconds: null };
+  }
+
+  const res = await fetch(
+    `${VIMEO_API_BASE}/videos/${videoIdClean}?fields=${COMBINED_FIELDS}`,
+    {
+      headers: {
+        Authorization: `bearer ${token}`,
+        Accept: 'application/vnd.vimeo.*+json;version=3.4',
+      },
+    },
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Vimeo API error ${res.status}: ${text}`);
+  }
+
+  const data = (await res.json()) as VimeoCombinedApiResponse;
+  return {
+    play: data.play,
+    pictures: data.pictures,
+    durationSeconds: data.duration ?? null,
+  };
+}
+
+export async function getVideoMeta(
+  videoId: string,
+  options?: GetPlaybackUrlOptions,
+): Promise<{
+  playbackUrl: string | null;
+  thumbnailUrl: string | null;
+  durationSeconds: number | null;
+}> {
+  const raw = await getVimeoVideoMetaRaw(videoId);
+  return {
+    playbackUrl: pickPlaybackUrlFromPlay(raw.play, options),
+    thumbnailUrl: pickThumbnailUrlFromPictures(raw.pictures),
+    durationSeconds: raw.durationSeconds,
+  };
+}
+
+export async function getPlaybackUrl(
+  videoId: string,
+  options?: GetPlaybackUrlOptions,
+): Promise<string | null> {
+  const raw = await getVimeoVideoMetaRaw(videoId);
+  return pickPlaybackUrlFromPlay(raw.play, options);
+}
+
+export async function getThumbnailUrl(videoId: string): Promise<string | null> {
+  const raw = await getVimeoVideoMetaRaw(videoId);
+  return pickThumbnailUrlFromPictures(raw.pictures);
+}
+
+export async function getDuration(videoId: string): Promise<number | null> {
+  const raw = await getVimeoVideoMetaRaw(videoId);
+  return raw.durationSeconds;
+}
+
 export const vimeoService = {
   getPlaybackUrl,
   getThumbnailUrl,
+  getDuration,
+  getVimeoVideoMetaRaw,
+  getVideoMeta,
 };

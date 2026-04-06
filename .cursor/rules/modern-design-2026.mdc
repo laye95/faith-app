@@ -8,165 +8,267 @@ globs:
 alwaysApply: false
 ---
 
-# Design Patterns - Faith Generation App
+# Design System — Faith Generation App
 
 ## Design Philosophy
 
-The Faith Generation App follows the **faithgeneration.com** website design: a **minimal black, white, and grey** palette. The design should feel:
+Matches [faithgeneration.com](https://faithgeneration.com/): **minimal black, white, and grey**. No accent colors except red for errors and green for success/streaks.
 
-- **Minimal**: Black, white, and grey only – no colored accents (except error red)
-- **Clean**: High contrast, clear typography hierarchy
-- **Professional**: Aligned with the ministry’s website aesthetic
-- **Readable**: Neutral backgrounds with proper text contrast
+- Minimal — black, white, grey palette
+- High contrast — clear typography hierarchy
+- Professional — aligned with the ministry's website
 
-## Faith Generation Color Palette
-
-Colors match [faithgeneration.com](https://faithgeneration.com/).
-
-### Light Mode
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `pageBg` | `#FFFFFF` | Page background |
-| `cardBg` | `#FAFAFA` | Card background |
-| `cardBorder` | `#E5E5E5` | Borders, dividers |
-| `textPrimary` | `#000000` | Headings, primary text |
-| `textSecondary` | `#525252` | Body, labels |
-| `textTertiary` | `#737373` | Placeholders, muted text |
-| `buttonPrimary` | `#171717` | Primary CTAs |
-| `buttonPrimaryContrast` | `#FFFFFF` | Text on primary buttons |
-| `avatarPrimary` | `#E5E5E5` | Icon/avatar backgrounds |
-
-### Dark Mode
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `pageBg` | `#0a0a0a` | Page background |
-| `cardBg` | `#171717` | Card background |
-| `cardBorder` | `#262626` | Borders, dividers |
-| `textPrimary` | `#FAFAFA` | Headings, primary text |
-| `textSecondary` | `#a3a3a3` | Body, labels |
-| `textTertiary` | `#737373` | Placeholders, muted text |
-| `buttonPrimary` | `#FAFAFA` | Primary CTAs |
-| `buttonPrimaryContrast` | `#171717` | Text on primary buttons |
-| `avatarPrimary` | `#262626` | Icon/avatar backgrounds |
-
-### Semantic (both modes)
-
-- `buttonDecline` / `badgeError`: Red for errors
-- `badgeSuccess`: Green for success
-- `badgeWarning`: Amber for warnings
-
-## Theme System
-
-### useTheme Hook
-
-Always use the centralized `useTheme` hook instead of hardcoded colors:
+## useTheme Hook (always use this)
 
 ```typescript
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from '@/hooks/useTheme';
 
 function MyComponent() {
   const theme = useTheme();
-
-  return (
-    <Box style={{ backgroundColor: theme.pageBg }}>
-      <Text style={{ color: theme.textPrimary }}>Hello</Text>
-      <Button style={{ backgroundColor: theme.buttonPrimary }}>
-        <ButtonText style={{ color: theme.buttonPrimaryContrast }}>Submit</ButtonText>
-      </Button>
-    </Box>
-  );
+  // Use theme.* tokens everywhere — never hardcode hex values
 }
 ```
 
-### Theme Interface
+## Complete ThemeColors Interface
 
-- `pageBg`, `cardBg`, `cardBorder` – backgrounds and borders
-- `textPrimary`, `textSecondary`, `textTertiary` – typography
-- `buttonPrimary`, `buttonPrimaryContrast` – primary CTAs (use `buttonPrimaryContrast` for text on primary buttons)
-- `buttonAccept`, `buttonDecline` – semantic actions
-- `avatarPrimary`, `badgeSuccess`, `badgeError`, `badgeWarning`, `badgeInfo` – component backgrounds
-- `isDark` – boolean for dark mode logic
+Every token available on the `theme` object:
 
-### Gluestack Config
+```typescript
+interface ThemeColors {
+  // Backgrounds
+  pageBg: string;           // Page/screen background
+  cardBg: string;           // Card surface
+  emptyBg: string;          // Empty state background
+  messageBg: string;        // Message/notification background
+  inputBg: string;          // Input field background
+  overlayBg: string;        // Semi-transparent overlay (modal backdrop)
 
-`components/ui/gluestack-ui-provider/config.ts` uses a greyscale primary palette (black in light, white in dark). GluestackUIProvider follows system color scheme: `mode={colorScheme ?? 'light'}`.
+  // Borders
+  cardBorder: string;       // Card borders, dividers
+
+  // Text
+  textPrimary: string;      // Headings, primary content
+  textSecondary: string;    // Body text, labels
+  textTertiary: string;     // Placeholders, muted/helper text
+
+  // Buttons
+  buttonPrimary: string;    // Primary CTA background
+  buttonPrimaryContrast: string; // Text ON primary buttons (not white/black — use this)
+  buttonAccept: string;     // Accept/confirm action
+  buttonDecline: string;    // Decline/destructive action
+  buttonDeclineContrast: string; // Text on decline buttons
+
+  // Brand
+  brandAccent: string;      // Brand accent (same as buttonPrimary)
+  brandAccentMuted: string; // Muted brand accent (semi-transparent)
+
+  // Tab bar
+  tabActive: string;        // Active tab indicator/icon
+  tabInactiveBg: string;    // Inactive tab background
+  tabInactiveText: string;  // Inactive tab label color
+
+  // Avatars & icons
+  avatarPrimary: string;    // Default avatar/icon background
+  avatarWarning: string;    // Warning-state avatar background
+
+  // Badges (background colors)
+  badgeSuccess: string;     // Success badge bg
+  badgeError: string;       // Error badge bg
+  badgeWarning: string;     // Warning badge bg
+  badgeInfo: string;        // Info badge bg
+  badgeSuccessBg: string;   // Translucent success bg (rgba)
+  badgeInfoBg: string;      // Translucent info bg (rgba)
+
+  // Quiz feedback
+  quizCorrect: string;      // Correct answer text color
+  quizCorrectBg: string;    // Correct answer background
+  quizIncorrect: string;    // Incorrect answer text color
+  quizIncorrectBg: string;  // Incorrect answer background
+
+  // Special
+  starSuccess: string;      // Star/streak icon color
+  isDark: boolean;          // True when dark mode is active
+}
+```
+
+## Light/Dark Token Values
+
+### Light Mode
+
+| Token | Hex |
+|---|---|
+| `pageBg` | `#FFFFFF` |
+| `cardBg` | `#FAFAFA` |
+| `cardBorder` | `#E5E5E5` |
+| `textPrimary` | `#000000` |
+| `textSecondary` | `#525252` |
+| `textTertiary` | `#737373` |
+| `buttonPrimary` | `#171717` |
+| `buttonPrimaryContrast` | `#FFFFFF` |
+| `buttonAccept` | `#10b981` |
+| `buttonDecline` | `#b91c1c` |
+| `avatarPrimary` | `#E5E5E5` |
+| `tabInactiveBg` | `#F5F5F5` |
+| `tabInactiveText` | `#525252` |
+| `badgeSuccess` | `#dcfce7` |
+| `badgeError` | `#fee2e2` |
+| `inputBg` | `#FFFFFF` |
+
+### Dark Mode
+
+| Token | Hex |
+|---|---|
+| `pageBg` | `#0a0a0a` |
+| `cardBg` | `#171717` |
+| `cardBorder` | `#262626` |
+| `textPrimary` | `#FAFAFA` |
+| `textSecondary` | `#a3a3a3` |
+| `textTertiary` | `#737373` |
+| `buttonPrimary` | `#FAFAFA` |
+| `buttonPrimaryContrast` | `#171717` |
+| `buttonAccept` | `#10b981` |
+| `buttonDecline` | `#f87171` |
+| `avatarPrimary` | `#262626` |
+| `tabInactiveBg` | `#262626` |
+| `tabInactiveText` | `#a3a3a3` |
+| `badgeSuccess` | `#064e3b` |
+| `badgeError` | `#7f1d1d` |
+| `inputBg` | `#171717` |
 
 ## Typography
 
-### Brand Label
+**Font family:** Poppins (loaded in `app/_layout.tsx`)
+- Regular: `Poppins_400Regular`
+- Medium: `Poppins_500Medium`
+- SemiBold: `Poppins_600SemiBold`
+- Bold: `Poppins_700Bold`
 
-- "Faith Generation" / "Faith Generation Bijbelschool": `text-xs font-semibold uppercase tracking-widest`, `theme.textSecondary`
+### Hierarchy
 
-### Headings
-
-- Primary: `text-2xl` or `text-3xl`, `font-bold`, `theme.textPrimary`
-- Secondary: `text-base`, `theme.textSecondary`, `lineHeight: 22–24`
-
-### Body
-
-- `text-base`, `theme.textPrimary` or `theme.textSecondary`
-- `lineHeight: 24` for readability
+| Role | Classes | Color |
+|---|---|---|
+| Brand label | `text-xs font-semibold uppercase tracking-widest` | `theme.textSecondary` |
+| Screen heading | `text-2xl font-bold` or `text-3xl font-bold` | `theme.textPrimary` |
+| Section title | `text-lg font-semibold` | `theme.textPrimary` |
+| Body | `text-base` | `theme.textPrimary` or `theme.textSecondary` |
+| Caption/helper | `text-sm` | `theme.textSecondary` or `theme.textTertiary` |
 
 ## Cards & Surfaces
 
-- Background: `theme.cardBg`
-- Border: `theme.cardBorder`
-- Shadow (light): `shadowOpacity: 0.06`, `shadowRadius: 16`
-- Shadow (dark): `shadowOpacity: 0.25`, `shadowRadius: 16`
-- Corners: `rounded-2xl` for large cards, `rounded-xl` for smaller
-- Use `theme.isDark` when shadow/border behavior differs by mode
+```tsx
+<View
+  className="rounded-2xl p-5"
+  style={{
+    backgroundColor: theme.cardBg,
+    borderWidth: 1,
+    borderColor: theme.cardBorder,
+    shadowColor: '#000',
+    shadowOpacity: theme.isDark ? 0.25 : 0.06,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  }}
+>
+```
+
+- Large cards: `rounded-2xl`
+- Smaller cards/chips: `rounded-xl`
+- Shadow opacity: `0.06` (light) / `0.25` (dark)
+- Use `theme.isDark` for conditional shadow/border behavior
 
 ## Buttons
 
-### Primary
+### Primary CTA
 
-- Background: `theme.buttonPrimary`
-- Text: `theme.buttonPrimaryContrast` (never hardcode white/black)
-- Size: `h-14` for main CTAs
-- Corners: `rounded-2xl`
+```tsx
+<TouchableOpacity
+  className="h-14 rounded-2xl items-center justify-center"
+  style={{ backgroundColor: theme.buttonPrimary }}
+  activeOpacity={0.7}
+>
+  <Text style={{ color: theme.buttonPrimaryContrast }} className="font-semibold text-base">
+    {label}
+  </Text>
+</TouchableOpacity>
+```
 
 ### Secondary / Ghost
 
-- Background: `transparent`
-- Border: `theme.textTertiary` or `theme.textSecondary`
-- Text: `theme.textSecondary`
+```tsx
+<TouchableOpacity
+  className="h-14 rounded-2xl items-center justify-center"
+  style={{ borderWidth: 1, borderColor: theme.textTertiary }}
+  activeOpacity={0.7}
+>
+  <Text style={{ color: theme.textSecondary }}>{label}</Text>
+</TouchableOpacity>
+```
 
-### Touch Feedback
+### Touch feedback
 
-- `TouchableOpacity` with `activeOpacity={0.7}`
+Always `activeOpacity={0.7}` on `TouchableOpacity`.
 
 ## Form Inputs
 
-- Background: `theme.cardBg` (dark) or `#ffffff` (light)
-- Border: `theme.cardBorder` or `#e5e7eb` (light)
-- Focus/error: `theme.buttonPrimary` (focus), `theme.buttonDecline` (error)
-- Labels: `theme.textSecondary`
-- Placeholders: `theme.textTertiary`
+```tsx
+<View
+  className="rounded-xl px-4 h-12"
+  style={{
+    backgroundColor: theme.inputBg,
+    borderWidth: 1,
+    borderColor: theme.cardBorder,
+  }}
+>
+```
 
-## Spacing & Layout
+- Focus border: `theme.buttonPrimary`
+- Error border: `theme.buttonDecline`
+- Placeholder color: `theme.textTertiary`
+- Label color: `theme.textSecondary`
 
-- Page padding: `px-6`, `pt-6`, `pb-8`
-- Between sections: `gap-6`
-- Between related items: `gap-3` or `gap-4`
-- Card internal: `p-5` or `p-8`
+## Spacing
+
+| Usage | Class |
+|---|---|
+| Page horizontal padding | `px-6` |
+| Page top padding | `pt-6` |
+| Page bottom padding | `pb-8` |
+| Between sections | `gap-6` |
+| Between related items | `gap-3` or `gap-4` |
+| Card internal | `p-5` or `p-8` |
 
 ## LoadingScreen
 
-- Use `LoadingScreen` from `@/components/ui/LoadingScreen` for full-screen loading
-- Component uses `theme.pageBg`, `theme.buttonPrimary`, `theme.textSecondary` – no hardcoded colors
+```tsx
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
-## Don'ts
+// Always provide a translated message
+if (isLoading) return <LoadingScreen message={t('common.loading')} />;
+```
 
-- Don’t add purple, gold, blue, or other accent colors – stick to black/white/grey (plus red for errors)
-- Don’t hardcode hex values – use `theme.*` tokens
-- Don’t use `#ffffff` or `#000000` directly where theme tokens exist
-- Don’t assume button text color – use `buttonPrimaryContrast` on primary buttons
+Uses `theme.pageBg`, `theme.buttonPrimary`, `theme.textSecondary` internally.
 
-## Do's
+## Color Rules
 
-- Use `useTheme()` in all UI components
-- Use `theme.isDark` instead of comparing `pageBg` to hex values
-- Follow system color scheme (light/dark)
-- Keep Faith Generation branding consistent with faithgeneration.com
+- **Never** hardcode hex values — use `theme.*` tokens
+- **Never** assume primary button text is white — use `theme.buttonPrimaryContrast`
+- **Never** add purple, gold, blue, or other brand accents — black/white/grey only
+- **Never** use `#ffffff` or `#000000` directly where a theme token exists
+- **Always** use `theme.isDark` for conditional dark/light logic
+- For quiz correct/incorrect: use `theme.quizCorrect` / `theme.quizIncorrect` (text), `theme.quizCorrectBg` / `theme.quizIncorrectBg` (background)
+- For badge pills: use `theme.badgeSuccess`, `theme.badgeError`, `theme.badgeWarning`, `theme.badgeInfo`
+
+## Gluestack Integration
+
+The Gluestack provider config (`components/ui/gluestack-ui-provider/config.ts`) uses a greyscale primary scale. `GluestackUIProvider` is set to `mode={colorScheme ?? 'light'}` following system color scheme. Use Gluestack primitives (`Box`, `VStack`, `HStack`, `Text`, `Button`) as building blocks and customize with NativeWind classes.
+
+## Raw Color Tokens
+
+Source: `constants/themeTokens.ts`. Do not use these directly in components — use `useTheme()` which maps them to the correct mode:
+
+```
+primary.light = '#171717'   primary.dark = '#FAFAFA'
+decline.light = '#b91c1c'   decline.dark = '#f87171'
+accept.light = '#10b981'    (same for both modes)
+success = '#4d7c59'
+```

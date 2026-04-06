@@ -44,17 +44,17 @@ export const error = {
 } as const;
 
 export const quizIncorrect = {
-  light: '#b91c1c',
-  dark: '#b91c1c',
-  bgLight: '#fef2f2',
-  bgDark: '#450a0a',
+  light: '#DD4B4B',
+  dark: '#DD4B4B',
+  bgLight: '#FCE8E8',
+  bgDark: 'rgba(221, 75, 75, 0.18)',
 } as const;
 
 export const quizCorrect = {
-  light: '#4d7c59',
-  dark: '#4d7c59',
-  bgLight: '#dcfce7',
-  bgDark: '#064e3b',
+  light: '#4BDD83',
+  dark: '#4BDD83',
+  bgLight: '#E8F9F0',
+  bgDark: 'rgba(75, 221, 131, 0.18)',
 } as const;
 
 export const primaryScaleLight = {

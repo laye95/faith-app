@@ -1,8 +1,6 @@
 import { MainTopBar } from "@/app/(main)/_components/MainTopBar";
 import { Box } from "@/components/ui/box";
-import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { Text } from "@/components/ui/text";
-import { VStack } from "@/components/ui/vstack";
 import { routes } from "@/constants/routes";
 import {
   useIntroductionVimeoId,
@@ -12,6 +10,8 @@ import { useLastWatchedLesson } from "@/hooks/useLastWatchedLesson";
 import { prefetchLessonThumbnailsForModule } from "@/hooks/usePrefetchLessonThumbnails";
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslation } from "@/hooks/useTranslation";
+import type { BibleschoolModule } from "@/types/bibleschool";
+import { filterBibleschoolModulesBySearch } from "@/utils/bibleschoolModuleSearch";
 import { bzzt } from "@/utils/haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,13 +19,14 @@ import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  InteractionManager,
   ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";
-import { InteractionManager } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ModuleCard } from "./_components/ModuleCard";
+import { ModulesCatalogSections } from "./_components/ModulesCatalogSections";
+import { ModulesSearchBar } from "./_components/ModulesSearchBar";
 import { useModuleProgress } from "./_hooks/useModuleProgress";
 
 export default function BibleSchoolModulesScreen() {
@@ -37,47 +38,66 @@ export default function BibleSchoolModulesScreen() {
   const { progressMap, attemptCountMap } = useModuleProgress();
   const { data: modules } = useModules(locale);
   const { module: currentModule } = useLastWatchedLesson();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredModules = useMemo(() => {
+    if (!modules?.length) return [];
+    return filterBibleschoolModulesBySearch(modules, searchQuery);
+  }, [modules, searchQuery]);
+
+  const moduleToPrefetch = useMemo(() => {
+    if (!modules?.length) return undefined;
+    const cmd = currentModule
+      ? modules.find((m) => m.id === currentModule.id)
+      : undefined;
+    const pool = cmd
+      ? modules.filter((m) => m.id !== cmd.id)
+      : modules;
+    const remaining = pool.filter(
+      (m) => progressMap[m.id]?.status !== "completed",
+    );
+    return cmd ?? remaining[0];
+  }, [modules, currentModule?.id, progressMap]);
 
   const handleModulePress = useCallback(
-    (module: { id: string; lessons?: { videoId?: string; thumbnailUrl?: string }[] }) => {
+    (module: BibleschoolModule) => {
       bzzt();
+      const full = modules?.find((m) => m.id === module.id);
+      const lessons = full?.lessons ?? module.lessons ?? [];
       prefetchLessonThumbnailsForModule(
         queryClient,
         module.id,
-        module.lessons ?? [],
+        lessons,
         introductionVimeoId ?? undefined,
       );
       router.push(routes.bibleschoolModule(module.id));
     },
-    [queryClient, introductionVimeoId],
+    [queryClient, introductionVimeoId, modules],
   );
 
   const currentModuleData = useMemo(() => {
-    if (!modules?.length || !currentModule) return undefined;
-    return modules.find((m) => m.id === currentModule.id);
-  }, [modules, currentModule?.id]);
+    if (!filteredModules?.length || !currentModule) return undefined;
+    return filteredModules.find((m) => m.id === currentModule.id);
+  }, [filteredModules, currentModule?.id]);
 
   const completedModules = useMemo(() => {
-    if (!modules?.length) return [];
-    return modules.filter((m) => progressMap[m.id]?.status === "completed");
-  }, [modules, progressMap]);
+    if (!filteredModules?.length) return [];
+    return filteredModules.filter(
+      (m) => progressMap[m.id]?.status === "completed",
+    );
+  }, [filteredModules, progressMap]);
 
   const allModulesExcludingCurrent = useMemo(() => {
-    if (!modules?.length) return [];
-    if (!currentModuleData) return modules;
-    return modules.filter((m) => m.id !== currentModuleData.id);
-  }, [modules, currentModuleData?.id]);
+    if (!filteredModules?.length) return [];
+    if (!currentModuleData) return filteredModules;
+    return filteredModules.filter((m) => m.id !== currentModuleData.id);
+  }, [filteredModules, currentModuleData?.id]);
 
   const remainingModules = useMemo(() => {
     return allModulesExcludingCurrent.filter(
       (m) => progressMap[m.id]?.status !== "completed",
     );
   }, [allModulesExcludingCurrent, progressMap]);
-
-  const moduleToPrefetch = useMemo(
-    () => currentModuleData ?? remainingModules[0],
-    [currentModuleData, remainingModules],
-  );
 
   useEffect(() => {
     if (!moduleToPrefetch || !modules?.length) return;
@@ -103,6 +123,10 @@ export default function BibleSchoolModulesScreen() {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const SCROLL_THRESHOLD = 150;
+
+  const searchTrimmed = searchQuery.trim();
+  const hasNoSearchResults =
+    searchTrimmed.length > 0 && filteredModules.length === 0;
 
   if (!modules?.length) {
     return (
@@ -143,6 +167,7 @@ export default function BibleSchoolModulesScreen() {
       <ScrollView
         ref={scrollRef}
         className="flex-1"
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         onScroll={(e) => {
           const y = e.nativeEvent.contentOffset.y;
@@ -160,73 +185,36 @@ export default function BibleSchoolModulesScreen() {
         >
           {t("navbar.modules")}
         </Text>
-        <VStack className="gap-6">
-          {currentModuleData && (
-            <VStack className="gap-2">
-              <Text
-                className="text-xs font-semibold uppercase tracking-wider"
-                style={{ color: theme.textTertiary }}
-              >
-                {t("modules.currentModule")}
-              </Text>
-              <ModuleCard
-                key={currentModuleData.id}
-                module={{
-                  ...currentModuleData,
-                  title: currentModuleData.title,
-                  backgroundImageUrl: currentModuleData.backgroundImageUrl,
-                }}
-                progress={progressMap[currentModuleData.id] ?? null}
-                attemptCount={attemptCountMap[currentModuleData.id] ?? 0}
-                onPress={() => handleModulePress(currentModuleData)}
-              />
-            </VStack>
-          )}
-          <VStack className="gap-2">
-            <CollapsibleSection
-              title={t("modules.allModules")}
-              collapsed={!allModulesExpanded}
-              onToggle={() => setAllModulesExpanded((v) => !v)}
-              headerBg={theme.tabInactiveBg}
-            >
-              {remainingModules.map((module) => (
-                <ModuleCard
-                  key={module.id}
-                  module={{
-                    ...module,
-                    title: module.title,
-                    backgroundImageUrl: module.backgroundImageUrl,
-                  }}
-                  progress={progressMap[module.id] ?? null}
-                  attemptCount={attemptCountMap[module.id] ?? 0}
-                  onPress={() => handleModulePress(module)}
-                />
-              ))}
-            </CollapsibleSection>
-            {completedModules.length > 0 && (
-              <CollapsibleSection
-                title={t("modules.completedModules")}
-                collapsed={!completedModulesExpanded}
-                onToggle={() => setCompletedModulesExpanded((v) => !v)}
-                headerBg={theme.tabInactiveBg}
-              >
-                {completedModules.map((module) => (
-                  <ModuleCard
-                    key={module.id}
-                    module={{
-                      ...module,
-                      title: module.title,
-                      backgroundImageUrl: module.backgroundImageUrl,
-                    }}
-                    progress={progressMap[module.id] ?? null}
-                    attemptCount={attemptCountMap[module.id] ?? 0}
-                    onPress={() => handleModulePress(module)}
-                  />
-                ))}
-              </CollapsibleSection>
-            )}
-          </VStack>
-        </VStack>
+        <ModulesSearchBar value={searchQuery} onChangeText={setSearchQuery} />
+        {hasNoSearchResults ? (
+          <Text
+            className="text-center text-base py-8 px-2"
+            style={{ color: theme.textSecondary }}
+          >
+            {t("modules.searchNoResults")}
+          </Text>
+        ) : (
+          <ModulesCatalogSections
+            theme={theme}
+            currentModuleLabel={t("modules.currentModule")}
+            allModulesLabel={t("modules.allModules")}
+            completedModulesLabel={t("modules.completedModules")}
+            currentModuleData={currentModuleData}
+            remainingModules={remainingModules}
+            completedModules={completedModules}
+            progressMap={progressMap}
+            attemptCountMap={attemptCountMap}
+            allModulesExpanded={allModulesExpanded}
+            onToggleAllModules={() =>
+              setAllModulesExpanded((v) => !v)
+            }
+            completedModulesExpanded={completedModulesExpanded}
+            onToggleCompletedModules={() =>
+              setCompletedModulesExpanded((v) => !v)
+            }
+            onModulePress={handleModulePress}
+          />
+        )}
       </ScrollView>
       {showScrollToTop && (
         <View

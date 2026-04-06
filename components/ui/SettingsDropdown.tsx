@@ -36,6 +36,7 @@ interface SettingsDropdownProps<T> {
   isLoading?: boolean;
   variant?: 'default' | 'inline';
   dropdownWidth?: 'full' | 'matchTrigger';
+  showTriggerLabel?: boolean;
 }
 
 function SettingsDropdownInner<T extends string>(
@@ -48,6 +49,7 @@ function SettingsDropdownInner<T extends string>(
     isLoading = false,
     variant = 'default',
     dropdownWidth = 'full',
+    showTriggerLabel = true,
   }: SettingsDropdownProps<T>,
   ref: React.ForwardedRef<SettingsDropdownRef>,
 ) {
@@ -63,9 +65,17 @@ function SettingsDropdownInner<T extends string>(
   const triggerRef = useRef<View>(null);
   const isDark = theme.isDark;
   const { width: screenWidth } = Dimensions.get('window');
+  const selectedOption = options.find((o) => o.value === value) ?? options[0];
+  const displayLabel = selectedOption.label ?? (selectedOption.labelKey ? t(selectedOption.labelKey) : '');
   const isInline = variant === 'inline';
+  const triggerCompact =
+    isInline && !showTriggerLabel && Boolean(selectedOption.flag);
+  const inlineMenuWidth = Math.min(screenWidth - 96, 160);
+  const compactMatchTriggerMenuWidth = Math.min(screenWidth - 32, 280);
   const switcherWidth = isInline
-    ? Math.min(screenWidth - 96, 160)
+    ? triggerCompact
+      ? Math.min(screenWidth - 96, 72)
+      : inlineMenuWidth
     : fullWidth
       ? undefined
       : Math.min(screenWidth - 96, 320);
@@ -73,9 +83,6 @@ function SettingsDropdownInner<T extends string>(
   const containerStyle: ViewStyle = fullWidth
     ? { flex: 1, alignSelf: 'stretch' }
     : { width: switcherWidth, minWidth: switcherWidth };
-
-  const selectedOption = options.find((o) => o.value === value) ?? options[0];
-  const displayLabel = selectedOption.label ?? (selectedOption.labelKey ? t(selectedOption.labelKey) : '');
 
   const handleOpen = () => {
     bzzt();
@@ -105,7 +112,7 @@ function SettingsDropdownInner<T extends string>(
   const triggerStyle: ViewStyle = isInline
     ? {
         width: '100%' as const,
-        paddingHorizontal: 12,
+        paddingHorizontal: triggerCompact ? 10 : 12,
         paddingVertical: 10,
       }
     : {
@@ -130,7 +137,9 @@ function SettingsDropdownInner<T extends string>(
         activeOpacity={0.7}
         style={triggerStyle}
       >
-        <HStack className="items-center gap-2">
+        <HStack
+          className={`items-center gap-2 ${triggerCompact ? 'w-full justify-between' : ''}`}
+        >
           {isLoading ? (
             <ActivityIndicator size="small" color={theme.brandAccent} />
           ) : selectedOption.flag ? (
@@ -142,12 +151,14 @@ function SettingsDropdownInner<T extends string>(
               color={theme.textPrimary}
             />
           ) : null}
-          <Text
-            className="text-sm font-semibold flex-1"
-            style={{ color: theme.textPrimary }}
-          >
-            {displayLabel}
-          </Text>
+          {(!selectedOption.flag || showTriggerLabel) && (
+            <Text
+              className="text-sm font-semibold flex-1"
+              style={{ color: theme.textPrimary }}
+            >
+              {displayLabel}
+            </Text>
+          )}
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
             size={16}
@@ -171,7 +182,20 @@ function SettingsDropdownInner<T extends string>(
               style={{
                 position: 'absolute',
                 ...(dropdownWidth === 'matchTrigger'
-                  ? { left: layout.x, width: layout.width }
+                  ? triggerCompact
+                    ? {
+                        width: compactMatchTriggerMenuWidth,
+                        left: Math.max(
+                          16,
+                          Math.min(
+                            layout.x +
+                              layout.width -
+                              compactMatchTriggerMenuWidth,
+                            screenWidth - 16 - compactMatchTriggerMenuWidth,
+                          ),
+                        ),
+                      }
+                    : { left: layout.x, width: layout.width }
                   : { left: 24, right: 24 }),
                 top: layout.y + layout.height + 4,
                 zIndex: 9999,

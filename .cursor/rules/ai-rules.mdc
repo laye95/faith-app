@@ -2,745 +2,442 @@
 alwaysApply: true
 ---
 
-# AI Development Rules - Faith Generation App
+# Faith Generation App — Core Development Rules
 
-## Reference Project
+## Project Identity
 
-**Praise app reference:** The Praise app at `Documents/Projects/Praise/praise-app` can be used as reference for BaseService implementation, folder structure, services layer, and patterns. **Never modify the Praise app.** Copy and adapt patterns into faith-app as needed.
+Faith Generation is a Christian mobile Bible school app. Content (modules, lessons, podcasts, sermons) is free and fetched from Storyblok CMS. User auth and progress live in Supabase. Videos are hosted on Vimeo. The UI language defaults to Dutch; English is the fallback locale.
 
-## Tech Stack
+## Tech Stack (exact versions from package.json)
 
-- **Framework**: React Native with Expo (SDK 54+)
-- **Styling**: NativeWind v4 (Tailwind CSS for React Native)
-- **UI Components**: Gluestack UI
-- **Language**: TypeScript (strict mode)
-- **State Management**: React Context API + TanStack Query
-- **Navigation**: Expo Router (file-based routing)
-- **Data Fetching**: TanStack Query v5 with persistence
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **Content**: Storyblok CMS (modules, lessons, handouts, podcasts, sermons)
-- **Video**: Vimeo (metadata and playback URLs; store vimeo_id in content)
-- **Video Player**: expo-video (NOT deprecated expo-av)
-- **Code Formatting**: Prettier
+| Layer | Choice |
+|---|---|
+| Framework | React Native 0.81.5 + Expo SDK 54 |
+| Router | Expo Router 6 (file-based, `expo-router/drawer` for main nav) |
+| Styling | NativeWind v4 + Tailwind CSS 3 |
+| UI primitives | Gluestack UI (`@gluestack-ui/core`) |
+| Language | TypeScript 5.9 strict mode |
+| State | React Context + TanStack Query v5 |
+| Backend | Supabase JS v2 |
+| CMS | Storyblok (`storyblok` package) |
+| Video | `expo-video` (never `expo-av` — deprecated in SDK 54) |
+| Fonts | Poppins 400/500/600/700 via `@expo-google-fonts/poppins` |
+| Animation | `@legendapp/motion`, `react-native-reanimated` v4 |
+| Keyboard | `react-native-keyboard-controller` (KeyboardProvider wraps the whole app) |
+| Forms | `FormScrollView` from `@/components/ui/FormScrollView` |
+| Formatting | Prettier |
 
-## Technology Updates & Best Practices
+## Provider Tree (app/_layout.tsx)
 
-- **Current Date Context**: Always reference the current date when providing solutions (January 2026)
-- **Latest Versions**: Use the most recent stable versions of libraries and frameworks available as of January 2026
-- **Modern Patterns**: Implement the latest React Native, Expo, and TypeScript best practices from 2025-2026
-- **Deprecated Features**: Avoid patterns, APIs, or libraries that were deprecated in 2024 or earlier
-- **Stay Current**: When suggesting packages, features, or solutions, prioritize those that are actively maintained and relevant in 2026
-- **Version Awareness**: If a package or feature has been updated significantly since 2024, use the 2025-2026 version and syntax
-- **Documentation**: Reference the latest documentation and API changes from 2025-2026 releases
-
-### Context7 MCP for Up-to-Date Documentation
-
-Use [Context7 MCP](https://github.com/upstash/context7) to access current, version-specific documentation for libraries and frameworks. Context7 prevents outdated code generation and hallucinated APIs by fetching documentation directly from the source.
-
-**When to Use Context7:**
-
-- Setting up or configuring a new library (React Native libraries, Expo modules, etc.)
-- Working with unfamiliar APIs or packages
-- Need to verify current API methods and syntax
-- Implementing features with third-party services (Supabase, Firebase, etc.)
-- Questions about library-specific best practices
-
-**When NOT to Use Context7:**
-
-- Basic TypeScript/JavaScript syntax questions
-- General React Native concepts already known
-- Project-specific code that's already in the codebase
-- Simple refactoring tasks
-- Questions about the Faith app's custom code
-
-**How to Use Context7:**
-
-1. **Use MCP Tools Directly**: Call the Context7 MCP tools when you need documentation:
-   - `mcp_context7_resolve-library-id`: First, resolve the library name to get its Context7 ID
-   - `mcp_context7_query-docs`: Then query the docs using the library ID and your specific question
-
-2. **With Known Library ID**: If you already know the library ID (format: `/org/project` or `/org/project/version`), skip the resolve step and go directly to `query-docs`:
-
-   ```
-   /expo/expo
-   /supabase/supabase
-   /tanstack/query
-   /gluestack/gluestack-ui
-   /websites/nativewind_dev
-   /websites/storyblok
-   /websites/developer_vimeo_player_sdk
-   ```
-
-3. **With Version Specificity**: When querying, mention the specific version if needed in your query parameter
-
-**Available Context7 MCP Tools:**
-
-- `mcp_context7_resolve-library-id`: Resolves library name to Context7-compatible ID
-  - Parameters: `query` (user's question), `libraryName` (library to search for)
-  - Use this first to find the correct library ID
-- `mcp_context7_query-docs`: Retrieves documentation using library ID
-  - Parameters: `libraryId` (exact Context7 ID), `query` (specific question about the library)
-  - Use this to get actual documentation and code examples
-
-**Best Practices:**
-
-- Only invoke Context7 when you actually need external library documentation
-- Don't invoke for every single response - be selective and purposeful
-- Prefer direct library IDs when known to skip the matching step
-- Cache knowledge from Context7 responses for the current session
-- Use version-specific queries when working with particular package versions
-
-## Code Quality Standards
-
-### TypeScript
-
-- Use strict TypeScript with proper typing - no `any` types unless absolutely necessary
-- Define interfaces for all props, state, and API responses
-- Use type inference where possible to reduce verbosity
-- Create shared types in `types/` directory for cross-feature usage
-- Use discriminated unions for complex state management
-- Prefer `interface` over `type` for object shapes
-- Use `type` for unions, intersections, and utility types
-- **Use `undefined` instead of `null` for optional values** - TypeScript optional properties (`field?: string`) allow `string | undefined`, not `string | null`
-  - ✅ `value || undefined`
-  - ❌ `value || null`
-
-### Component Architecture
-
-- Functional components only with hooks
-- Keep components small and focused (< 250 lines)
-- Extract complex logic into custom hooks
-- Use composition over prop drilling
-- Implement proper error boundaries for error handling
-- Prefer controlled components over uncontrolled
-
-### File Organization & Folder Structure
-
-#### Project Structure Overview
+The exact nesting order — never rearrange:
 
 ```
-faith-app/
-├── app/
-│   ├── (auth)/                    # Authentication route group
-│   │   ├── _layout.tsx           # Auth layout wrapper
-│   │   ├── login/
-│   │   │   ├── index.tsx         # Login page
-│   │   │   ├── _components/
-│   │   │   └── _hooks/
-│   │   └── register/
-│   │       ├── index.tsx
-│   │       ├── _components/
-│   │       └── _hooks/
-│   │
-│   ├── (main)/                    # Main app (tabs: Home, Content, Profile)
-│   │   ├── _layout.tsx           # Tab layout
-│   │   ├── index.tsx             # Overview (Jouw Overzicht)
-│   │   ├── modules/
-│   │   │   ├── index.tsx         # Module list
-│   │   │   └── [moduleId]/
-│   │   │       ├── index.tsx     # Module detail
-│   │   │       └── lessons/[lessonId]/  # Lesson detail
-│   │   ├── handouts/
-│   │   └── profile/
-│   │       ├── index.tsx
-│   │       ├── _components/
-│   │       └── _hooks/
-│   │
-│   └── quiz/                      # Test jezelf (module exams)
-│       ├── _layout.tsx
-│       └── [moduleId]/
-│           ├── index.tsx          # Quiz flow
-│           └── result.tsx        # Quiz results
-│
-├── components/
-│   ├── ui/
-│   └── common/
-│
-├── hooks/
-│   ├── useAuth.ts
-│   └── useToast.ts
-│
-├── providers/
-│   └── QueryProvider.tsx
-│
-├── services/
-│   ├── api/                       # Supabase services (BaseService pattern)
-│   │   ├── baseService.ts
-│   │   ├── authService.ts
-│   │   ├── progressService.ts     # Lesson/module/quiz progress
-│   │   └── ...
-│   ├── storyblok/                  # Storyblok client (content)
-│   │   └── client.ts
-│   ├── supabase/
-│   │   └── client.ts
-│   └── queryKeys.ts
-│
-├── types/
-│   ├── auth.ts
-│   ├── module.ts
-│   ├── lesson.ts
-│   ├── progress.ts
-│   └── quiz.ts
-│
-├── constants/
-│   └── api.ts
-│
-├── i18n/
-│   ├── index.ts
-│   ├── localeConfig.ts
-│   └── locales/
-│       ├── en.json
-│       ├── nl.json
-│       ├── hi.json
-│       └── id.json
-│
-└── utils/
-    ├── formatters.ts
-    └── validators.ts
+GestureHandlerRootView
+  └─ KeyboardProvider
+       └─ TypographyProvider       (contexts/TypographyContext)
+            └─ QueryProvider       (providers/QueryProvider)
+                 └─ AuthProvider   (contexts/AuthContext)
+                      └─ ThemeProvider   (contexts/ThemeContext)
+                           └─ LanguageProvider (contexts/LanguageContext)
+                                └─ ToastProvider (contexts/ToastContext)
+                                     └─ ThemeLayout (components/ThemeLayout)
 ```
 
-#### Folder Structure Rules
+## Navigation Architecture
 
-**Route Groups & Layouts**
+**Root:** `app/_layout.tsx` → `ThemeLayout` → Stack with `index`, `(auth)`, `(main)`
 
-- Use route groups like `(auth)` and `(dashboard)` to organize related pages with shared layouts
-- Each route group should have a `_layout.tsx` for shared UI (navigation, headers, etc.)
-- Route groups allow logical separation without affecting URL structure
-- When defining Stack.Screen components, ALWAYS use the full path: `name="folder/index"` not `name="folder"`
+**Auth group** (`app/(auth)/`): Unauthenticated only — login and register.
 
-**Page-Specific Organization**
+**Main group** (`app/(main)/`): Drawer navigation (right-side). Requires session. Uses `SectionNavigationContext` to show a loading overlay during drawer transitions.
 
-- Every feature page folder (e.g., `home/`, `members/`, `teams/`) MUST contain:
-  - `index.tsx` - The main page component
-  - `_components/` - Components used ONLY by this page (underscore prefix prevents Expo Router from treating as routes)
-  - `_hooks/` - Custom hooks used ONLY by this page (underscore prefix prevents Expo Router from treating as routes)
-- Prefix with underscore (`_components`, `_hooks`) to indicate page-private code
-- This keeps page-specific code co-located and prevents it from being mistaken as shared
-- Metro bundler is configured to ignore `_components` and `_hooks` folders to prevent route warnings
+Drawer screens (exact names from `_layout.tsx`):
+- `index` — "Jouw Overzicht" (home/overview)
+- `bibleschool` — Bible school with its own tabs inside
+- `admin` — Admin panel (admin users only)
+- `podcasts`
+- `sermons`
+- `faith-business-school`
+- `profile`
+- `badges`
+- `settings`
 
-**Global/Shared Code**
+**Bibleschool sub-navigation:** `app/(main)/bibleschool/` uses a `(tabs)/` route group containing:
+- `(tabs)/index` — bibleschool home/overview
+- `(tabs)/modules/` — module list
+- `(tabs)/modules/[id]/` — module detail (with its own `_layout.tsx`)
+- `(tabs)/modules/[id]/[lessonId]` — lesson detail (video + handout)
+- `(tabs)/modules/[id]/exam` — module quiz
 
-- `/components/` - Components used across multiple pages/features
-  - Place in `/components/ui/` for base UI elements
-  - Place in `/components/common/` for business-specific shared components
-- `/hooks/` - Hooks used across multiple pages/features
-- Only promote code to global when it's genuinely reusable
-
-**Services Layer**
-
-- All API calls and external service integrations go in `/services/`
-- **All domain services MUST extend BaseService**
-- Set `protected tableName = "table_name"` to enable generic CRUD operations
-- Services are ALWAYS shared and never page-specific
-- BaseService handles:
-  - Generic CRUD operations (get, list, create, update, delete)
-  - Filtering and sorting
-  - Pagination with metadata
-  - Batch operations
-  - Error normalization (Supabase → AppError)
-  - Dev-mode logging
-- Domain-specific services add custom methods beyond CRUD
-- Services should be framework-agnostic (no React hooks inside services)
-- Use TanStack Query to call services from components/hooks
-
-**Types Organization**
-
-- Page-specific types can live in the page file or a `types.ts` in that folder
-- Shared types go in root `/types/` directory
-- Organize by domain (auth, church, member, team, etc.)
-- Export types from index files for clean imports
-
-**Naming Conventions for Folders**
-
-- Route folders: lowercase with hyphens (e.g., `user-profile/`)
-- Route groups: lowercase with hyphens in parentheses (e.g., `(dashboard)/`)
-- Component folders: PascalCase or lowercase (e.g., `_components/`)
-- Private folders: prefix with underscore (e.g., `_components/`, `_hooks/`)
-
-**Import Path Best Practices**
+**Always navigate using `constants/routes.ts`:**
 
 ```typescript
-// Page-specific imports (relative)
-import { UserCard } from "./_components/UserCard";
-import { useMembers } from "./_hooks/useMembers";
-
-// Global imports (absolute or relative from root)
-import { Button } from "@/components/ui/Button";
-import { useAuth } from "@/hooks/useAuth";
-import { progressService } from "@/services/api/progressService";
-import { LessonProgress } from "@/types/progress";
+import { routes } from '@/constants/routes';
+router.push(routes.bibleschool());
+router.push(routes.bibleschoolModuleLesson(moduleId, lessonId));
+router.push(routes.settings('preferences'));
 ```
 
-**When to Create vs. Use Existing**
+Never hardcode route strings like `'/(main)/bibleschool'`.
 
-- ✅ Create in `_components/` if component is only used in that page
-- ✅ Create in `_hooks/` if hook contains page-specific logic
-- ✅ Create in `/components/` if component will be used in 2+ pages
-- ✅ Create in `/hooks/` if hook will be used in 2+ pages
-- ✅ Always create services in `/services/` (they're inherently shared)
-- ⚠️ Don't create page-specific services - refactor into a shared service
-- ⚠️ Don't duplicate components - if similar, make the global one more flexible
+## Internationalization
 
-**File Naming in Folders**
+**5 supported languages:**
 
-- Components: PascalCase (e.g., `MemberCard.tsx`, `TeamList.tsx`)
-- Hooks: camelCase with `use` prefix (e.g., `useMembers.ts`, `useTeamData.ts`)
-- Services: camelCase with `Service` suffix (e.g., `authService.ts`)
-- Utils: camelCase (e.g., `formatDate.ts`, `validateEmail.ts`)
-- Types: PascalCase or camelCase (e.g., `member.ts`, `apiTypes.ts`)
+| Code | Name | Flag | Shown in UI? |
+|---|---|---|---|
+| `en` | English | 🇬🇧 | No (fallback only) |
+| `nl` | Dutch | 🇳🇱 | Yes |
+| `bg` | Bulgarian | 🇧🇬 | Yes |
+| `hi` | Hindi | 🇮🇳 | Yes |
+| `id` | Indonesian | 🇮🇩 | Yes |
 
-### Naming Conventions
+**Important:** English is the fallback locale but is hidden from the language switcher UI (`LANGUAGES_FOR_UI` filters it out). When adding new UI strings, add translations to **all 5 locale files**: `en.json`, `nl.json`, `bg.json`, `hi.json`, `id.json`.
 
-- Components: PascalCase (`UserProfile.tsx`)
-- Hooks: camelCase with `use` prefix (`useAuth.ts`)
-- Services: camelCase (`authService.ts`)
-- Types/Interfaces: PascalCase (`UserRole`, `ChurchMember`)
-- Constants: UPPER_SNAKE_CASE (`API_BASE_URL`)
-- Files: kebab-case for utilities, PascalCase for components
-- Folders: kebab-case
-
-### Component Structure
-
+**Usage:**
 ```typescript
-// 1. Imports (external, then internal)
-//    - React/React Native imports first
-//    - Third-party libraries
-//    - Local imports (@/components, @/hooks, etc.)
-// 2. Types/Interfaces
-// 3. Component definition
-// 4. Styles (if using StyleSheet)
-// 5. Export (use named exports for components in _components folders, default exports for page components)
+const { t } = useTranslation(); // from @/hooks/useTranslation
+t('auth.login')
+t('common.loading')
 ```
 
-**Import Best Practices:**
+**Rules:**
+- Never hardcode Dutch or English strings in components
+- All user-facing text uses `t()` — labels, buttons, placeholders, error messages
+- Language preference stored in `user_settings` (key: `language`) when logged in, in AsyncStorage when not
 
-- Always import `SafeAreaView` from `react-native-safe-area-context`, never from `react-native`
-- Group imports logically (UI components, hooks, services, types)
-- Use absolute imports with `@/` prefix for better maintainability
+## TypeScript Standards
 
-### React Native & NativeWind Best Practices
+- Strict mode — no `any` unless genuinely unavoidable
+- `interface` for object shapes, `type` for unions/intersections/utility types
+- **`undefined` not `null` for optional values** — optional TS properties are `T | undefined`
+- No unused variables, imports, or arguments
+- Explicit return types on service methods; inferred types fine for local variables
 
-- Use NativeWind classes for styling (e.g., `className="flex-1 bg-white"`)
-- Avoid inline styles unless dynamic values required
-- **ALWAYS use `SafeAreaView` from `react-native-safe-area-context`**, never from `react-native` (deprecated)
-  - Import: `import { SafeAreaView } from "react-native-safe-area-context";`
-  - Alternative: use `useSafeAreaInsets` hook for custom implementations
-- Optimize images with proper sizing and formats
-- Use `FlatList` or `FlashList` for long lists (never `map` in ScrollView)
-- **Forms with multiple inputs:** Use `FormScrollView` from `@/components/ui/FormScrollView` (KeyboardAwareScrollView; no KeyboardToolbar). Add `returnKeyType="next"`, `blurOnSubmit={false}`, and `onSubmitEditing={() => nextRef.current?.focus()}` to chain inputs; use `returnKeyType="done"` on the last field. Pass refs via `useRef<TextInput>(null)` to each InputField
-- Use platform-specific code when necessary (`Platform.select()`)
-- Always test on both iOS and Android
-- Use Expo's asset system for images and fonts
+## Component Architecture
 
-### Internationalization (i18n)
+- Functional components with hooks only
+- Max ~250 lines per component; extract into sub-components if larger
+- Named exports from `_components/` files; default exports for page/screen components
+- No inline styles when a NativeWind class exists
+- `SafeAreaView` always from `react-native-safe-area-context`, never from `react-native`
 
-- **Supported languages:** English (en, default), Dutch (nl), Hindi (hi), Indonesian (id)
-- **Always add translations** when adding or changing UI text. Every user-facing string must exist in all 4 locale files
-- **Locale files:** `i18n/locales/en.json`, `nl.json`, `hi.json`, `id.json`
-- **Usage:** `const { t } = useTranslation();` then `t("auth.login")` or nested keys like `t("home.welcome")`
-- **Adding a new string:** Add the key to all 4 JSON files under the appropriate section (auth, home, common, etc.)
-- **Adding a new language:** Update `i18n/localeConfig.ts` (LANGUAGES array), create `i18n/locales/xx.json`, add import and I18n entry in `i18n/index.ts`
-- **Never hardcode** user-facing strings; use `t()` for all labels, buttons, messages, placeholders, errors
-- Language preference is stored in `user_settings` (key: `language`) when logged in, and in AsyncStorage when not
+## Folder Structure Rules
 
-### Gluestack UI Usage
+```
+app/
+├── (auth)/
+│   ├── _layout.tsx
+│   ├── login/
+│   │   ├── index.tsx
+│   │   ├── _components/    # LoginForm, ThemeToggleIcon
+│   │   └── _hooks/         # useLogin
+│   └── register/
+│       ├── index.tsx
+│       ├── _components/    # RegisterAccountStep, RegisterProfileStep
+│       └── _hooks/         # useRegister
+└── (main)/
+    ├── _layout.tsx          # Drawer + SectionNavigationProvider
+    ├── _components/         # DrawerContent, MainTopBar, CustomTabBar, SectionCard, etc.
+    ├── index.tsx            # Home overview
+    ├── bibleschool/
+    │   ├── _layout.tsx
+    │   ├── intro.tsx
+    │   ├── _components/     # OverviewCard, ProgressCard, ContinueLearningCard, etc.
+    │   └── (tabs)/
+    │       ├── _layout.tsx
+    │       ├── index.tsx
+    │       ├── _components/ # AdminBibleschoolAnalytics, etc.
+    │       └── modules/
+    │           ├── index.tsx
+    │           ├── _layout.tsx
+    │           ├── _components/ # ModuleCard
+    │           └── [id]/
+    │               ├── index.tsx
+    │               ├── _layout.tsx
+    │               ├── exam.tsx
+    │               ├── [lessonId].tsx
+    │               └── _components/ # LockedLessonModal
+    ├── admin/           # AdminLayout, users/, analytics/
+    ├── profile/         # index, information, _layout
+    ├── settings/        # index, preferences, video, notifications, _components/, _config/
+    ├── badges/          # index, _components/BadgeDetailModal
+    ├── podcasts/        # index, _layout
+    ├── sermons/         # index, _layout
+    └── faith-business-school/  # index, _layout
+```
 
-- Use Gluestack components as base building blocks
-- Customize with NativeWind classes for brand consistency
-- Create wrapper components for frequently used patterns
-- Follow Gluestack's composition patterns
-- Leverage Gluestack's accessibility features
+**Location rules:**
+- `_components/` and `_hooks/` = page-private, underscore prefix, not treated as routes
+- `/components/ui/` = shared base UI elements
+- `/components/common/` = shared business components
+- `/hooks/` = shared hooks (used by 2+ pages)
+- `/services/` = all API/service code (always shared)
 
-### Performance
+## Services & Data Layer
 
-- Memoize expensive computations with `useMemo`
-- Memoize callbacks with `useCallback` when passing to child components
-- Use `React.memo` for pure components that render often
-- Implement virtualization for long lists
-- Lazy load heavy components
-- Optimize images and assets
-- Avoid anonymous functions in render methods
-- Use `InteractionManager` for deferred work after animations
+### BaseService Pattern
 
-### State Management
-
-- Local state with `useState` for component-specific data
-- Context for shared state across component tree (e.g., AuthContext)
-- **TanStack Query for server state** - all data fetching should use TanStack Query
-- Keep state as close to usage as possible
-- Avoid prop drilling beyond 2-3 levels
-- Use reducers for complex state logic
-
-### Data Fetching with TanStack Query
-
-- **Always use TanStack Query for server data** - mutations, queries, caching
-- Configure QueryProvider with persistence using AsyncStorage
-- Use query keys factory from `services/queryKeys.ts`
-- Mutations for write operations (create, update, delete)
-- Queries for read operations (get, list)
-- Configure staleTime and cacheTime appropriately
-  - Default: 5 minutes staleTime, 24 hours cacheTime
-- Use optimistic updates for better UX where appropriate
-
-Example:
+Every domain service extends `BaseService` from `@/services/api/baseService.ts`:
 
 ```typescript
-const loginMutation = useMutation({
-  mutationFn: async (data) => authService.login(data),
+import { BaseService } from '@/services/api/baseService';
+
+export class MyService extends BaseService {
+  protected tableName = 'my_table';
+
+  async getByUser(userId: string) {
+    return this.list<MyType>({
+      filters: [{ field: 'user_id', operator: 'eq', value: userId }],
+      sort: [{ field: 'created_at', ascending: false }],
+    });
+  }
+}
+
+export const myService = new MyService();
+```
+
+**BaseService public/protected methods:**
+- `get<T>(id, options?)` — fetch single record by id
+- `list<T>(options?)` — fetch array with filters/sort/pagination
+- `listPaginated<T>(options?)` — returns `PaginatedResponse<T>`
+- `create<T, D>(data)` — insert, returns created record
+- `createWithUser<T, D>(data)` — injects `user_id` automatically
+- `update<T, D>(id, data)` — update by id
+- `upsertWithConflict<T, D>(data, { onConflict })` — upsert
+- `delete(id)` — delete by id
+- `batchCreate<T, D>(items[])` — multi-insert
+- `batchDelete(ids[])` — multi-delete
+- `count(filters?)` — count records
+- `exists(id)` — boolean existence check
+- `executeRpc<T>(name, params?)` — call a Postgres RPC
+- `getCurrentUserId()` — gets auth user id (throws if unauthenticated)
+- `injectUserId(data)` — adds `user_id` field to data
+
+### Existing Services
+
+| File | Table | Purpose |
+|---|---|---|
+| `authService.ts` | auth | Login, register, password reset |
+| `userService.ts` | profiles | User profiles |
+| `lessonProgressService.ts` | user_lesson_progress | Lesson completion, video position |
+| `moduleProgressService.ts` | user_module_progress | Module status, progress % |
+| `quizAttemptService.ts` | user_quiz_attempts | Quiz attempt records |
+| `userSettingsService.ts` | user_settings | Key-value user preferences |
+| `badgeService.ts` | badges, user_badges | Achievement badges |
+| `streakService.ts` | user_streaks | Learning streaks |
+| `notificationService.ts` | user_notifications | In-app notifications |
+| `adminAnalyticsService.ts` | RPCs | Admin dashboard analytics |
+
+Other services:
+- `services/storyblok/client.ts` — Storyblok content fetching
+- `services/supabase/client.ts` — Supabase JS client (singleton)
+- `services/vimeo/vimeoService.ts` — Vimeo playback URLs and thumbnails
+- `services/quizContentService.ts` — Quiz question content (from `constants/quizQuestions.ts`)
+
+### TanStack Query
+
+Always use TanStack Query for server state. Never `useEffect` + `useState` for data fetching.
+
+```typescript
+// Queries
+const { data, isLoading, error } = useQuery({
+  queryKey: queryKeys.progress.lesson(userId, lessonId),
+  queryFn: () => lessonProgressService.getByUserLesson(userId, lessonId),
+  staleTime: 5 * 60 * 1000,
+});
+
+// Mutations
+const mutation = useMutation({
+  mutationFn: (input) => lessonProgressService.upsertProgress(input),
   onSuccess: () => {
-    toast.success("Welcome back!");
+    queryClient.invalidateQueries({ queryKey: queryKeys.progress.lesson(userId, lessonId) });
+    toast.success(t('common.saved'));
   },
-  onError: (err) => {
-    toast.error(err.message);
-  },
+  onError: (err) => toast.error(err.message),
 });
 ```
 
-### API & Data Fetching
+**Query key factory** is at `services/queryKeys.ts`. Always use it. Never write raw arrays for query keys.
 
-- **Use BaseService pattern for all API services** (`services/api/baseService.ts`)
-- All domain services extend BaseService and set `protected tableName`
-- BaseService provides: `get`, `list`, `listPaginated`, `create`, `update`, `delete`, `batchCreate`, `batchUpdate`, `batchDelete`, `count`, `exists`
-- Use typed interfaces from `types/` for all requests and responses
-- Handle errors with AppError class (normalized from Supabase errors)
-- All errors are automatically logged in dev mode
-- Use TanStack Query for data fetching, not direct service calls in components
+## Error Handling
 
-**BaseService Features:**
-
-- Generic CRUD operations (no need to rewrite for each table)
-- **Automatic user_id injection**: Use `createWithUser()` instead of `create()` to automatically inject the current authenticated user's ID
-- Filtering: `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `like`, `ilike`, `in`, `is`
-- Sorting: by any field, ascending/descending
-- Pagination: with metadata (total, totalPages, hasNext, hasPrevious)
-- Batch operations: create/update/delete multiple records
-- Automatic error normalization and logging
-- Protected helper methods: `getCurrentUserId()` - gets authenticated user ID, `injectUserId()` - adds user_id to data
-
-Example Service:
+Services throw `AppError` (from `@/services/api/baseService.ts`):
 
 ```typescript
-export class ProgressService extends BaseService {
-  protected tableName = "user_lesson_progress";
+import { AppError, AppErrorCode } from '@/services/api/baseService';
 
-  async getLessonProgress(userId: string, lessonId: string): Promise<LessonProgress | null> {
-    const { data } = await this.list<LessonProgress>({
-      filters: [
-        { field: "user_id", operator: "eq", value: userId },
-        { field: "lesson_id", operator: "eq", value: lessonId },
-      ],
-    });
-    return data[0] ?? null;
-  }
-
-  async upsertProgress(data: UpsertLessonProgressData): Promise<LessonProgress> {
-    return this.createWithUser<LessonProgress, UpsertLessonProgressData>(data);
-  }
-}
-```
-
-### Error Handling
-
-- **Use AppError class** - all services throw typed AppError instances
-- AppError includes: `code`, `message`, `originalError`, `details`
-- Error codes: `UNKNOWN`, `NETWORK`, `AUTH_*`, `DATABASE_*`, `PERMISSION_DENIED`, `RATE_LIMIT`
-- BaseService automatically normalizes Supabase errors to AppError
-- Show user-friendly error messages in UI
-- Log errors to console in dev mode (automatic in BaseService)
-- Validate user input at form level before submission
-- Use try-catch for async operations
-- Display errors inline for form validation, toasts for general errors
-
-Example:
-
-```typescript
 try {
   await authService.login(data);
 } catch (err) {
   if (err instanceof AppError) {
-    if (err.code === AppErrorCode.AUTH_INVALID_CREDENTIALS) {
-      setError("Invalid email or password");
+    switch (err.code) {
+      case AppErrorCode.AUTH_INVALID_CREDENTIALS:
+        setError(t('auth.invalidCredentials'));
+        break;
+      case AppErrorCode.AUTH_USER_EXISTS:
+        setError(t('auth.userExists'));
+        break;
+      default:
+        toast.error(err.message);
     }
   }
 }
 ```
 
-### Security
+Error codes: `UNKNOWN`, `NETWORK`, `AUTH_INVALID_CREDENTIALS`, `AUTH_USER_EXISTS`, `AUTH_WEAK_PASSWORD`, `AUTH_SESSION_MISSING`, `DATABASE_CONFLICT`, `DATABASE_NOT_FOUND`, `DATABASE_VALIDATION`, `PERMISSION_DENIED`, `RATE_LIMIT`.
 
-- Never commit API keys or secrets
-- Use environment variables for sensitive data
-- Implement proper authentication flows
-- Store tokens securely (SecureStore for sensitive data)
-- Validate all user inputs
-- Implement proper authorization checks
-- Use HTTPS for all API calls
-- Implement rate limiting on API calls
+## UI Patterns
 
-### Accessibility
+### Theme
 
-- Add proper `accessibilityLabel` to interactive elements
-- Use semantic components from Gluestack
-- Ensure sufficient color contrast
-- Support screen readers
-- Test with accessibility tools
-- Provide haptic feedback for interactions
+Always use `useTheme()` from `@/hooks/useTheme`. Never hardcode colors.
 
-### Code Style
-
-- No inline comments unless explicitly requested
-- Self-documenting code with clear names
-- DRY principle - extract reusable logic
-- Single responsibility principle
-- Keep functions small and focused
-- Use early returns to reduce nesting
-- Prefer async/await over promise chains
-
-### UI/UX Guidelines
-
-- **Design system**: Faith Generation uses a black/white/grey palette matching [faithgeneration.com](https://faithgeneration.com/). See `.cursor/rules/modern-design-2026.mdc` for full design patterns.
-- **Theme**: Use `useTheme()` from `@/hooks/useTheme` for all colors. Never hardcode hex values.
-- **Light/dark**: App follows system color scheme (GluestackUIProvider `mode={colorScheme ?? 'light'}`).
-- **Primary buttons**: Use `theme.buttonPrimary` for background and `theme.buttonPrimaryContrast` for text.
-- Add `cursor-pointer` class to all clickable elements
-- Space buttons properly in flex-row layouts (ml-2, ml-3, etc.)
-- Implement loading states for async operations
-- Provide visual feedback for user actions
-- Use haptic feedback on mobile interactions (`expo-haptics`)
-- Follow platform-specific design patterns (iOS vs Android)
-- Implement proper navigation patterns with back buttons
-- **Use toast notifications for success/error feedback** (`useToast` hook)
-- Implement pull-to-refresh where appropriate
-- **Always use `LoadingScreen` component for full-screen loading states** (e.g., authentication, profile fetching, route guards)
-  - Import from `@/components/ui/LoadingScreen`
-  - Provide descriptive messages: `<LoadingScreen message="Loading your profile..." />`
-  - Never use bare `ActivityIndicator` for full-screen loading
-
-### Testing
-
-- No test files should be generated
-- Manual testing on both iOS and Android required
-- Test on various screen sizes
-- Test offline scenarios for cached content
-- Test video playback and progress sync
-
-### Git & Commits
-
-- Write clear, descriptive commit messages
-- Keep commits atomic and focused
-- Never force push to main/master
-- Use conventional commit format when possible
-
-### Dependencies
-
-- Keep dependencies up to date
-- Prefer well-maintained libraries
-- Check bundle size impact before adding dependencies
-- Use Expo-compatible packages when possible
-- Document why non-standard dependencies are added
-
-### Environment Setup
-
-- Use .env files for environment variables
-- Never commit .env files
-- Provide .env.example with required variables
-- Use different configs for dev/staging/production
-- **All environment variables must be defined** - no fallback values in code
-- Required variables:
-  - `EXPO_PUBLIC_SUPABASE_URL` - from `supabase status`
-  - `EXPO_PUBLIC_SUPABASE_ANON_KEY` - from `supabase status`
-  - `EXPO_PUBLIC_STORYBLOK_ACCESS_TOKEN` - Storyblok content API
-  - `EXPO_PUBLIC_VIMEO_*` - (if needed for Vimeo API access)
-
-### Supabase Local Development & Seeding
-
-**Creating Auth User Seed Files:**
-
-- When seeding `auth.users`, **ALL token fields must be empty strings (`''`), not NULL**
-- Required empty string fields:
-  - `confirmation_token`, `recovery_token`
-  - `email_change`, `email_change_token_new`, `email_change_token_current`
-  - `phone_change`, `phone_change_token`
-  - `reauthentication_token`
-- Use `::jsonb` cast for `raw_app_meta_data` and `raw_user_meta_data`
-- Use `crypt('password', gen_salt('bf'))` for `encrypted_password`
-- Set `email_confirmed_at` to `NOW()` for confirmed users
-- Always create corresponding entries in `auth.identities` with matching `user_id` and `provider_id`
-- Example:
-
-```sql
-INSERT INTO auth.users (
-  id, instance_id, email, encrypted_password,
-  email_confirmed_at, created_at, updated_at,
-  raw_app_meta_data, raw_user_meta_data,
-  is_super_admin, role, aud,
-  confirmation_token, recovery_token,
-  email_change, email_change_token_new, email_change_token_current,
-  phone_change, phone_change_token, reauthentication_token
-) VALUES (
-  '...uuid...', '00000000-0000-0000-0000-000000000000',
-  'user@example.com', crypt('password123', gen_salt('bf')),
-  NOW(), NOW(), NOW(),
-  '{"provider":"email","providers":["email"]}'::jsonb,
-  '{"full_name":"User Name"}'::jsonb,
-  false, 'authenticated', 'authenticated',
-  '', '', '', '', '', '', '', ''
-);
+```typescript
+const theme = useTheme();
+// theme.pageBg, theme.cardBg, theme.cardBorder
+// theme.textPrimary, theme.textSecondary, theme.textTertiary
+// theme.buttonPrimary, theme.buttonPrimaryContrast
+// theme.buttonDecline, theme.buttonAccept
+// theme.isDark (boolean)
 ```
 
-## Senior Developer Mindset
+Full token reference in `.cursor/rules/modern-design-2026.mdc`.
 
-- Think about scalability from the start
-- Consider mobile-specific constraints (memory, battery, network)
-- Write maintainable code for future developers
-- Balance perfection with pragmatism
-- Question requirements when unclear
-- Suggest improvements proactively
-- Consider edge cases and error scenarios
-- Think about offline-first architecture for videos and handouts
-- Consider data synchronization for user progress across devices
-- Plan authentication and profile architecture
-- Consider push notification strategies for new content
-- Think about content structure compatibility with existing Storyblok setup
+### Loading States
 
-## Common Pitfalls to Avoid
+Full-screen loading → `LoadingScreen` from `@/components/ui/LoadingScreen`. Never bare `ActivityIndicator`.
 
-1. **Never use deprecated APIs:**
-   - ❌ `SafeAreaView` from `react-native` (deprecated)
-   - ✅ `SafeAreaView` from `react-native-safe-area-context`
+```typescript
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+if (isLoading) return <LoadingScreen message={t('common.loading')} />;
+```
 
-2. **Expo Router Stack.Screen declarations:**
-   - ❌ `<Stack.Screen name="home" />` (causes layout warnings)
-   - ✅ `<Stack.Screen name="home/index" />` (correct path)
+### Toast Notifications
 
-3. **Metro bundler and Expo Router:**
-   - Folders prefixed with underscore (`_components`, `_hooks`) are automatically ignored as routes by Expo Router
-   - Do NOT add them to metro.config.js blockList - this prevents imports entirely
-   - The underscore prefix is sufficient for Expo Router to skip them during route generation
-   - If you see warnings about missing default exports in `_components` or `_hooks`, they are harmless and can be ignored
-   - After making structural changes, clear cache: `rm -rf node_modules/.cache .expo`
-   - Restart the dev server to pick up changes
+```typescript
+import { useToast } from '@/hooks/useToast';
+const toast = useToast();
+toast.success(t('common.saved'));
+toast.error(t('common.error'));
+```
 
-4. **Import organization:**
-   - Always import from `react-native-safe-area-context` for SafeAreaView
-   - Use absolute imports (`@/`) for internal modules
-   - Group imports logically
+### Forms
 
-5. **Error handling:**
-   - Always use BaseService for API calls
-   - Return typed errors (AppError) with appropriate error codes
-   - Provide user-friendly error messages
+Use `FormScrollView` from `@/components/ui/FormScrollView` (KeyboardAwareScrollView). Chain inputs with refs:
 
-6. **TypeScript null vs undefined:**
-   - ❌ Use `null` for optional values
-   - ✅ Use `undefined` for optional values (matches TypeScript optional properties)
-   - Example: `data.field || undefined` not `data.field || null`
+```typescript
+const emailRef = useRef<TextInput>(null);
+const passwordRef = useRef<TextInput>(null);
 
-7. **Services pattern:**
-   - ❌ Writing manual CRUD operations for each table
-   - ✅ Extend BaseService and set `tableName`
-   - ❌ Calling Supabase directly in components
-   - ✅ Use services + TanStack Query
+<FormScrollView>
+  <InputField ref={emailRef} returnKeyType="next" blurOnSubmit={false}
+    onSubmitEditing={() => passwordRef.current?.focus()} />
+  <InputField ref={passwordRef} returnKeyType="done" />
+</FormScrollView>
+```
 
-8. **Data fetching:**
-   - ❌ Using `useEffect` + `useState` for data fetching
-   - ✅ Use TanStack Query mutations and queries
-   - ❌ Direct service calls in components
-   - ✅ Wrap service calls in `useMutation` or `useQuery`
+Never use `KeyboardAvoidingView` + `ScrollView`. Never use `KeyboardToolbar`.
 
-9. **Video playback:**
-   - ❌ `expo-av` Video component (deprecated in SDK 54)
-   - ✅ `expo-video` for native video playback
+### Lists
 
-10. **Form keyboard handling:**
-    - ❌ `KeyboardAvoidingView` + `ScrollView` (inconsistent, doesn't auto-scroll)
-    - ✅ `FormScrollView` from `@/components/ui/FormScrollView` (KeyboardAwareScrollView)
-    - ❌ `KeyboardToolbar` (do not use; user prefers no toolbar)
-    - ✅ `returnKeyType` + `onSubmitEditing` + refs for Next/Done keyboard navigation
+Use `FlatList` or `FlashList` for lists. Never `.map()` inside `ScrollView` for long lists.
 
-11. **Internationalization:**
-    - ❌ Hardcoded Dutch/English strings in components
-    - ✅ Use `t("section.key")` from `useTranslation()` for all user-facing text
-    - When adding new UI text, add the key to all 4 locale files: `en.json`, `nl.json`, `hi.json`, `id.json`
+## Supabase Database Schema
 
-## Data Architecture
+Tables in `public`:
 
-### Data Sources
+| Table | Key columns |
+|---|---|
+| `profiles` | `id` (FK auth.users), `full_name`, `avatar_url` |
+| `user_lesson_progress` | `user_id`, `lesson_id`, `module_id`, `completed` (bool), `video_position_seconds`, `completed_at` |
+| `user_module_progress` | `user_id`, `module_id`, `status` (`locked\|in_progress\|completed`), `progress_percentage`, `completed_at` |
+| `user_quiz_attempts` | `user_id`, `module_id`, `attempt_number`, `score_percentage`, `passed`, `answers` (jsonb), `correct_count`, `total_count` |
+| `user_settings` | `user_id`, `key`, `value` (jsonb) — key-value store |
+| `badges` | `id`, `key`, `title`, `description`, `icon_url` |
+| `user_badges` | `user_id`, `badge_id`, `earned_at` |
+| `user_streaks` | `user_id`, `current_streak`, `longest_streak`, `last_activity_date` |
+| `user_notifications` | `user_id`, `title`, `body`, `type`, `read`, `created_at` |
 
-- **Storyblok CMS:** Modules, lessons, handouts (rich text), podcasts, sermons; video IDs (vimeo_id); PDF handout URLs
-- **Supabase:** Auth, `profiles`, user progress (lessons, modules, quizzes)
-- **Vimeo:** Video hosting; store vimeo_id in Storyblok content; use playback URLs for video player
+RLS: all tables enforce `auth.uid() = user_id`.
 
-### User Progress Schema (Supabase)
+RPCs: `get_user_setting(p_user_id, p_key)`, `set_user_setting(p_user_id, p_key, p_value)`, analytics RPCs for admin.
 
-**`public.profiles`**
+**Migration naming:** `YYYYMMDDHHMMSS_description.sql`. Always run `date -u +%Y%m%d%H%M%S` before naming.
 
-- `id` (uuid, PK, FK auth.users)
-- `full_name`, `avatar_url`, etc.
-- `created_at`, `updated_at`
+## Storyblok Content Structure
 
-**`public.user_lesson_progress`**
+Content types used:
+- `bibleschool_category` — module container (fetched by locale)
+- Module stories contain: `title`, `description`, `vimeo_id`, lesson references
+- Lesson stories contain: `title`, `vimeo_id`, `content` (rich text), handout data
 
-- `id` (uuid, PK)
-- `user_id` (uuid, FK auth.users)
-- `lesson_id` (text – Storyblok slug or ID)
-- `completed_at` (timestamptz, nullable)
-- `video_position_seconds` (int, nullable)
-- `created_at`, `updated_at`
-- Unique on (user_id, lesson_id)
+Fetch with `EXPO_PUBLIC_STORYBLOK_ACCESS_TOKEN`. See `services/storyblok/client.ts` and `hooks/useBibleschoolContent.ts`.
 
-**`public.user_module_progress`**
+## Contexts Reference
 
-- `id` (uuid, PK)
-- `user_id` (uuid, FK auth.users)
-- `module_id` (text – Storyblok slug or ID)
-- `status` (text: 'not_started' | 'in_progress' | 'passed')
-- `progress_pct` (int, 0–100)
-- `passed_at` (timestamptz, nullable)
-- `attempt_count` (int)
-- `created_at`, `updated_at`
-- Unique on (user_id, module_id)
+| Context | File | Export hook | Purpose |
+|---|---|---|---|
+| Auth | `contexts/AuthContext.tsx` | `useAuth()` | `{ session, user, isLoading, signOut }` |
+| Theme | `contexts/ThemeContext.tsx` | `useThemePreference()` | `{ preference, setPreference, effectiveScheme }` |
+| Language | `contexts/LanguageContext.tsx` | `useLanguage()` | `{ locale, changeLanguage, isInitialized }` |
+| Toast | `contexts/ToastContext.tsx` | `useToast()` (re-exported via `hooks/useToast.ts`) | Toast API |
+| SectionNavigation | `contexts/SectionNavigationContext.tsx` | `useSectionNavigation()` | Drawer loading overlay state |
+| Typography | `contexts/TypographyContext.tsx` | `useTypography()` | `{ fontFamily, fontSizeScale, setFontFamily, setFontSizeScale }` |
 
-**`public.quiz_attempts`**
+## Common Pitfalls
 
-- `id` (uuid, PK)
-- `user_id` (uuid, FK auth.users)
-- `module_id` (text)
-- `score_pct` (int)
-- `passed` (boolean)
-- `created_at`
+```
+❌ import { SafeAreaView } from 'react-native'
+✅ import { SafeAreaView } from 'react-native-safe-area-context'
 
-**`public.user_quiz_answers`**
+❌ <Stack.Screen name="bibleschool" />
+✅ <Stack.Screen name="bibleschool/index" />  (full path)
 
-- `id` (uuid, PK)
-- `attempt_id` (uuid, FK quiz_attempts)
-- `question_id` (text)
-- `answer_id` (text)
-- `is_correct` (boolean)
-- `created_at`
+❌ router.push('/(main)/bibleschool')
+✅ router.push(routes.bibleschool())
 
-RLS: Users can only read/write their own progress rows (auth.uid() = user_id).
+❌ useEffect + setState for data fetching
+✅ useQuery / useMutation from TanStack Query
 
-## Content Integration
+❌ expo-av Video component
+✅ expo-video
 
-### Storyblok
+❌ KeyboardAvoidingView + ScrollView for forms
+✅ FormScrollView from @/components/ui/FormScrollView
 
-- Fetch modules, lessons, handouts via Storyblok REST or GraphQL API
-- Use `storyblok-react` or direct fetch with `EXPO_PUBLIC_STORYBLOK_ACCESS_TOKEN`
-- Content structure should match existing Faith app in Storyblok to avoid recreating content
-- Store `vimeo_id` in lesson/sermon content for video playback
+❌ Hardcoded strings: <Text>Laden...</Text>
+✅ <Text>{t('common.loading')}</Text>
 
-### Vimeo
+❌ null for optional values
+✅ undefined for optional values
 
-- Videos hosted on Vimeo; metadata and playback URLs stored in content (Storyblok)
-- Use Vimeo Player SDK or expo-video with Vimeo embed/playback URL as needed
-- No app-side Vimeo API key required if URLs come from Storyblok
+❌ Translate to only en.json / nl.json
+✅ Add to all 5 locale files: en, nl, bg, hi, id
 
-### Handouts
+❌ Hardcoded hex colors
+✅ theme.* tokens from useTheme()
 
-- **PDF:** URLs in Storyblok (Supabase Storage or external); display with PDF viewer component
-- **Rich text:** Stored in Storyblok; render in-app with rich text component
+❌ ActivityIndicator for full-screen loading
+✅ LoadingScreen from @/components/ui/LoadingScreen
 
-## Video Player
+❌ Direct supabase calls in components
+✅ Service methods + TanStack Query
+```
 
-- Use **expo-video** for video playback (expo-av is deprecated in SDK 54+)
-- For Vimeo: use Vimeo Player SDK, WebView embed, or a React Native player that supports Vimeo URLs
+## Environment Variables
+
+All required, no fallbacks:
+- `EXPO_PUBLIC_SUPABASE_URL`
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- `EXPO_PUBLIC_STORYBLOK_ACCESS_TOKEN`
+- `EXPO_PUBLIC_VIMEO_ACCESS_TOKEN`
+- `EXPO_PUBLIC_LOCAL_DEV_IP`
+
+## Admin Guard
+
+Use `useIsAdmin()` from `@/hooks/useIsAdmin` to check admin role before rendering admin-only UI.
+
+## Context7 MCP for Library Docs
+
+Use when working with external libraries. Known IDs: `/expo/expo`, `/supabase/supabase`, `/tanstack/query`, `/gluestack/gluestack-ui`, `/websites/nativewind_dev`, `/websites/storyblok`. Call `mcp_context7_resolve-library-id` first if ID is unknown, then `mcp_context7_query-docs`.

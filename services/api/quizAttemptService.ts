@@ -42,6 +42,32 @@ class QuizAttemptService extends BaseService {
       sort: [{ field: 'attempt_number', ascending: false }],
     });
   }
+
+  async listAllByUser(userId: string): Promise<QuizAttempt[]> {
+    return this.list<QuizAttempt>({
+      filters: [{ field: 'user_id', operator: 'eq', value: userId }],
+      sort: [
+        { field: 'module_id', ascending: true },
+        { field: 'attempt_number', ascending: false },
+      ],
+    });
+  }
+}
+
+export function groupQuizAttemptsByModuleId(
+  attempts: QuizAttempt[] | undefined,
+): Map<string, QuizAttempt[]> {
+  const map = new Map<string, QuizAttempt[]>();
+  if (!attempts) return map;
+  for (const a of attempts) {
+    const list = map.get(a.module_id) ?? [];
+    list.push(a);
+    map.set(a.module_id, list);
+  }
+  for (const list of map.values()) {
+    list.sort((x, y) => y.attempt_number - x.attempt_number);
+  }
+  return map;
 }
 
 export const quizAttemptService = new QuizAttemptService();

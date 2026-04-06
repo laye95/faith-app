@@ -1,8 +1,38 @@
 {
+  "app": {
+    "versionLabel": "Версия на приложението {{version}}"
+  },
+  "splash": {
+    "logoFaith": "Faith",
+    "logoGeneration": "Generation",
+    "sloganLine1": "REVIVING A",
+    "sloganLine2": "GENERATION",
+    "sloganLine3": "OF FAITH"
+  },
+  "onboarding": {
+    "homeWelcomeTitle": "Добре дошли в Faith Generation",
+    "homeWelcomeSubtitle": "Вашата безплатна християнска среда за обучение. Растете в вяра чрез множество курсове.",
+    "homeAppsTitle": "Изберете своя курс",
+    "homeAppsSubtitle": "От Библийско училище до Business School — всичко на едно място, напълно безплатно.",
+    "homeBeginTitle": "Започнете днес",
+    "homeBeginSubtitle": "Докоснете курс, за да започнете. Започнете с Библийското училище като първа стъпка.",
+    "homeBeginCta": "Да започнем!",
+    "welcomeTitle": "Добре дошли в Библийското училище на Faith Generation",
+    "welcomeSubtitle": "Вашето безплатно онлайн Библийско училище. Растете в вяра и познание на Словото.",
+    "contentTitle": "100 урока · 20 модула",
+    "contentSubtitle": "Всичко безплатно. Напредвайте в собствено темпо.",
+    "startTitle": "Започнете с въвеждащото видео",
+    "startSubtitle": "Открийте как работи Библийското училище и какво да очаквате.",
+    "startCta": "Гледайте въвеждащото видео",
+    "next": "Напред",
+    "skip": "Пропусни",
+    "saveFailed": "Неуспешно записване на напредъка. Моля, опитайте отново."
+  },
   "auth": {
     "back": "Назад",
     "welcomeBack": "Добре дошли отново",
     "loginSubtitle": "Влезте, за да проследявате напредъка си в Библийското училище",
+    "loginBrandTitle": "ДОБРЕ ДОШЛИ В FAITH GENERATION",
     "email": "Имейл",
     "password": "Парола",
     "emailPlaceholder": "Въведете имейл адрес",
@@ -32,7 +62,23 @@
     "passwordsDoNotMatch": "Паролите не съвпадат",
     "registrationFailed": "Регистрацията не беше успешна. Опитайте отново.",
     "invalidCredentials": "Невалиден имейл или парола. Проверете данните си или създайте акаунт.",
-    "loginFailed": "Входът не беше успешен. Опитайте отново."
+    "loginFailed": "Входът не беше успешен. Опитайте отново.",
+    "next": "Напред",
+    "stepOf": "Стъпка {{current}} от {{total}}",
+    "step1Title": "Акаунт",
+    "step2Title": "Профил",
+    "phone": "Телефонен номер",
+    "phonePlaceholder": "По избор",
+    "phoneMinLength": "Телефонният номер трябва да е поне 8 цифри",
+    "birthdate": "Дата на раждане",
+    "birthdatePlaceholder": "По избор",
+    "birthdateInvalid": "Въведете валидна дата",
+    "birthdateNotFuture": "Датата на раждане не може да е в бъдещето",
+    "country": "Държава",
+    "countryPlaceholder": "По избор",
+    "countrySearchPlaceholder": "Търсене на държави",
+    "city": "Град",
+    "cityPlaceholder": "По избор"
   },
   "streak": {
     "days": "{{count}} дни"
@@ -122,6 +168,7 @@
     "cancel": "Отказ",
     "confirm": "Потвърди",
     "close": "Затвори",
+    "done": "Готово",
     "loading": "Зареждане...",
     "authenticating": "Удостоверяване...",
     "redirecting": "Пренасочване...",
@@ -138,7 +185,13 @@
     "badge": "Скоро",
     "podcastsDescription": "Подготвяме вдъхновяващи подкасти за укрепване на вярата ви. Слушайте учения, свидетелства и насърчения навсякъде.",
     "sermonsDescription": "Гледайте и слушайте силни проповеди от Faith Generation. Нашата видео и аудио библиотека ще бъде налична тук скоро.",
-    "faithBusinessSchoolDescription": "Faith Business School идва скоро. Открийте как да изградите бизнес върху библейски принципи."
+    "faithBusinessSchoolDescription": "Faith Business School идва скоро. Открийте как да изградите бизнес върху библейски принципи.",
+    "healingSchoolDescription": "Healing School ще предлага задълбочено учение за Божието изцеление и цялост—в допълнение към библейското училище.",
+    "bibleVersesLearnDescription": "Подготвяме инструменти за запомняне и размисъл върху Писанието, за да останат с вас стиховете от уроците.",
+    "audiobooksDescription": "Слушайте християнски книги и учение в движение—колекция от аудиоматериали предстои.",
+    "givingDescription": "Скоро ще можете да подкрепяте мисията на Faith Generation директно от приложението със сигурни начини на даряване.",
+    "miraclesDescription": "Истории за Божията сила и свидетелства от тялото на Христос—тази секция се разработва.",
+    "bibleReadingScheduleDescription": "Структурирани планове за ежедневно четене на Библията—предстои в приложението."
   },
   "hub": {
     "title": "Какво бихте искали да направите днес?",
@@ -149,21 +202,21 @@
     "faithBusinessSchool": "Faith Business School",
     "faithBusinessSchoolSubtitle": "Бизнес и предприемачество",
     "healingSchool": "Healing School",
-    "healingSchoolSubtitle": "Скоро",
+    "healingSchoolSubtitle": "Учение за изцеление и цялост",
     "sermons": "Проповеди",
     "sermonsSubtitle": "Гледайте и слушайте проповеди",
     "podcasts": "Подкасти",
     "podcastsSubtitle": "Слушайте учения и насърчения",
     "bibleVersesLearn": "Научете библейски стихове",
-    "bibleVersesLearnSubtitle": "Скоро",
+    "bibleVersesLearnSubtitle": "Запомняйте стихове стъпка по стъпка",
     "audiobooks": "Аудиокниги",
-    "audiobooksSubtitle": "Скоро",
+    "audiobooksSubtitle": "Християнски книги за слушане",
     "giving": "Даване",
-    "givingSubtitle": "Скоро",
+    "givingSubtitle": "Подкрепете мисията",
     "miracles": "Чудеса",
-    "miraclesSubtitle": "Скоро",
+    "miraclesSubtitle": "Истории за Божията сила",
     "bibleReadingSchedule": "Библейски четене",
-    "bibleReadingScheduleSubtitle": "Скоро",
+    "bibleReadingScheduleSubtitle": "Ежедневни планове за четене",
     "comingSoon": "Скоро"
   },
   "admin": {
@@ -232,8 +285,26 @@
     "settings": "Настройки",
     "overview": "Обзор",
     "modules": "Модули",
+    "voortgang": "Напредък",
     "browse": "Преглед",
     "latest": "Последни"
+  },
+  "voortgang": {
+    "pageTitle": "Вашият напредък",
+    "overallProgress": "Общ напредък",
+    "lessons": "Уроци",
+    "modules": "Модули",
+    "streak": "Серия",
+    "modulesSection": "Модули",
+    "examPassed": "Положен",
+    "examFailed": "Неположен",
+    "examReady": "Изпитът е готов",
+    "examLocked": "Заключен",
+    "recentBadges": "Скорошни значки",
+    "allBadges": "Всички значки",
+    "currentModule": "Текущ модул",
+    "showAllCompleted": "Покажи {{count}} завършени модула",
+    "hideCompleted": "Скрий завършените модули"
   },
   "overview": {
     "sectionTitle": "Вашият обзор",
@@ -245,6 +316,7 @@
     "introVideoSubtitle": "Започнете своето пътуване",
     "introVideoContent": "Това въведение ще ви помогне да започнете с Faith Generation Библийското училище. Ще научите какво да очаквате от 100 урока в 20 модула и как да извлечете максимум от пътуването си.",
     "currentVideoPlaceholder": "Последният гледан урок ще се появи тук",
+    "currentVideoContext": "{{moduleName}}",
     "continueWatching": "Продължи гледането",
     "moduleWithNumber": "Модул {{number}}",
     "continueLearningTitle": "Продължи обучението",
@@ -261,7 +333,18 @@
     "save": "Запазване на промените",
     "saving": "Запазване...",
     "saved": "Профилът ви е актуализиран",
-    "saveFailed": "Запазването е неуспешно. Опитайте отново."
+    "saveFailed": "Запазването е неуспешно. Опитайте отново.",
+    "memberSince": "Член от {{date}}",
+    "progressTitle": "Вашият напредък",
+    "streakLabel": "Поредица дни",
+    "lessonsCompleted": "Уроци",
+    "modulesCompleted": "Модули",
+    "recentBadges": "Последни значки",
+    "noBadgesYet": "Все още няма значки",
+    "viewAll": "Виж всички",
+    "changeAvatar": "Промени снимка",
+    "uploadingAvatar": "Качване...",
+    "avatarUpdateFailed": "Неуспешно обновяване на снимка"
   },
   "settings": {
     "language": "Език",
@@ -297,6 +380,8 @@
       "bibleschool": "Зареждане на Библийско училище...",
       "podcasts": "Зареждане на подкасти...",
       "sermons": "Зареждане на проповеди...",
+      "faith-business-school": "Зареждане на Faith Business School...",
+      "hub-teaser": "Зареждане...",
       "profile": "Зареждане на профил...",
       "settings": "Зареждане на настройки..."
     }
@@ -378,7 +463,10 @@
     "attemptZero": "0 опита",
     "currentModule": "Текущ модул",
     "completedModules": "Завършени модули",
-    "allModules": "Всички модули"
+    "allModules": "Всички модули",
+    "searchPlaceholder": "Търси модули и уроци…",
+    "searchNoResults": "Няма модули или уроци, които да отговарят на търсенето.",
+    "searchClear": "Изчисти търсенето"
   },
   "lessons": {
     "lessonNumber": "Урок {{number}}",
@@ -393,6 +481,18 @@
     "introRequiredMessage": "Гледайте първо въвеждащото видео",
     "introPageLockedMessage": "Завършете видеото по-горе, за да отключите първия урок",
     "watchIntro": "Гледай въвеждащото",
+    "lockedModalTitle": "Урокът е заключен",
+    "lockedModalMessage": "Завършете първо урок {{number}}, за да продължите.",
+    "lockedModalMessageWithModule": "Завършете първо урок {{number}} от {{module}}, за да продължите.",
+    "lockedModalMessageModuleLesson": "Завършете първо урок {{number}} от модул {{moduleNumber}}, за да продължите.",
+    "lockedModalMessageExamModule": "Завършете първо изпита на модул {{moduleNumber}}, за да отключите този урок.",
+    "lockedModalMessageExamWithModule": "Завършете първо изпита на {{module}}, за да отключите този урок.",
+    "lockedModalMessageFirstLesson": "Завършете първо изпита на предишния модул, за да отключите този урок.",
+    "lockedModalOk": "Затвори",
+    "lockedModalGoToLesson": "Към урок {{number}}",
+    "lockedModalGoToLessonModule": "Към модул {{moduleNumber}} урок {{number}}",
+    "lockedModalGoToExam": "Към изпита",
+    "lockedModalGoToExamModule": "Към изпита на модул {{moduleNumber}}",
     "modules": {
       "1": {
         "1": "Какво е вярата?",
@@ -539,7 +639,10 @@
   "lessonsPage": {
     "title": "Уроци",
     "empty": "Няма уроци в този модул",
-    "lessonsCount": "{{count}} урока"
+    "lessonsCount": "{{count}} урока",
+    "currentLesson": "Текущ урок",
+    "otherLessons": "Други уроци",
+    "remaining": "Още {{count}} мин."
   },
   "handouts": {
     "title": "Раздавани материали",
@@ -548,6 +651,7 @@
   },
   "quiz": {
     "title": "Изпит по модул",
+    "examTopBarTitle": "Изпит",
     "submit": "Изпращане",
     "submitError": "Нещо се обърка. Моля, опитайте отново.",
     "pass": "Поздравления! Успешно преминахте.",
@@ -557,6 +661,18 @@
     "correct": "Правилно",
     "incorrect": "Грешно",
     "scoreSummary": "{{score}}% - {{correct}}/{{total}} верни",
+    "loading": "Зареждане на изпита...",
+    "intro": "Отговорете на всички въпроси. Нужни са ви поне {{minCorrect}} от {{total}} верни отговора, за да преминете.",
+    "questionProgress": "{{current}} от {{total}} отговорени",
+    "questionOf": "Въпрос {{current}} от {{total}}",
+    "submitConfirmTitle": "Изпращане на отговорите?",
+    "submitConfirmMessage": "Не можете да промените отговорите си след изпращане.",
+    "cancel": "Отказ",
+    "leaveConfirmTitle": "Напускане на изпита?",
+    "leaveConfirmMessage": "Напредъкът ви е запазен.",
+    "attemptNumber": "Опит {{number}}",
+    "continue": "Продължи",
+    "backToModule": "Назад към модула",
     "modules": {
       "1": {
         "questions": {
