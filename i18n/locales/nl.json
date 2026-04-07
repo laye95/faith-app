@@ -61,6 +61,14 @@
     "confirmPasswordRequired": "Bevestig uw wachtwoord",
     "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
     "registrationFailed": "Registreren mislukt. Probeer het opnieuw.",
+    "profileSetupNotReady": "Je account wordt nog ingesteld. Probeer het zo meteen opnieuw.",
+    "verifyEmailToContinue": "Bevestig je e-mailadres via de link die we hebben gestuurd, en log daarna in.",
+    "verifyEmailTitle": "Bevestig je e-mail",
+    "verifyEmailBody": "We hebben een link gestuurd naar {{email}}. Open die om je account te activeren en log daarna in.",
+    "resendConfirmationEmail": "Bevestigingsmail opnieuw versturen",
+    "resendConfirmationSending": "Verzenden...",
+    "resendConfirmationSent": "Bevestigingsmail verstuurd.",
+    "resendConfirmationFailed": "Kon de e-mail niet opnieuw versturen. Probeer het later opnieuw.",
     "invalidCredentials": "Ongeldig e-mailadres of wachtwoord. Controleer je gegevens of maak een account aan.",
     "loginFailed": "Inloggen mislukt. Probeer het opnieuw.",
     "next": "Volgende",
@@ -78,7 +86,21 @@
     "countryPlaceholder": "Optioneel",
     "countrySearchPlaceholder": "Zoek landen",
     "city": "Stad",
-    "cityPlaceholder": "Optioneel"
+    "cityPlaceholder": "Optioneel",
+    "a11y": {
+      "showPassword": "Wachtwoord tonen",
+      "hidePassword": "Wachtwoord verbergen",
+      "formHasErrorHint": "Controleer de foutmelding onder het formulier.",
+      "opensDatePicker": "Opent de datumkiezer.",
+      "opensCountryPicker": "Opent de landenlijst.",
+      "dismissSheet": "Tik buiten het venster om te sluiten.",
+      "countryList": "Landen",
+      "cycleTheme": "Dubbeltik om te wisselen tussen licht, donker en systeem.",
+      "goToRegister": "Registreren",
+      "goToRegisterHint": "Ga naar account aanmaken",
+      "goToLogin": "Inloggen",
+      "goToLoginHint": "Ga naar inloggen"
+    }
   },
   "streak": {
     "days": "{{count}} dagen"
@@ -425,5 +447,9 @@
   "lessonsPage": {"title": "Lessen", "empty": "Geen lessen in deze module", "lessonsCount": "{{count}} lessen", "currentLesson": "Huidige les", "otherLessons": "Lessen", "remaining": "Nog {{count}} min."},
   "handouts": {"title": "Handouts","lesson": "Leshandout","module": "Modulehandout"},
   "quiz": {"title": "Module-examen","examTopBarTitle": "Examen","loading": "Examen laden...","intro": "Beantwoord alle vragen. Je hebt minstens {{minCorrect}} van {{total}} goed nodig om te slagen.","submit": "Versturen","submitError": "Er is iets misgegaan. Probeer het opnieuw.","pass": "Gefeliciteerd! Je bent geslaagd.","fail": "Nog niet. Je hebt minstens {{minCorrect}} van {{total}} goed nodig om te slagen.","retry": "Opnieuw proberen","answerAll": "Beantwoord alle vragen","correct": "Correct","incorrect": "Incorrect","scoreSummary": "{{score}}% - {{correct}}/{{total}} goed","questionProgress": "{{current}} van {{total}} beantwoord","questionOf": "Vraag {{current}} van {{total}}","submitConfirmTitle": "Antwoorden versturen?","submitConfirmMessage": "Je kunt je antwoorden niet meer wijzigen na het versturen.","cancel": "Annuleren","leaveConfirmTitle": "Examen verlaten?","leaveConfirmMessage": "Je voortgang is opgeslagen.","attemptNumber": "Poging {{number}}","continue": "Doorgaan","backToModule": "Terug naar module","modules":{"1":{"questions":{"1":{"question":"Wat is geloof?","a":"Vertrouwen in wat we verwachten","b":"Een gevoel","c":"Een religie","d":"Een emotie"},"2":{"question":"Geloof komt van:","a":"Onze ouders","b":"Het Woord van God horen","c":"Opleiding","d":"Ervaring"},"3":{"question":"Zonder geloof is het onmogelijk te:","a":"Werken","b":"Rusten","c":"God behagen","d":"Eten"}}}}},
+  "bibleschoolContent": {
+    "loadError": "De nieuwste inhoud kon niet worden geladen. Er wordt opgeslagen of offline materiaal getoond.",
+    "retry": "Opnieuw proberen"
+  },
   "exam": {"takeExam": "Examen maken","unlockHint": "Voltooi alle lessen om te ontgrendelen","readyHint": "Alle lessen voltooid","passed": "Examen behaald","passedHint": "Je hebt het examen van deze module afgerond","failedScore": "{{score}}% - {{correct}}/{{total}} goed","retryHint": "Tik om opnieuw te proberen","retryHintWithAttempt": "Poging {{count}} - Tik om opnieuw te proberen","alreadyPassed": "Je hebt dit examen al behaald"}
 }

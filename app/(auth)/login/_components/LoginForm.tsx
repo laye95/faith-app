@@ -4,7 +4,7 @@ import { useAuthCardShadow } from '@/hooks/useShadows';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { bzzt } from '@/utils/haptics';
-import { validateEmail, validatePassword } from '@/utils/validators';
+import { validateEmail, validatePasswordForLogin } from '@/utils/validators';
 import { useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import { AuthErrorBox } from '../../_components/AuthErrorBox';
@@ -35,7 +35,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
   const handleSubmit = async () => {
     bzzt();
     const emailErr = validateEmail(email, t);
-    const passwordErr = validatePassword(password, t);
+    const passwordErr = validatePasswordForLogin(password, t);
     setEmailError(emailErr);
     setPasswordError(passwordErr);
     if (emailErr || passwordErr) return;

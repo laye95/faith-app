@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
@@ -7,7 +7,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
 
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ThemeToggleIcon } from '../login/_components/ThemeToggleIcon';
@@ -37,6 +36,8 @@ export function AuthTopBar({ showBackButton, onBack }: AuthTopBarProps) {
               onBack();
             }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t('auth.back')}
             className="flex-row items-center gap-2 cursor-pointer rounded-full pl-3 pr-4 py-2"
             style={{
               backgroundColor: theme.cardBg,

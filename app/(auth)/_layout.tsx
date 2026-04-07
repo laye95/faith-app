@@ -26,6 +26,10 @@ export default function AuthLayout() {
         name="register/index"
         options={{ title: "Registreren" }}
       />
+      <Stack.Screen
+        name="verify-email/index"
+        options={{ title: "E-mail bevestigen" }}
+      />
     </Stack>
   );
 }

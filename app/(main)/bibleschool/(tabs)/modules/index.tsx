@@ -11,19 +11,15 @@ import { prefetchLessonThumbnailsForModule } from "@/hooks/usePrefetchLessonThum
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { BibleschoolModule } from "@/types/bibleschool";
+import { getFirstModuleId } from "@/utils/bibleschoolCurriculum";
 import { filterBibleschoolModulesBySearch } from "@/utils/bibleschoolModuleSearch";
 import { bzzt } from "@/utils/haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  InteractionManager,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView, TouchableOpacity, View } from "react-native";
+import { runDeferredTask } from "@/utils/runDeferredTask";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ModulesCatalogSections } from "./_components/ModulesCatalogSections";
 import { ModulesSearchBar } from "./_components/ModulesSearchBar";
@@ -39,6 +35,8 @@ export default function BibleSchoolModulesScreen() {
   const { data: modules } = useModules(locale);
   const { module: currentModule } = useLastWatchedLesson();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const firstModuleId = useMemo(() => getFirstModuleId(modules ?? []), [modules]);
 
   const filteredModules = useMemo(() => {
     if (!modules?.length) return [];
@@ -69,10 +67,11 @@ export default function BibleSchoolModulesScreen() {
         module.id,
         lessons,
         introductionVimeoId ?? undefined,
+        firstModuleId,
       );
       router.push(routes.bibleschoolModule(module.id));
     },
-    [queryClient, introductionVimeoId, modules],
+    [queryClient, introductionVimeoId, firstModuleId, modules],
   );
 
   const currentModuleData = useMemo(() => {
@@ -101,12 +100,13 @@ export default function BibleSchoolModulesScreen() {
 
   useEffect(() => {
     if (!moduleToPrefetch || !modules?.length) return;
-    const task = InteractionManager.runAfterInteractions(() => {
+    const task = runDeferredTask(() => {
       prefetchLessonThumbnailsForModule(
         queryClient,
         moduleToPrefetch.id,
         moduleToPrefetch.lessons ?? [],
         introductionVimeoId ?? undefined,
+        firstModuleId,
       );
     });
     return () => task.cancel();
@@ -114,6 +114,7 @@ export default function BibleSchoolModulesScreen() {
     moduleToPrefetch?.id,
     queryClient,
     introductionVimeoId,
+    firstModuleId,
     modules?.length,
   ]);
 

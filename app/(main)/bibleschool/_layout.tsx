@@ -1,5 +1,6 @@
 import { BibleschoolTabProvider } from "@/contexts/BibleschoolTabContext";
 import { BibleschoolTabBar } from "./_components/BibleschoolTabBar";
+import { StoryblokErrorBanner } from "./_components/StoryblokErrorBanner";
 import {
   rootScreenOptions,
   stackScreenOptions,
@@ -30,10 +31,13 @@ export default function BibleSchoolLayout() {
   return (
     <BibleschoolTabProvider>
       <View style={{ flex: 1, backgroundColor: theme.pageBg }}>
-        <Stack screenOptions={baseOptions}>
-          <Stack.Screen name="(tabs)" options={rootScreenOptions()} />
-          <Stack.Screen name="intro" />
-        </Stack>
+        <StoryblokErrorBanner />
+        <View style={{ flex: 1 }}>
+          <Stack screenOptions={baseOptions}>
+            <Stack.Screen name="(tabs)" options={rootScreenOptions()} />
+            <Stack.Screen name="intro" />
+          </Stack>
+        </View>
         <View style={{ position: "absolute", left: 0, right: 0, bottom: 0 }}>
           <BibleschoolTabBar />
         </View>

@@ -13,7 +13,8 @@
       "userInterfaceStyle": "automatic",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "appleTeamId": "S92GAYN59Q"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +24,10 @@
       "userInterfaceStyle": "automatic",
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.trinixInteractive.faith_generation"
+      "package": "com.trinixInteractive.faith_generation",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -35,10 +39,27 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo_icon.png",
-          "imageWidth": 120,
-          "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#000000",
+          "ios": {
+            "image": "./assets/images/splash_branded.png",
+            "resizeMode": "cover",
+            "backgroundColor": "#000000",
+            "enableFullScreenImage_legacy": true,
+            "dark": {
+              "image": "./assets/images/splash_branded.png",
+              "backgroundColor": "#000000"
+            }
+          },
+          "android": {
+            "image": "./assets/images/splash_branded.png",
+            "resizeMode": "cover",
+            "backgroundColor": "#000000",
+            "imageWidth": 288,
+            "dark": {
+              "image": "./assets/images/splash_branded.png",
+              "backgroundColor": "#000000"
+            }
+          }
         }
       ],
       "expo-secure-store",

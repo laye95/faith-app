@@ -1,12 +1,14 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { MODULES } from '@/constants/modules';
+import { useModules } from '@/hooks/useBibleschoolContent';
 import { useCompletedLessons } from '@/hooks/useCompletedLessons';
 import { useIntroVideoWatched } from '@/hooks/useIntroVideoWatched';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   groupQuizAttemptsByModuleId,
   quizAttemptService,
 } from '@/services/api/quizAttemptService';
 import { queryKeys } from '@/services/queryKeys';
+import { sortModulesByOrder } from '@/utils/bibleschoolCurriculum';
 import {
   getNextUnlockedLesson,
   getNextUnlockedTarget,
@@ -26,6 +28,10 @@ export interface ExamStatusForModule {
 
 export function useLessonUnlocks() {
   const { user } = useAuth();
+  const { locale } = useTranslation();
+  const { data: modules = [], isLoading: modulesLoading } = useModules(locale);
+  const curriculum = useMemo(() => sortModulesByOrder(modules), [modules]);
+
   const { data: completedLessons, isLoading: completedLoading } =
     useCompletedLessons(user?.id);
   const { hasWatched: introVideoWatched, isLoading: introLoading } =
@@ -50,36 +56,59 @@ export function useLessonUnlocks() {
 
   const passedModuleIds = useMemo(() => {
     const set = new Set<string>();
-    MODULES.forEach((m) => {
+    curriculum.forEach((m) => {
       const attempts = attemptsByModuleId.get(m.id) ?? [];
       const passed = attempts.some((a) => a.passed);
       if (passed) set.add(m.id);
     });
     return set;
-  }, [attemptsByModuleId]);
+  }, [attemptsByModuleId, curriculum]);
 
-  const isLoading = completedLoading || introLoading || quizAttemptsLoading;
+  const isLoading =
+    completedLoading ||
+    introLoading ||
+    quizAttemptsLoading ||
+    modulesLoading;
 
   const checkLessonUnlocked = useMemo(
     () => (moduleId: string, lesson: { id: string; moduleId: string; order: number }) =>
-      isLessonUnlocked(moduleId, lesson, completedLessonIds, passedModuleIds, introVideoWatched),
-    [completedLessonIds, passedModuleIds, introVideoWatched],
+      isLessonUnlocked(
+        curriculum,
+        moduleId,
+        lesson,
+        completedLessonIds,
+        passedModuleIds,
+        introVideoWatched,
+      ),
+    [curriculum, completedLessonIds, passedModuleIds, introVideoWatched],
   );
 
   const checkExamUnlocked = useMemo(
     () => (moduleId: string) =>
-      isExamUnlocked(moduleId, completedLessonIds),
-    [completedLessonIds],
+      isExamUnlocked(curriculum, moduleId, completedLessonIds),
+    [curriculum, completedLessonIds],
   );
 
   const nextUnlockedLesson = useMemo(
-    () => getNextUnlockedLesson(completedLessonIds, passedModuleIds, introVideoWatched),
-    [completedLessonIds, passedModuleIds, introVideoWatched],
+    () =>
+      getNextUnlockedLesson(
+        curriculum,
+        completedLessonIds,
+        passedModuleIds,
+        introVideoWatched,
+      ),
+    [curriculum, completedLessonIds, passedModuleIds, introVideoWatched],
   );
 
   const nextUnlockedTarget = useMemo(
-    () => getNextUnlockedTarget(completedLessonIds, passedModuleIds, introVideoWatched),
-    [completedLessonIds, passedModuleIds, introVideoWatched],
+    () =>
+      getNextUnlockedTarget(
+        curriculum,
+        completedLessonIds,
+        passedModuleIds,
+        introVideoWatched,
+      ),
+    [curriculum, completedLessonIds, passedModuleIds, introVideoWatched],
   );
 
   const getExamStatusForModule = useMemo(

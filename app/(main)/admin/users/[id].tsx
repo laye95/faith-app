@@ -3,10 +3,9 @@ import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
-import { MODULES } from '@/constants/modules';
+import { useModules } from '@/hooks/useBibleschoolContent';
 import { adminAnalyticsService } from '@/services/api/adminAnalyticsService';
 import { queryKeys } from '@/services/queryKeys';
-import type { AdminUserDetail } from '@/types/analytics';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLocalSearchParams } from 'expo-router';
@@ -15,10 +14,12 @@ import { useMemo } from 'react';
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatFullDate } from '@/utils/formatters';
+import { sortModulesByOrder } from '@/utils/bibleschoolCurriculum';
 
 export default function AdminUserDetailScreen() {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const { data: modules = [] } = useModules(locale);
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -29,19 +30,11 @@ export default function AdminUserDetailScreen() {
   });
 
   const modulesByModuleId = useMemo(() => {
-    const map = new Map(MODULES.map((m) => [m.id, m]));
-    return map;
-  }, []);
+    return new Map(sortModulesByOrder(modules).map((m) => [m.id, m]));
+  }, [modules]);
 
-  if (!id || isLoading || !data) {
-    return <LoadingScreen message={t('common.loading')} />;
-  }
-
-  const { user, lessonCompletedCount, moduleProgress, quizAttempts } = data;
-
-  const completedModules = moduleProgress.filter((p) => p.status === 'completed');
-  const passedQuizzes = quizAttempts.filter((q) => q.passed);
   const lastAttemptByModule = useMemo(() => {
+    const quizAttempts = data?.quizAttempts ?? [];
     const map = new Map<
       string,
       { moduleId: string; scorePercentage: number; passed: boolean; completedAt: string }
@@ -53,7 +46,16 @@ export default function AdminUserDetailScreen() {
       }
     }
     return map;
-  }, [quizAttempts]);
+  }, [data?.quizAttempts]);
+
+  if (!id || isLoading || !data) {
+    return <LoadingScreen message={t('common.loading')} />;
+  }
+
+  const { user, lessonCompletedCount, moduleProgress, quizAttempts } = data;
+
+  const completedModules = moduleProgress.filter((p) => p.status === 'completed');
+  const passedQuizzes = quizAttempts.filter((q) => q.passed);
 
   return (
     <Box
@@ -211,7 +213,7 @@ export default function AdminUserDetailScreen() {
                       style={{ color: theme.textPrimary }}
                       numberOfLines={1}
                     >
-                      {mod ? t(mod.titleKey as never) : p.moduleId}
+                      {mod ? mod.title : p.moduleId}
                     </Text>
                     <Box className="flex-row items-center gap-3">
                       <Text

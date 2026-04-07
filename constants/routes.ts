@@ -16,6 +16,8 @@ export const routes = {
   admin: (path?: string): Href =>
     (path ? `/(main)/admin/${path}` : "/(main)/admin") as Href,
   auth: (screen: "login" | "register") => `/(auth)/${screen}` as Href,
+  authVerifyEmail: (email: string) =>
+    `/(auth)/verify-email?email=${encodeURIComponent(email)}` as Href,
   profile: (sub?: "information" | "settings"): Href =>
     (sub ? `/(main)/profile/${sub}` : "/(main)/profile") as Href,
   badges: (badgeId?: string): Href =>

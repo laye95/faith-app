@@ -90,7 +90,7 @@ function PassedRow({ data, onPress }: { data: ModuleProgressData; onPress: () =>
             style={{ color: theme.textPrimary }}
             numberOfLines={1}
           >
-            {t(data.titleKey as never)}
+            {data.moduleTitle}
           </Text>
         </View>
 
@@ -150,7 +150,7 @@ function LockedRow({ data, onPress }: { data: ModuleProgressData; onPress: () =>
             style={{ color: theme.textPrimary }}
             numberOfLines={1}
           >
-            {t(data.titleKey as never)}
+            {data.moduleTitle}
           </Text>
         </View>
 
@@ -237,7 +237,7 @@ function ActiveRow({
                 style={{ color: theme.textPrimary }}
                 numberOfLines={2}
               >
-                {t(data.titleKey as never)}
+                {data.moduleTitle}
               </Text>
             </View>
 

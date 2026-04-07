@@ -2,8 +2,8 @@ import type { Href } from 'expo-router';
 import { routes } from '@/constants/routes';
 import { router, usePathname } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { InteractionManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { runDeferredTask } from '@/utils/runDeferredTask';
 
 export const LAST_SECTION_KEY = '@faith_app:last_section';
 export const PROFILE_RETURN_HREF_KEY = '@faith_app:profile_return_href';
@@ -105,7 +105,7 @@ export function useLastSectionRestore() {
     hasRunRestore.current = true;
     hasAttemptedRestoreThisSession = true;
 
-    InteractionManager.runAfterInteractions(() => {
+    runDeferredTask(() => {
       setTimeout(() => {
         getLastSectionHref().then((href) => {
           const hrefStr = String(href);

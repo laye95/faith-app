@@ -3,7 +3,6 @@ import type {
   QuizAnalytics,
   TimeAnalytics,
 } from '@/types/analytics';
-import { MODULES } from '@/constants/modules';
 
 function escapeCsvCell(value: string | number): string {
   const s = String(value);
@@ -17,6 +16,7 @@ export function buildAnalyticsCsv(
   analytics: BibleschoolAnalytics | null,
   quizAnalytics: QuizAnalytics | null,
   timeAnalytics: TimeAnalytics | null,
+  moduleLabels?: Record<string, string>,
 ): string {
   const sections: string[] = [];
 
@@ -32,12 +32,13 @@ export function buildAnalyticsCsv(
     sections.push('Module Completion');
     sections.push('Module,Completed,In Progress,Locked,Total');
     for (const stat of analytics.moduleStats) {
-      const mod = MODULES.find((m) => m.id === stat.moduleId);
+      const mod =
+        moduleLabels?.[stat.moduleId] ?? stat.moduleId;
       const total =
         stat.completedCount + stat.inProgressCount + stat.lockedCount;
       sections.push(
         [
-          escapeCsvCell(mod?.titleKey ?? stat.moduleId),
+          escapeCsvCell(mod),
           escapeCsvCell(stat.completedCount),
           escapeCsvCell(stat.inProgressCount),
           escapeCsvCell(stat.lockedCount),
@@ -54,10 +55,10 @@ export function buildAnalyticsCsv(
       'Module,Attempts,Passed,Failed,Avg Score %,Retry Count',
     );
     for (const stat of quizAnalytics.moduleStats) {
-      const mod = MODULES.find((m) => m.id === stat.moduleId);
+      const mod = moduleLabels?.[stat.moduleId] ?? stat.moduleId;
       sections.push(
         [
-          escapeCsvCell(mod?.titleKey ?? stat.moduleId),
+          escapeCsvCell(mod),
           escapeCsvCell(stat.attemptCount),
           escapeCsvCell(stat.passedCount),
           escapeCsvCell(stat.failedCount),

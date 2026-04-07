@@ -13,7 +13,11 @@ export function AuthErrorBox({ message }: AuthErrorBoxProps) {
   const theme = useTheme();
 
   return (
-    <Animated.View entering={FadeIn}>
+    <Animated.View
+      entering={FadeIn}
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+    >
       <Box
         className="rounded-xl border p-4"
         style={{

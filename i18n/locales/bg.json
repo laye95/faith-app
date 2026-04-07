@@ -61,6 +61,14 @@
     "confirmPasswordRequired": "Потвърдете паролата си",
     "passwordsDoNotMatch": "Паролите не съвпадат",
     "registrationFailed": "Регистрацията не беше успешна. Опитайте отново.",
+    "profileSetupNotReady": "Настройването на акаунта отнема повече време от очакваното. Опитайте отново след малко.",
+    "verifyEmailToContinue": "Проверете имейла си, за да потвърдите акаунта, след което влезте.",
+    "verifyEmailTitle": "Потвърдете имейла си",
+    "verifyEmailBody": "Изпратихме връзка на {{email}}. Отворете я, за да активирате акаунта, след което влезте.",
+    "resendConfirmationEmail": "Изпрати отново имейл за потвърждение",
+    "resendConfirmationSending": "Изпращане...",
+    "resendConfirmationSent": "Имейлът за потвърждение е изпратен.",
+    "resendConfirmationFailed": "Неуспешно повторно изпращане. Опитайте по-късно.",
     "invalidCredentials": "Невалиден имейл или парола. Проверете данните си или създайте акаунт.",
     "loginFailed": "Входът не беше успешен. Опитайте отново.",
     "next": "Напред",
@@ -78,7 +86,21 @@
     "countryPlaceholder": "По избор",
     "countrySearchPlaceholder": "Търсене на държави",
     "city": "Град",
-    "cityPlaceholder": "По избор"
+    "cityPlaceholder": "По избор",
+    "a11y": {
+      "showPassword": "Покажи парола",
+      "hidePassword": "Скрий парола",
+      "formHasErrorHint": "Проверете съобщението за грешка под формата.",
+      "opensDatePicker": "Отваря избора на дата.",
+      "opensCountryPicker": "Отваря списъка с държави.",
+      "dismissSheet": "Докоснете извън прозореца, за да затворите.",
+      "countryList": "Държави",
+      "cycleTheme": "Двоен докос за превключване между светла, тъмна и системна тема.",
+      "goToRegister": "Регистрация",
+      "goToRegisterHint": "Отиди към създаване на акаунт",
+      "goToLogin": "Вход",
+      "goToLoginHint": "Отиди към влизане"
+    }
   },
   "streak": {
     "days": "{{count}} дни"
@@ -700,6 +722,10 @@
         }
       }
     }
+  },
+  "bibleschoolContent": {
+    "loadError": "Неуспешно зареждане на най-новото съдържание. Показват се запазени или офлайн данни.",
+    "retry": "Опитайте отново"
   },
   "exam": {
     "takeExam": "Направете изпита",

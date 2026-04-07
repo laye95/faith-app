@@ -23,7 +23,10 @@ function daysBetween(a: string, b: string): number {
 }
 
 async function loadStoredStreak(userId: string): Promise<StoredStreak | null> {
-  const dbStreak = await streakService.getStreak(userId).catch(() => null);
+  const dbStreak = await streakService.getStreak(userId).catch((err) => {
+    console.error('[Streak] load from server failed', { userId, error: err });
+    return null;
+  });
   if (dbStreak) {
     return {
       lastActiveDate: dbStreak.last_active_date,
@@ -48,7 +51,14 @@ async function persistStreak(
 ): Promise<void> {
   const toStore: StoredStreak = { lastActiveDate, days };
   await AsyncStorage.setItem(STREAK_KEY(userId), JSON.stringify(toStore));
-  await streakService.upsertStreak(userId, lastActiveDate, days).catch(() => {});
+  await streakService.upsertStreak(userId, lastActiveDate, days).catch((err) => {
+    console.error('[Streak] sync to server failed', {
+      userId,
+      lastActiveDate,
+      days,
+      error: err,
+    });
+  });
 }
 
 export async function loadStreakDisplay(userId: string): Promise<number> {

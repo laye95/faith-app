@@ -1,4 +1,6 @@
+import { BrandedSplashScreen } from '@/components/ui/BrandedSplashScreen';
 import { ONBOARDING_SECTIONS } from '@/constants/onboarding';
+import { routes } from '@/constants/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOnboardingSection } from '@/hooks/useOnboardingSection';
 import { useTheme } from '@/hooks/useTheme';
@@ -7,7 +9,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams } from 'expo-router';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
@@ -18,7 +20,7 @@ export default function OnboardingScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
   const toast = useToast();
-  const { user } = useAuth();
+  const { user, session, isLoading: authLoading } = useAuth();
   const { section: sectionParam } = useLocalSearchParams<{ section?: string }>();
 
   const section = sectionParam && sectionParam in ONBOARDING_SECTIONS
@@ -37,8 +39,16 @@ export default function OnboardingScreen() {
     theme.isDark ? theme.cardBg : theme.emptyBg,
   ] as [string, string];
 
+  if (authLoading) {
+    return <BrandedSplashScreen />;
+  }
+
+  if (!session) {
+    return <Redirect href={routes.auth('login')} />;
+  }
+
   const complete = async (navigate: () => void) => {
-    if (!user?.id) return;
+    if (!(user?.id ?? session?.user?.id)) return;
     try {
       await markCompleted();
       navigate();

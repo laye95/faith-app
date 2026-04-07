@@ -28,6 +28,7 @@ export function AuthSubmitButton({
         size="lg"
         className="h-14 cursor-pointer rounded-full"
         isDisabled={isLoading}
+        accessibilityState={{ busy: isLoading }}
         style={{
           backgroundColor: theme.buttonPrimary,
           ...buttonShadow,

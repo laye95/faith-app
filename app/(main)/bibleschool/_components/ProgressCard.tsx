@@ -4,13 +4,15 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/contexts/AuthContext';
-import { TOTAL_LESSONS } from '@/constants/modules';
 import { routes } from '@/constants/routes';
 import { useBibleschoolTab } from '@/contexts/BibleschoolTabContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useModules } from '@/hooks/useBibleschoolContent';
 import { useCompletedLessons } from '@/hooks/useCompletedLessons';
 import { bzzt } from '@/utils/haptics';
+import { sortModulesByOrder, totalLessonCountInCurriculum } from '@/utils/bibleschoolCurriculum';
+import { useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
@@ -19,14 +21,19 @@ import { OverviewCard } from './OverviewCard';
 export function ProgressCard() {
   const { user } = useAuth();
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const { data: modules = [] } = useModules(locale);
+  const totalLessons = useMemo(
+    () => totalLessonCountInCurriculum(sortModulesByOrder(modules)),
+    [modules],
+  );
   const { setActiveTab, setNavigationDirection } = useBibleschoolTab();
 
   const { data: completedLessons } = useCompletedLessons(user?.id);
 
   const completedCount = completedLessons?.length ?? 0;
-  const percentage = TOTAL_LESSONS > 0
-    ? Math.round((completedCount / TOTAL_LESSONS) * 100)
+  const percentage = totalLessons > 0
+    ? Math.round((completedCount / totalLessons) * 100)
     : 0;
 
   const handlePress = () => {
@@ -69,7 +76,7 @@ export function ProgressCard() {
                 className="text-sm mt-1"
                 style={{ color: theme.textSecondary }}
               >
-                {t('overview.progressCount', { completed: completedCount, total: TOTAL_LESSONS })}
+                {t('overview.progressCount', { completed: completedCount, total: totalLessons })}
               </Text>
               <Box className="mt-3">
                 <ProgressBar value={percentage} />

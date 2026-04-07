@@ -5,6 +5,7 @@ import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useTheme } from '@/hooks/useTheme';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Ionicons as Ion } from '@expo/vector-icons';
 import { forwardRef } from 'react';
 import { View, type TextInput } from 'react-native';
@@ -66,8 +67,9 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
     ref,
   ) => {
     const theme = useTheme();
-    const isDark = theme.isDark;
+    const { t } = useTranslation();
     const hasError = !!error || !!hasFormError;
+    const formErrorOnly = !!hasFormError && !error;
     const showToggle = secureTextEntry && onTogglePassword !== undefined;
 
     const boxStyle = {
@@ -91,10 +93,14 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
         ? theme.buttonPrimary
         : theme.textTertiary;
 
+    const inputA11yLabel = error ? `${label}. ${error}` : label;
+
     return (
       <FormControl isInvalid={hasError}>
         <VStack className="gap-2">
           <Text
+            accessible={false}
+            importantForAccessibility="no"
             className="text-sm font-medium"
             style={{ color: theme.textSecondary }}
           >
@@ -106,7 +112,7 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
               size="lg"
               className="h-14 border-0 bg-transparent"
             >
-              <InputSlot className="pl-5">
+              <InputSlot className="pl-5" accessible={false}>
                 <InputIcon>
                   <Ion name={icon} size={22} color={iconColor} />
                 </InputIcon>
@@ -131,14 +137,27 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
                 placeholderTextColor={theme.textTertiary}
                 className="pl-3 pr-3 text-base"
                 style={{ color: theme.textPrimary }}
+                accessibilityLabel={inputA11yLabel}
+                accessibilityHint={
+                  formErrorOnly ? t('auth.a11y.formHasErrorHint') : undefined
+                }
               />
               {showToggle && (
                 <InputSlot
                   onPress={onTogglePassword}
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   className="cursor-pointer min-w-12 items-center justify-center pr-5"
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    showPassword
+                      ? t('auth.a11y.hidePassword')
+                      : t('auth.a11y.showPassword')
+                  }
                 >
-                  <View className="items-center justify-center">
+                  <View
+                    accessible={false}
+                    className="items-center justify-center"
+                  >
                     <Ion
                       name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                       size={24}
@@ -150,9 +169,19 @@ export const AuthInputField = forwardRef<TextInput, AuthInputFieldProps>(
             </Input>
           </Box>
           {error && (
-            <Animated.View entering={FadeIn}>
-              <HStack className="mt-1 items-center gap-1.5">
-                <Ion name="close-circle" size={14} color={theme.buttonDecline} />
+            <Animated.View entering={FadeIn} accessibilityLiveRegion="polite">
+              <HStack
+                className="mt-1 items-center gap-1.5"
+                accessible
+                accessibilityRole="text"
+              >
+                <View accessible={false} importantForAccessibility="no">
+                  <Ion
+                    name="close-circle"
+                    size={14}
+                    color={theme.buttonDecline}
+                  />
+                </View>
                 <Text
                   className="text-xs"
                   style={{ color: theme.buttonDecline }}

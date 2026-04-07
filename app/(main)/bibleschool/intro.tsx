@@ -3,7 +3,7 @@ import { Text } from '@/components/ui/text';
 import { MainTopBar } from '@/app/(main)/_components/MainTopBar';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useIntroductionVimeoId, useModule } from '@/hooks/useBibleschoolContent';
+import { useIntroductionVimeoId, useModule, useModules } from '@/hooks/useBibleschoolContent';
 import { useNetworkQuality } from '@/hooks/useNetworkQuality';
 import { useVimeoPlaybackUrl } from '@/hooks/useVimeoPlaybackUrl';
 import { useVimeoThumbnail } from '@/hooks/useVimeoThumbnail';
@@ -15,7 +15,7 @@ import { useEvent, useEventListener } from 'expo';
 import { useNavigation, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { bzzt, bzztWarning } from '@/utils/haptics';
+import { getFirstModuleId, sortLessonsByOrder } from '@/utils/bibleschoolCurriculum';
 import { LockedLessonModal } from '@/app/(main)/bibleschool/(tabs)/modules/[id]/_components/LockedLessonModal';
 import { LockOverlay } from '@/components/common/LockOverlay';
 
@@ -320,8 +321,13 @@ export default function IntroScreen() {
     savePosition,
     isLoading: positionLoading,
   } = useIntroVideoPosition();
-  const { data: moduleData } = useModule('module-1', locale);
-  const firstLesson = moduleData?.lessons?.[0];
+  const { data: modules = [] } = useModules(locale);
+  const firstModuleId = useMemo(() => getFirstModuleId(modules), [modules]);
+  const { data: moduleData } = useModule(firstModuleId, locale);
+  const firstLesson = useMemo(() => {
+    if (!moduleData?.lessons?.length) return undefined;
+    return sortLessonsByOrder(moduleData)[0];
+  }, [moduleData]);
   const [showLockedModal, setShowLockedModal] = useState(false);
 
   const handleSavePosition = useCallback(
@@ -371,8 +377,9 @@ export default function IntroScreen() {
 
   const handleNextLessonPress = useCallback(() => {
     bzzt();
-    router.replace(routes.bibleschoolModuleLesson('module-1', firstLesson!.id));
-  }, [firstLesson]);
+    if (!firstModuleId || !firstLesson) return;
+    router.replace(routes.bibleschoolModuleLesson(firstModuleId, firstLesson.id));
+  }, [firstLesson, firstModuleId]);
 
   const handleNextLessonLockedPress = useCallback(() => {
     bzztWarning();
@@ -495,7 +502,7 @@ export default function IntroScreen() {
         targetModuleNumber={1}
         isExam={false}
         isOnIntroPage
-        targetModuleId="module-1"
+        targetModuleId={firstModuleId ?? ''}
         targetModuleTitle=""
         targetLessonId={firstLesson?.id ?? null}
         onClose={() => setShowLockedModal(false)}

@@ -130,7 +130,7 @@ export function LessonDetailScreen({ moduleId, lessonId }: LessonDetailScreenPro
     const target = nextUnlockedTarget;
     if (!target) return;
     const mod = modules?.find((m) => m.id === target.module.id);
-    const targetModuleTitle = mod?.title ?? t(target.module.titleKey as never);
+    const targetModuleTitle = mod?.title ?? target.module.title;
     if (target.type === 'lesson') {
       setLockedModal({
         message: t('lessons.lockedModalMessageModuleLesson', {

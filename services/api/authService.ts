@@ -154,6 +154,26 @@ export const authService = {
     }
   },
 
+  async resendSignupConfirmation(email: string) {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim().toLowerCase(),
+      });
+      if (error) throw error;
+    } catch (err) {
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'status' in err &&
+        'message' in err
+      ) {
+        throw normalizeAuthError(err as AuthError);
+      }
+      throw err;
+    }
+  },
+
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;

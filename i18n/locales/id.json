@@ -61,6 +61,14 @@
     "confirmPasswordRequired": "Konfirmasi kata sandi Anda",
     "passwordsDoNotMatch": "Kata sandi tidak cocok",
     "registrationFailed": "Pendaftaran gagal. Silakan coba lagi.",
+    "profileSetupNotReady": "Penyiapan akun membutuhkan waktu lebih lama dari perkiraan. Coba lagi sebentar lagi.",
+    "verifyEmailToContinue": "Periksa email Anda untuk mengonfirmasi akun, lalu masuk.",
+    "verifyEmailTitle": "Konfirmasi email Anda",
+    "verifyEmailBody": "Kami mengirim tautan ke {{email}}. Buka untuk mengaktifkan akun, lalu masuk.",
+    "resendConfirmationEmail": "Kirim ulang email konfirmasi",
+    "resendConfirmationSending": "Mengirim...",
+    "resendConfirmationSent": "Email konfirmasi terkirim.",
+    "resendConfirmationFailed": "Tidak dapat mengirim ulang email. Coba lagi nanti.",
     "invalidCredentials": "Email atau kata sandi tidak valid. Periksa data Anda atau buat akun.",
     "loginFailed": "Login gagal. Silakan coba lagi.",
     "next": "Berikutnya",
@@ -78,7 +86,21 @@
     "countryPlaceholder": "Opsional",
     "countrySearchPlaceholder": "Cari negara",
     "city": "Kota",
-    "cityPlaceholder": "Opsional"
+    "cityPlaceholder": "Opsional",
+    "a11y": {
+      "showPassword": "Tampilkan kata sandi",
+      "hidePassword": "Sembunyikan kata sandi",
+      "formHasErrorHint": "Periksa pesan kesalahan di bawah formulir.",
+      "opensDatePicker": "Membuka pemilih tanggal.",
+      "opensCountryPicker": "Membuka daftar negara.",
+      "dismissSheet": "Ketuk di luar untuk menutup.",
+      "countryList": "Negara",
+      "cycleTheme": "Ketuk dua kali untuk beralih antara tema terang, gelap, dan sistem.",
+      "goToRegister": "Daftar",
+      "goToRegisterHint": "Buka buat akun",
+      "goToLogin": "Masuk",
+      "goToLoginHint": "Buka halaman masuk"
+    }
   },
   "streak": {
     "days": "{{count}} hari"
@@ -425,5 +447,9 @@
   "lessonsPage": {"title": "Pelajaran", "empty": "Tidak ada pelajaran dalam modul ini", "lessonsCount": "{{count}} pelajaran", "currentLesson": "Pelajaran saat ini", "otherLessons": "Pelajaran lainnya", "remaining": "Sisa {{count}} mnt."},
   "handouts": {"title": "Handout","lesson": "Handout pelajaran","module": "Handout modul"},
   "quiz": {"title": "Ujian Modul","examTopBarTitle": "Ujian","loading": "Memuat ujian...","intro": "Jawab semua pertanyaan. Anda membutuhkan minimal {{minCorrect}} dari {{total}} benar untuk lulus.","submit": "Kirim","submitError": "Terjadi kesalahan. Silakan coba lagi.","pass": "Selamat! Anda lulus.","fail": "Belum. Anda membutuhkan minimal {{minCorrect}} dari {{total}} benar untuk lulus.","retry": "Coba lagi","answerAll": "Silakan jawab semua pertanyaan","correct": "Benar","incorrect": "Salah","scoreSummary": "{{score}}% - {{correct}}/{{total}} benar","questionProgress": "{{current}} dari {{total}} dijawab","questionOf": "Pertanyaan {{current}} dari {{total}}","submitConfirmTitle": "Kirim jawaban?","submitConfirmMessage": "Anda tidak dapat mengubah jawaban setelah mengirim.","cancel": "Batal","leaveConfirmTitle": "Tinggalkan ujian?","leaveConfirmMessage": "Progres Anda telah disimpan.","attemptNumber": "Percobaan {{number}}","continue": "Lanjutkan","backToModule": "Kembali ke modul","modules":{"1":{"questions":{"1":{"question":"Apa itu iman?","a":"Keyakinan pada apa yang kita harapkan","b":"Perasaan","c":"Agama","d":"Emosi"},"2":{"question":"Iman datang dari:","a":"Orang tua kita","b":"Mendengar Firman Allah","c":"Pendidikan","d":"Pengalaman"},"3":{"question":"Tanpa iman tidak mungkin:","a":"Bekerja","b":"Beristirahat","c":"Berkenan kepada Allah","d":"Makan"}}}}},
+  "bibleschoolContent": {
+    "loadError": "Konten terbaru tidak dapat dimuat. Menampilkan data tersimpan atau offline.",
+    "retry": "Coba lagi"
+  },
   "exam": {"takeExam": "Kerjakan ujian","unlockHint": "Selesaikan semua pelajaran untuk membuka","readyHint": "Semua pelajaran selesai","passed": "Ujian lulus","passedHint": "Anda telah menyelesaikan ujian modul ini","failedScore": "{{score}}% - {{correct}}/{{total}} benar","retryHint": "Ketuk untuk mencoba lagi","retryHintWithAttempt": "Percobaan {{count}} - Ketuk untuk mencoba lagi","alreadyPassed": "Anda sudah lulus ujian ini"}
 }

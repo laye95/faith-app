@@ -1,10 +1,9 @@
-import { MODULES, getLessonsForModule } from '@/constants/modules';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { useBibleschoolTab } from '@/contexts/BibleschoolTabContext';
 import { useLastWatchedLesson } from '@/hooks/useLastWatchedLesson';
-import { useIntroductionVimeoId } from '@/hooks/useBibleschoolContent';
+import { useIntroductionVimeoId, useModules } from '@/hooks/useBibleschoolContent';
 import { useIntroVideoWatched } from '@/hooks/useIntroVideoWatched';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -13,9 +12,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { routes } from '@/constants/routes';
 import { router } from 'expo-router';
-import { TouchableOpacity } from 'react-native';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, TouchableOpacity } from 'react-native';
 import { bzzt } from '@/utils/haptics';
+import { sortLessonsByOrder, sortModulesByOrder } from '@/utils/bibleschoolCurriculum';
+import { useMemo } from 'react';
 import { OverviewCard } from './OverviewCard';
 
 export function CurrentVideoCard() {
@@ -26,9 +26,11 @@ export function CurrentVideoCard() {
   const { hasWatched: introWatched, isLoading: introLoading } =
     useIntroVideoWatched();
   const { data: introductionVimeoId } = useIntroductionVimeoId(locale);
-
-  const fallbackLesson = getLessonsForModule(MODULES[0].id)[0];
-  const fallbackModule = MODULES[0];
+  const { data: modules = [] } = useModules(locale);
+  const curriculum = useMemo(() => sortModulesByOrder(modules), [modules]);
+  const firstModule = curriculum[0];
+  const fallbackLesson = firstModule ? sortLessonsByOrder(firstModule)[0] : undefined;
+  const fallbackModule = firstModule;
   const targetLesson = lesson ?? fallbackLesson;
   const targetModule = module ?? fallbackModule;
 
@@ -49,17 +51,10 @@ export function CurrentVideoCard() {
     ? vimeoThumbnail
     : targetLesson?.thumbnailUrl ?? vimeoThumbnail ?? undefined;
 
-  const moduleName =
-    targetModule &&
-    ('title' in targetModule
-      ? targetModule.title
-      : t((targetModule as { titleKey: string }).titleKey as never));
+  const moduleName = targetModule?.title ?? '';
   const lessonName = showIntro
     ? t('overview.introVideoTitle')
-    : targetLesson &&
-      ('title' in targetLesson
-        ? targetLesson.title
-        : t((targetLesson as { titleKey: string }).titleKey as never));
+    : targetLesson?.title ?? '';
 
   const subtitle = isLoading || introLoading
     ? t('overview.currentVideoPlaceholder')
@@ -74,7 +69,7 @@ export function CurrentVideoCard() {
     if (showIntro) {
       setActiveTab('modules');
       router.push(routes.bibleschoolIntro());
-    } else {
+    } else if (targetModule && targetLesson) {
       setActiveTab('modules');
       router.push(routes.bibleschoolModuleLesson(targetModule.id, targetLesson.id));
     }
@@ -85,7 +80,7 @@ export function CurrentVideoCard() {
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={handlePress}
-        disabled={!showIntro && isLoading}
+        disabled={!showIntro && (isLoading || !targetLesson || !targetModule)}
         className="cursor-pointer"
         style={{ opacity: !showIntro && isLoading ? 0.7 : 1 }}
       >

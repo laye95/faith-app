@@ -1,12 +1,14 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { MODULES, TOTAL_LESSONS } from '@/constants/modules';
+import { useModules } from '@/hooks/useBibleschoolContent';
 import { useCompletedLessons } from '@/hooks/useCompletedLessons';
 import { useLessonUnlocks } from '@/hooks/useLessonUnlocks';
 import { useStreak } from '@/hooks/useStreak';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useUserBadges } from '@/hooks/useUserBadges';
 import { moduleProgressService } from '@/services/api/moduleProgressService';
 import { queryKeys } from '@/services/queryKeys';
 import type { UserBadge } from '@/types/badge';
+import { sortModulesByOrder, totalLessonCountInCurriculum } from '@/utils/bibleschoolCurriculum';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 
@@ -21,7 +23,7 @@ export type ModuleExamStatus =
 export interface ModuleProgressData {
   moduleId: string;
   order: number;
-  titleKey: string;
+  moduleTitle: string;
   lessonCount: number;
   completedLessons: number;
   lessonPercentage: number;
@@ -32,12 +34,20 @@ export interface ModuleProgressData {
 
 export function useVoortgangData() {
   const { user } = useAuth();
+  const { locale } = useTranslation();
   const queryClient = useQueryClient();
+  const { data: modules = [], isLoading: modulesLoading } = useModules(locale);
+  const curriculum = useMemo(() => sortModulesByOrder(modules), [modules]);
+  const totalLessons = useMemo(
+    () => totalLessonCountInCurriculum(curriculum),
+    [curriculum],
+  );
+  const totalModules = curriculum.length;
 
   const { data: completedLessons, isLoading: lessonsLoading } =
     useCompletedLessons(user?.id);
 
-  const { data: moduleProgressList, isLoading: moduleLoading } = useQuery({
+  const { isLoading: moduleLoading } = useQuery({
     queryKey: queryKeys.progress.moduleProgress.overview(user?.id ?? ''),
     queryFn: () => moduleProgressService.listByUser(user!.id),
     enabled: !!user?.id,
@@ -55,7 +65,7 @@ export function useVoortgangData() {
 
   const completedCount = completedLessons?.length ?? 0;
   const overallPercentage =
-    TOTAL_LESSONS > 0 ? Math.round((completedCount / TOTAL_LESSONS) * 100) : 0;
+    totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   const completedPerModule = useMemo(() => {
     const map = new Map<string, number>();
@@ -68,16 +78,17 @@ export function useVoortgangData() {
   const passedModuleCount = passedModuleIds.size;
 
   const moduleProgressData = useMemo((): ModuleProgressData[] => {
-    return MODULES.map((module, index) => {
+    return curriculum.map((module, index) => {
+      const lessonCount = module.lessons.length;
       const completedInModule = completedPerModule.get(module.id) ?? 0;
       const lessonPercentage = Math.round(
-        (completedInModule / module.lessonCount) * 100,
+        lessonCount > 0 ? (completedInModule / lessonCount) * 100 : 0,
       );
       const examInfo = getExamStatusForModule(module.id);
       const isPassed = passedModuleIds.has(module.id);
-      const allLessonsDone = completedInModule === module.lessonCount;
+      const allLessonsDone = lessonCount > 0 && completedInModule === lessonCount;
       const prevModulePassed =
-        index === 0 || passedModuleIds.has(MODULES[index - 1].id);
+        index === 0 || passedModuleIds.has(curriculum[index - 1].id);
 
       let examStatus: ModuleExamStatus;
       let examScore: number | undefined;
@@ -85,9 +96,6 @@ export function useVoortgangData() {
       if (isPassed) {
         examStatus = 'passed';
         examScore = examInfo.latestFailedAttempt?.score;
-        // If passed, get score from the examInfo — need to look at quizAttempts
-        // passedModuleIds means at least one attempt passed
-        // We don't have the passing score directly, mark as passed without score
         examScore = undefined;
       } else if (allLessonsDone && (examInfo.attemptCount ?? 0) > 0) {
         examStatus = 'failed';
@@ -109,8 +117,8 @@ export function useVoortgangData() {
       return {
         moduleId: module.id,
         order: module.order,
-        titleKey: module.titleKey,
-        lessonCount: module.lessonCount,
+        moduleTitle: module.title,
+        lessonCount,
         completedLessons: completedInModule,
         lessonPercentage,
         examStatus,
@@ -118,7 +126,7 @@ export function useVoortgangData() {
         isLocked: examStatus === 'locked',
       };
     });
-  }, [completedPerModule, passedModuleIds, getExamStatusForModule]);
+  }, [completedPerModule, passedModuleIds, getExamStatusForModule, curriculum]);
 
   const recentBadges = useMemo((): UserBadge[] => {
     return [...userBadges]
@@ -137,10 +145,17 @@ export function useVoortgangData() {
   }, [queryClient, user?.id]);
 
   return {
-    isLoading: lessonsLoading || moduleLoading || unlocksLoading || badgesLoading,
+    isLoading:
+      lessonsLoading ||
+      moduleLoading ||
+      unlocksLoading ||
+      badgesLoading ||
+      modulesLoading,
     completedCount,
     overallPercentage,
     passedModuleCount,
+    totalLessons,
+    totalModules,
     streakDays,
     moduleProgressData,
     badges,

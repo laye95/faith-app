@@ -1,12 +1,10 @@
+import {
+  DOTTED_RING_CONTAINER,
+  DOTTED_RING_DOT_SIZE,
+  getDottedRingDotLayouts,
+} from '@/constants/dottedRing';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
-
-const DOT_COUNT = 8;
-const CONTAINER = 96;
-const RADIUS = 36;
-const DOT_SIZE = 8;
-
-const OPACITIES = [1, 0.75, 0.55, 0.38, 0.25, 0.16, 0.1, 0.14];
 
 export function DottedRingSpinner() {
   const spin = useRef(new Animated.Value(0)).current;
@@ -29,22 +27,19 @@ export function DottedRingSpinner() {
     outputRange: ['0deg', '360deg'],
   });
 
+  const dotLayouts = getDottedRingDotLayouts(1);
+
   return (
     <View style={styles.wrap}>
       <Animated.View
         style={[styles.ring, { transform: [{ rotate: rotation }] }]}
       >
-        {OPACITIES.map((opacity, i) => {
-          const angle = -Math.PI / 2 + (i * 2 * Math.PI) / DOT_COUNT;
-          const cx = CONTAINER / 2 + RADIUS * Math.cos(angle) - DOT_SIZE / 2;
-          const cy = CONTAINER / 2 + RADIUS * Math.sin(angle) - DOT_SIZE / 2;
-          return (
-            <View
-              key={i}
-              style={[styles.dot, { left: cx, top: cy, opacity }]}
-            />
-          );
-        })}
+        {dotLayouts.map(({ left, top, opacity }, i) => (
+          <View
+            key={i}
+            style={[styles.dot, { left, top, opacity }]}
+          />
+        ))}
       </Animated.View>
     </View>
   );
@@ -52,18 +47,18 @@ export function DottedRingSpinner() {
 
 const styles = StyleSheet.create({
   wrap: {
-    width: CONTAINER,
-    height: CONTAINER,
+    width: DOTTED_RING_CONTAINER,
+    height: DOTTED_RING_CONTAINER,
   },
   ring: {
-    width: CONTAINER,
-    height: CONTAINER,
+    width: DOTTED_RING_CONTAINER,
+    height: DOTTED_RING_CONTAINER,
   },
   dot: {
     position: 'absolute',
-    width: DOT_SIZE,
-    height: DOT_SIZE,
-    borderRadius: DOT_SIZE / 2,
+    width: DOTTED_RING_DOT_SIZE,
+    height: DOTTED_RING_DOT_SIZE,
+    borderRadius: DOTTED_RING_DOT_SIZE / 2,
     backgroundColor: '#FFFFFF',
   },
 });

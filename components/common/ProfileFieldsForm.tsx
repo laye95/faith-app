@@ -78,6 +78,14 @@ export function ProfileFieldsForm({
     return COUNTRIES.filter((c) => c.toLowerCase().includes(q));
   }, [countrySearchQuery]);
 
+  const birthdateA11yLabel = birthdate
+    ? `${t('auth.birthdate')}, ${formatDateForDisplay(birthdate)}`
+    : `${t('auth.birthdate')}, ${t('auth.birthdatePlaceholder')}`;
+
+  const countryA11yLabel = country
+    ? `${t('auth.country')}, ${country}`
+    : `${t('auth.country')}, ${t('auth.countryPlaceholder')}`;
+
   const handleDateChange = (event: { type: string }, selectedDate?: Date) => {
     if (Platform.OS === 'android') setShowDatePicker(false);
     if (event.type === 'dismissed') {
@@ -106,6 +114,8 @@ export function ProfileFieldsForm({
       <FormControl isInvalid={!!phoneError}>
         <VStack className="gap-2">
           <Text
+            accessible={false}
+            importantForAccessibility="no"
             className="text-sm font-medium"
             style={{ color: theme.textSecondary }}
           >
@@ -148,13 +158,16 @@ export function ProfileFieldsForm({
                 onSubmitEditing={() =>
                   requestAnimationFrame(() => cityRef.current?.focus())
                 }
+                accessibilityLabel={t('auth.phone')}
               />
             </Input>
           </Box>
           {phoneError && (
-            <Text className="text-xs mt-1" style={{ color: theme.buttonDecline }}>
-              {phoneError}
-            </Text>
+            <View accessibilityLiveRegion="polite">
+              <Text className="text-xs mt-1" style={{ color: theme.buttonDecline }}>
+                {phoneError}
+              </Text>
+            </View>
           )}
         </VStack>
       </FormControl>
@@ -162,6 +175,8 @@ export function ProfileFieldsForm({
       <FormControl isInvalid={!!birthdateError}>
         <VStack className="gap-2">
           <Text
+            accessible={false}
+            importantForAccessibility="no"
             className="text-sm font-medium"
             style={{ color: theme.textSecondary }}
           >
@@ -171,6 +186,10 @@ export function ProfileFieldsForm({
             onPress={() => editable && (bzzt(), setShowDatePicker(true))}
             activeOpacity={editable ? 0.7 : 1}
             disabled={!editable}
+            accessibilityRole="button"
+            accessibilityLabel={birthdateA11yLabel}
+            accessibilityHint={t('auth.a11y.opensDatePicker')}
+            accessibilityState={{ disabled: !editable }}
           >
             <Box
               className="rounded-2xl h-14 px-5 flex-row items-center"
@@ -201,9 +220,11 @@ export function ProfileFieldsForm({
             </Box>
           </TouchableOpacity>
           {birthdateError && (
-            <Text className="text-xs mt-1" style={{ color: theme.buttonDecline }}>
-              {birthdateError}
-            </Text>
+            <View accessibilityLiveRegion="polite">
+              <Text className="text-xs mt-1" style={{ color: theme.buttonDecline }}>
+                {birthdateError}
+              </Text>
+            </View>
           )}
         </VStack>
       </FormControl>
@@ -211,11 +232,19 @@ export function ProfileFieldsForm({
       {showDatePicker && (
         <>
           {Platform.OS === 'ios' && (
-            <Modal visible transparent animationType="slide">
+            <Modal
+              visible
+              transparent
+              animationType="slide"
+              accessibilityViewIsModal
+              onRequestClose={() => setShowDatePicker(false)}
+            >
               <View style={styles.modalContainer}>
                 <Pressable
                   style={[StyleSheet.absoluteFill, styles.backdrop]}
                   onPress={() => setShowDatePicker(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('auth.a11y.dismissSheet')}
                 />
                 <View
                   style={[
@@ -241,6 +270,8 @@ export function ProfileFieldsForm({
                       <TouchableOpacity
                         onPress={() => setShowDatePicker(false)}
                         className="cursor-pointer"
+                        accessibilityRole="button"
+                        accessibilityLabel={t('common.done')}
                       >
                         <Text
                           className="text-base font-semibold"
@@ -280,6 +311,8 @@ export function ProfileFieldsForm({
 
       <VStack className="gap-2">
         <Text
+          accessible={false}
+          importantForAccessibility="no"
           className="text-sm font-medium"
           style={{ color: theme.textSecondary }}
         >
@@ -289,6 +322,10 @@ export function ProfileFieldsForm({
           onPress={() => editable && (bzzt(), setShowCountryModal(true))}
           activeOpacity={editable ? 0.7 : 1}
           disabled={!editable}
+          accessibilityRole="button"
+          accessibilityLabel={countryA11yLabel}
+          accessibilityHint={t('auth.a11y.opensCountryPicker')}
+          accessibilityState={{ disabled: !editable }}
         >
           <Box
             className="rounded-2xl h-14 px-5 flex-row items-center"
@@ -318,12 +355,15 @@ export function ProfileFieldsForm({
         visible={showCountryModal}
         transparent
         animationType="slide"
+        accessibilityViewIsModal
         onRequestClose={handleCountryModalClose}
       >
         <View style={styles.modalContainer}>
           <Pressable
             style={[StyleSheet.absoluteFill, styles.backdrop]}
             onPress={handleCountryModalClose}
+            accessibilityRole="button"
+            accessibilityLabel={t('auth.a11y.dismissSheet')}
           />
           <View
             style={[
@@ -364,6 +404,7 @@ export function ProfileFieldsForm({
                       placeholderTextColor={theme.textTertiary}
                       className="pl-3 pr-4 text-base"
                       style={{ color: theme.textPrimary }}
+                      accessibilityLabel={t('auth.countrySearchPlaceholder')}
                     />
                   </Input>
                 </Box>
@@ -376,10 +417,13 @@ export function ProfileFieldsForm({
                   contentContainerStyle={styles.countryListContent}
                   keyboardShouldPersistTaps="handled"
                   nestedScrollEnabled
+                  accessibilityLabel={t('auth.a11y.countryList')}
                   renderItem={({ item }) => (
                     <TouchableOpacity
                       onPress={() => handleCountrySelect(item)}
                       className="px-5 py-4"
+                      accessibilityRole="button"
+                      accessibilityLabel={item}
                       style={{
                         backgroundColor: country === item ? theme.cardBorder : 'transparent',
                       }}
@@ -401,6 +445,8 @@ export function ProfileFieldsForm({
 
       <VStack className="gap-2">
         <Text
+          accessible={false}
+          importantForAccessibility="no"
           className="text-sm font-medium"
           style={{ color: theme.textSecondary }}
         >
@@ -440,6 +486,7 @@ export function ProfileFieldsForm({
                 Keyboard.dismiss();
                 onLastFieldSubmit?.();
               }}
+              accessibilityLabel={t('auth.city')}
             />
           </Input>
         </Box>

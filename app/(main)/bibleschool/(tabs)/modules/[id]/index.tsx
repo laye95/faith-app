@@ -18,6 +18,7 @@ import { lessonProgressService } from '@/services/api/lessonProgressService';
 import { Image } from 'expo-image';
 import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { useLessonUnlocks } from '@/hooks/useLessonUnlocks';
+import { getFirstModuleId, sortModulesByOrder } from '@/utils/bibleschoolCurriculum';
 import { getCurrentTargetForModule } from '@/utils/unlockLogic';
 import { LockedLessonModal } from './_components/LockedLessonModal';
 import { ModuleLessonList } from './_components/ModuleLessonList';
@@ -55,6 +56,8 @@ export default function ModuleLessonsScreen() {
 
   const { data: module } = useModule(id, locale);
   const { data: modules } = useModules(locale);
+  const curriculum = useMemo(() => sortModulesByOrder(modules ?? []), [modules]);
+  const firstModuleId = useMemo(() => getFirstModuleId(modules ?? []), [modules]);
   const lessons = useMemo(() => module?.lessons ?? [], [module]);
   const {
     isLessonUnlocked,
@@ -104,6 +107,8 @@ export default function ModuleLessonsScreen() {
   const currentTarget = useMemo(
     () =>
       getCurrentTargetForModule(
+        curriculum,
+        firstModuleId,
         id!,
         lessons,
         completedLessonIds,
@@ -113,6 +118,8 @@ export default function ModuleLessonsScreen() {
         examStatus.passed,
       ),
     [
+      curriculum,
+      firstModuleId,
       id,
       lessons,
       completedLessonIds,
@@ -127,7 +134,8 @@ export default function ModuleLessonsScreen() {
     currentTarget?.type === 'lesson' ? currentTarget.lesson.id : null;
 
   const showIntroInOther =
-    id === 'module-1' &&
+    !!firstModuleId &&
+    id === firstModuleId &&
     !!introductionVimeoId &&
     currentTarget?.type !== 'intro';
 
@@ -167,11 +175,16 @@ export default function ModuleLessonsScreen() {
     }
   }, [id, locale, queryClient, userId]);
 
-  usePrefetchLessonThumbnails(id ?? '', lessons, introductionVimeoId ?? undefined);
+  usePrefetchLessonThumbnails(
+    id ?? '',
+    lessons,
+    introductionVimeoId ?? undefined,
+    firstModuleId,
+  );
 
   useEffect(() => {
     const ids = new Set<string>();
-    if (id === 'module-1' && introductionVimeoId) {
+    if (firstModuleId && id === firstModuleId && introductionVimeoId) {
       ids.add(introductionVimeoId);
     }
     lessons
@@ -184,11 +197,12 @@ export default function ModuleLessonsScreen() {
         queryFn: () => vimeoService.getVimeoVideoMetaRaw(videoId),
       });
     });
-  }, [id, lessons, introductionVimeoId, queryClient]);
+  }, [id, firstModuleId, lessons, introductionVimeoId, queryClient]);
 
   const handleLockedPress = (lesson?: LessonLike) => {
     bzztWarning();
-    const isLesson1Module1 = id === 'module-1' && lesson?.order === 1;
+    const isLesson1Module1 =
+      !!firstModuleId && id === firstModuleId && lesson?.order === 1;
     if (isLesson1Module1 && !introWatched) {
       setLockedModal({
         message: t('lessons.introRequiredMessage'),
@@ -205,7 +219,7 @@ export default function ModuleLessonsScreen() {
     const target = nextUnlockedTarget;
     if (!target) return;
     const mod = modules?.find((m) => m.id === target.module.id);
-    const targetModuleTitle = mod?.title ?? t(target.module.titleKey as never);
+    const targetModuleTitle = mod?.title ?? target.module.title;
     if (target.type === 'lesson') {
       setLockedModal({
         message: t('lessons.lockedModalMessageModuleLesson', {

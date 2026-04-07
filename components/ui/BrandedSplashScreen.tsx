@@ -1,5 +1,13 @@
 import logoFull from '@/assets/images/logo_full.png';
 import { DottedRingSpinner } from '@/components/ui/DottedRingSpinner';
+import {
+  BRANDED_BOTTOM_SPACER_BELOW_SPINNER,
+  BRANDED_LOGO_HEIGHT,
+  BRANDED_LOGO_WIDTH,
+  BRANDED_SLOGAN_FONT_SIZE,
+  BRANDED_SLOGAN_LETTER_SPACING,
+  BRANDED_SLOGAN_LINE_HEIGHT,
+} from '@/constants/brandedSplashLayout';
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
 import i18n from '@/i18n';
@@ -59,12 +67,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   logoFull: {
-    width: 280,
-    height: 88,
+    width: BRANDED_LOGO_WIDTH,
+    height: BRANDED_LOGO_HEIGHT,
   },
   bottomBlock: {
     alignItems: 'center',
-    gap: 20,
+    gap: BRANDED_BOTTOM_SPACER_BELOW_SPINNER,
     paddingHorizontal: 24,
   },
   sloganBlock: {
@@ -73,9 +81,9 @@ const styles = StyleSheet.create({
   },
   sloganLine: {
     color: '#FFFFFF',
-    fontSize: 15,
-    lineHeight: 22,
-    letterSpacing: 3,
+    fontSize: BRANDED_SLOGAN_FONT_SIZE,
+    lineHeight: BRANDED_SLOGAN_LINE_HEIGHT,
+    letterSpacing: BRANDED_SLOGAN_LETTER_SPACING,
     textAlign: 'center',
     textTransform: 'uppercase',
   },

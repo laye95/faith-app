@@ -7,7 +7,7 @@ import { CollapsibleOverviewCard } from '../../_components/CollapsibleOverviewCa
 import { OverviewCard } from '../../_components/OverviewCard';
 import { AdminAnalyticsGraphPicker } from './AdminAnalyticsGraphPicker';
 import { useAdminAnalyticsLayout } from '../_hooks/useAdminAnalyticsLayout';
-import { MODULES } from '@/constants/modules';
+import { useModules } from '@/hooks/useBibleschoolContent';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { adminAnalyticsService } from '@/services/api/adminAnalyticsService';
@@ -26,6 +26,8 @@ import { userSettingsService } from '@/services/api/userSettingsService';
 import { Platform, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ModuleStat, QuizModuleStat } from '@/types/analytics';
+import type { BibleschoolModule } from '@/types/bibleschool';
+import { sortModulesByOrder } from '@/utils/bibleschoolCurriculum';
 
 function BarChart({
   stats,
@@ -33,7 +35,7 @@ function BarChart({
   theme,
   t,
 }: {
-  stats: Array<{ module: typeof MODULES[0]; stat: ModuleStat }>;
+  stats: Array<{ module: BibleschoolModule; stat: ModuleStat }>;
   maxValue: number;
   theme: ReturnType<typeof useTheme>;
   t: (key: string) => string;
@@ -67,7 +69,7 @@ function BarChart({
                 style={{ color: theme.textPrimary }}
                 numberOfLines={1}
               >
-                {t(module.titleKey as never)}
+                {module.title}
               </Text>
               <Text
                 className="text-sm font-semibold ml-3"
@@ -273,7 +275,13 @@ function TimeSeriesSection({
 
 export function AdminBibleschoolAnalytics() {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const { data: modules = [] } = useModules(locale);
+  const curriculumSorted = useMemo(() => sortModulesByOrder(modules), [modules]);
+  const moduleLabels = useMemo(
+    () => Object.fromEntries(curriculumSorted.map((m) => [m.id, m.title])),
+    [curriculumSorted],
+  );
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [dateRange, setDateRange] = useState<DateRangeKey>('30');
@@ -345,7 +353,7 @@ export function AdminBibleschoolAnalytics() {
   const mergedStats = useMemo(() => {
     if (!analytics) return [];
     const map = new Map(analytics.moduleStats.map((s) => [s.moduleId, s]));
-    return MODULES.map((module) => ({
+    return curriculumSorted.map((module) => ({
       module,
       stat: map.get(module.id) ?? {
         moduleId: module.id,
@@ -354,7 +362,7 @@ export function AdminBibleschoolAnalytics() {
         lockedCount: 0,
       },
     }));
-  }, [analytics]);
+  }, [analytics, curriculumSorted]);
 
   const mostCompleted = useMemo(() => {
     return [...mergedStats].sort(
@@ -379,7 +387,12 @@ export function AdminBibleschoolAnalytics() {
     setExporting(true);
     bzzt();
     try {
-      const csv = buildAnalyticsCsv(analytics ?? null, quizAnalytics ?? null, timeAnalytics ?? null);
+      const csv = buildAnalyticsCsv(
+        analytics ?? null,
+        quizAnalytics ?? null,
+        timeAnalytics ?? null,
+        moduleLabels,
+      );
       if (Platform.OS === 'web') {
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -419,6 +432,7 @@ export function AdminBibleschoolAnalytics() {
     analytics,
     quizAnalytics,
     timeAnalytics,
+    moduleLabels,
     exporting,
     toast,
     t,
@@ -727,7 +741,7 @@ export function AdminBibleschoolAnalytics() {
                   </Text>
                 </Box>
                 {quizAnalytics.moduleStats.slice(0, 10).map((qStat: QuizModuleStat) => {
-                  const module = MODULES.find((m) => m.id === qStat.moduleId);
+                  const module = curriculumSorted.find((m) => m.id === qStat.moduleId);
                   const passRate =
                     qStat.attemptCount > 0
                       ? Math.round(
@@ -748,7 +762,7 @@ export function AdminBibleschoolAnalytics() {
                         style={{ color: theme.textPrimary }}
                         numberOfLines={1}
                       >
-                        {module ? t(module.titleKey as never) : qStat.moduleId}
+                        {module ? module.title : qStat.moduleId}
                       </Text>
                       <Box className="flex-row items-center gap-4">
                         <Text
@@ -829,7 +843,7 @@ export function AdminBibleschoolAnalytics() {
                         style={{ color: theme.textPrimary }}
                         numberOfLines={1}
                       >
-                        {t(module.titleKey as never)}
+                        {module.title}
                       </Text>
                       <Text
                         className="text-xs"
@@ -905,7 +919,7 @@ export function AdminBibleschoolAnalytics() {
                         style={{ color: theme.textPrimary }}
                         numberOfLines={1}
                       >
-                        {t(module.titleKey as never)}
+                        {module.title}
                       </Text>
                       <Text
                         className="text-xs"

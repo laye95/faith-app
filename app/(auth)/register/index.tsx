@@ -191,6 +191,9 @@ export default function RegisterScreen() {
                     }}
                     activeOpacity={0.7}
                     className="cursor-pointer"
+                    accessibilityRole="link"
+                    accessibilityLabel={t("auth.a11y.goToLogin")}
+                    accessibilityHint={t("auth.a11y.goToLoginHint")}
                   >
                     <Text
                       className="text-sm font-semibold"

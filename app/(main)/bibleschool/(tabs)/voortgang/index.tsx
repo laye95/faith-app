@@ -34,6 +34,8 @@ export default function VoortgangScreen() {
     completedCount,
     overallPercentage,
     passedModuleCount,
+    totalLessons,
+    totalModules,
     streakDays,
     moduleProgressData,
     badges,
@@ -100,6 +102,8 @@ export default function VoortgangScreen() {
         completedCount={completedCount}
         passedModuleCount={passedModuleCount}
         streakDays={streakDays}
+        totalLessons={totalLessons}
+        totalModules={totalModules}
       />
 
       {completedModules.length > 0 && (

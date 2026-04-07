@@ -9,7 +9,7 @@ import { useButtonShadow } from '@/hooks/useShadows';
 import { bzzt } from '@/utils/haptics';
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 interface StepManagerProps {
   currentStep: number;
@@ -53,20 +53,30 @@ export function StepManager({
       {showStepIndicator && totalSteps > 1 && (
         <HStack className="items-center justify-center gap-2">
           {stepIndicatorVariant === 'dots' ? (
-            <HStack className="items-center gap-2">
-              {Array.from({ length: totalSteps }).map((_, i) => (
-                <Box
-                  key={i}
-                  className="rounded-full"
-                  style={{
-                    width: i === currentStep ? 10 : 8,
-                    height: 8,
-                    backgroundColor:
-                      i === currentStep ? theme.buttonPrimary : theme.cardBorder,
-                  }}
-                />
-              ))}
-            </HStack>
+            <View
+              accessibilityRole="text"
+              accessibilityLabel={t('auth.stepOf', {
+                current: currentStep + 1,
+                total: totalSteps,
+              })}
+            >
+              <HStack className="items-center gap-2">
+                {Array.from({ length: totalSteps }).map((_, i) => (
+                  <Box
+                    key={i}
+                    importantForAccessibility="no"
+                    accessibilityElementsHidden
+                    className="rounded-full"
+                    style={{
+                      width: i === currentStep ? 10 : 8,
+                      height: 8,
+                      backgroundColor:
+                        i === currentStep ? theme.buttonPrimary : theme.cardBorder,
+                    }}
+                  />
+                ))}
+              </HStack>
+            </View>
           ) : (
             <Text
               className="text-sm font-medium"
@@ -88,6 +98,8 @@ export function StepManager({
               onPrevious();
             }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.back')}
             className="flex-row items-center justify-center gap-2 py-3 cursor-pointer"
           >
             <Ionicons name="chevron-back" size={20} color={theme.buttonPrimary} />
@@ -111,6 +123,7 @@ export function StepManager({
             size="lg"
             className="h-14 cursor-pointer rounded-full"
             isDisabled={isNextDisabled || isNextLoading}
+            accessibilityState={{ busy: isNextLoading }}
             style={{
               backgroundColor: theme.buttonPrimary,
               ...buttonShadow,

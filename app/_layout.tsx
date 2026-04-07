@@ -1,4 +1,4 @@
-import "@/utils/ignoreWarnings";
+import "@/utils/suppressConsoleWarnings";
 import "@/global.css";
 import {
   Poppins_400Regular,

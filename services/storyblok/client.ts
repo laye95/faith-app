@@ -8,6 +8,36 @@ function getToken(): string {
   return token;
 }
 
+function truncateResponseBody(text: string, max = 400): string {
+  const t = text.trim();
+  return t.length > max ? `${t.slice(0, max)}…` : t;
+}
+
+export class StoryblokApiError extends Error {
+  readonly status: number;
+  readonly operation: 'fetchStories' | 'fetchStory';
+  readonly path?: string;
+  readonly responseBodyPreview?: string;
+
+  constructor(
+    message: string,
+    init: {
+      status: number;
+      operation: 'fetchStories' | 'fetchStory';
+      path?: string;
+      responseBodyPreview?: string;
+    },
+  ) {
+    super(message);
+    this.name = 'StoryblokApiError';
+    this.status = init.status;
+    this.operation = init.operation;
+    this.path = init.path;
+    this.responseBodyPreview = init.responseBodyPreview;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
 interface FetchOptions {
   version?: 'draft' | 'published';
   language?: string;
@@ -40,7 +70,11 @@ export async function fetchStories<T = Record<string, unknown>>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Storyblok API error ${res.status}: ${text}`);
+    throw new StoryblokApiError(`Storyblok CDN request failed (${res.status})`, {
+      status: res.status,
+      operation: 'fetchStories',
+      responseBodyPreview: truncateResponseBody(text),
+    });
   }
 
   return res.json() as Promise<{ stories: StoryblokStoryObject<T>[] }>;
@@ -61,7 +95,12 @@ export async function fetchStory<T = Record<string, unknown>>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Storyblok API error ${res.status}: ${text}`);
+    throw new StoryblokApiError(`Storyblok CDN request failed (${res.status})`, {
+      status: res.status,
+      operation: 'fetchStory',
+      path: normalizedPath,
+      responseBodyPreview: truncateResponseBody(text),
+    });
   }
 
   return res.json() as Promise<{ story: StoryblokStoryObject<T> }>;

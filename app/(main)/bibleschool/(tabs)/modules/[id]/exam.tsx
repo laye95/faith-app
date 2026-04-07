@@ -5,9 +5,9 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { MODULES } from "@/constants/modules";
 import { routes } from "@/constants/routes";
 import { useAuth } from "@/contexts/AuthContext";
+import { useModule } from "@/hooks/useBibleschoolContent";
 import { useLessonUnlocks } from "@/hooks/useLessonUnlocks";
 import { useButtonShadow } from "@/hooks/useShadows";
 import { useTheme } from "@/hooks/useTheme";
@@ -28,12 +28,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  InteractionManager,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
+import { runDeferredTask } from "@/utils/runDeferredTask";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const EXAM_PROGRESS_KEY = (userId: string, moduleId: string) =>
@@ -75,7 +71,7 @@ export default function ExamScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
-  const module = MODULES.find((m) => m.id === id);
+  const { data: storyModule } = useModule(id, locale);
   const {
     isExamUnlocked,
     passedModuleIds,
@@ -86,7 +82,7 @@ export default function ExamScreen() {
   const { data: questions, isLoading: questionsLoading } = useQuery({
     queryKey: ["quizQuestions", id, locale],
     queryFn: () => quizContentService.getQuestionsForModule(id!, locale),
-    enabled: !!id && !!module,
+    enabled: !!id && !!storyModule,
   });
 
   const { data: attempts } = useQuery({
@@ -163,7 +159,7 @@ export default function ExamScreen() {
               (q) => !valid[q.id],
             );
             if (firstUnansweredIndex >= 0) {
-              InteractionManager.runAfterInteractions(() => {
+              runDeferredTask(() => {
                 setTimeout(() => {
                   const top =
                     cardTopsRef.current[firstUnansweredIndex] ??
@@ -314,7 +310,7 @@ export default function ExamScreen() {
   }, [user?.id, id]);
 
   useEffect(() => {
-    if (unlocksLoading || !id || !module || showSuccessScreen) return;
+    if (unlocksLoading || !id || !storyModule || showSuccessScreen) return;
     if (!isExamUnlocked(id)) {
       toast.error(t("exam.unlockHint"));
       router.replace(routes.bibleschoolModule(id));
@@ -329,7 +325,7 @@ export default function ExamScreen() {
     isExamUnlocked,
     passedModuleIds,
     unlocksLoading,
-    module,
+    storyModule,
     showSuccessScreen,
     toast,
     t,
@@ -359,7 +355,7 @@ export default function ExamScreen() {
     t,
   ]);
 
-  if (!module) return null;
+  if (!storyModule) return null;
   if (!unlocksLoading && !isExamUnlocked(id!)) return null;
   if (
     !unlocksLoading &&
@@ -527,19 +523,19 @@ export default function ExamScreen() {
                 introHeightRef.current = e.nativeEvent.layout.height;
               }}
             >
-              {module ? (
+              {storyModule ? (
                 <VStack className="mb-4 items-center px-2">
                   <Text
                     className="text-xs font-semibold uppercase tracking-wider text-center mb-1.5"
                     style={{ color: theme.textSecondary }}
                   >
-                    {t('overview.moduleWithNumber', { number: module.order })}
+                    {t('overview.moduleWithNumber', { number: storyModule.order })}
                   </Text>
                   <Text
                     className="text-lg font-semibold text-center"
                     style={{ color: theme.textPrimary }}
                   >
-                    {t(module.titleKey as never)}
+                    {storyModule.title}
                   </Text>
                 </VStack>
               ) : null}

@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useEffect } from 'react';
-import { InteractionManager } from 'react-native';
 import { queryKeys } from '@/services/queryKeys';
+import { runDeferredTask } from '@/utils/runDeferredTask';
 import {
   pickThumbnailUrlFromPictures,
   vimeoService,
@@ -11,11 +11,12 @@ import type { LessonLike } from '@/types/bibleschool';
 
 function collectVideoIds(
   moduleId: string,
+  firstModuleId: string | undefined,
   lessons: LessonLike[],
   introductionVimeoId: string | undefined,
 ): string[] {
   const ids = new Set<string>();
-  if (moduleId === 'module-1' && introductionVimeoId) {
+  if (firstModuleId && moduleId === firstModuleId && introductionVimeoId) {
     ids.add(introductionVimeoId);
   }
   lessons
@@ -29,8 +30,9 @@ export async function prefetchLessonThumbnailsForModule(
   moduleId: string,
   lessons: LessonLike[],
   introductionVimeoId: string | undefined,
+  firstModuleId: string | undefined,
 ): Promise<void> {
-  const videoIds = collectVideoIds(moduleId, lessons, introductionVimeoId);
+  const videoIds = collectVideoIds(moduleId, firstModuleId, lessons, introductionVimeoId);
   if (videoIds.length === 0) return;
 
   await Promise.all(
@@ -60,21 +62,23 @@ export function usePrefetchLessonThumbnails(
   moduleId: string | undefined,
   lessons: LessonLike[],
   introductionVimeoId: string | undefined,
+  firstModuleId: string | undefined,
 ): void {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!moduleId) return;
 
-    const task = InteractionManager.runAfterInteractions(() => {
+    const task = runDeferredTask(() => {
       prefetchLessonThumbnailsForModule(
         queryClient,
         moduleId,
         lessons,
         introductionVimeoId,
+        firstModuleId,
       );
     });
 
     return () => task.cancel();
-  }, [moduleId, queryClient, introductionVimeoId, lessons]);
+  }, [moduleId, queryClient, introductionVimeoId, lessons, firstModuleId]);
 }

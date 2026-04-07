@@ -61,6 +61,14 @@
     "confirmPasswordRequired": "अपने पासवर्ड की पुष्टि करें",
     "passwordsDoNotMatch": "पासवर्ड मेल नहीं खाते",
     "registrationFailed": "पंजीकरण विफल। कृपया पुनः प्रयास करें।",
+    "profileSetupNotReady": "खाता सेटअप में अपेक्षा से अधिक समय लग रहा है। कृपया कुछ देर बाद पुनः प्रयास करें।",
+    "verifyEmailToContinue": "अपना खाता पुष्टि करने के लिए ईमेल देखें, फिर लॉग इन करें।",
+    "verifyEmailTitle": "अपना ईमेल पुष्टि करें",
+    "verifyEmailBody": "हमने {{email}} पर एक लिंक भेजा है। अपना खाता सक्रिय करने के लिए उसे खोलें, फिर लॉग इन करें।",
+    "resendConfirmationEmail": "पुष्टिकरण ईमेल पुनः भेजें",
+    "resendConfirmationSending": "भेजा जा रहा है...",
+    "resendConfirmationSent": "पुष्टिकरण ईमेल भेज दिया गया।",
+    "resendConfirmationFailed": "ईमेल पुनः नहीं भेजा जा सका। बाद में पुनः प्रयास करें।",
     "invalidCredentials": "अमान्य ईमेल या पासवर्ड। अपना विवरण जांचें या खाता बनाएं।",
     "loginFailed": "लॉगिन विफल। कृपया पुनः प्रयास करें।",
     "next": "अगला",
@@ -78,7 +86,21 @@
     "countryPlaceholder": "वैकल्पिक",
     "countrySearchPlaceholder": "देश खोजें",
     "city": "शहर",
-    "cityPlaceholder": "वैकल्पिक"
+    "cityPlaceholder": "वैकल्पिक",
+    "a11y": {
+      "showPassword": "पासवर्ड दिखाएँ",
+      "hidePassword": "पासवर्ड छिपाएँ",
+      "formHasErrorHint": "फ़ॉर्म के नीचे दिख रही त्रुटि संदेश की जाँच करें।",
+      "opensDatePicker": "तारीख चयनकर्ता खोलता है।",
+      "opensCountryPicker": "देशों की सूची खोलता है।",
+      "dismissSheet": "बंद करने के लिए बाहर टैप करें।",
+      "countryList": "देश",
+      "cycleTheme": "हल्का, गहरा और सिस्टम थीम के बीच बदलने के लिए दो बार टैप करें।",
+      "goToRegister": "पंजीकरण",
+      "goToRegisterHint": "खाता बनाने पर जाएँ",
+      "goToLogin": "लॉग इन",
+      "goToLoginHint": "साइन इन पर जाएँ"
+    }
   },
   "streak": {
     "days": "{{count}} दिन"
@@ -425,5 +447,9 @@
   "lessonsPage": {"title": "पाठ", "empty": "इस मॉड्यूल में कोई पाठ नहीं", "lessonsCount": "{{count}} पाठ", "currentLesson": "वर्तमान पाठ", "otherLessons": "अन्य पाठ", "remaining": "{{count}} मि. बाकी"},
   "handouts": {"title": "हैंडआउट","lesson": "पाठ हैंडआउट","module": "मॉड्यूल हैंडआउट"},
   "quiz": {"title": "मॉड्यूल परीक्षा","examTopBarTitle": "परीक्षा","loading": "परीक्षा लोड हो रही है...","intro": "सभी प्रश्नों के उत्तर दें। उत्तीर्ण होने के लिए कम से कम {{minCorrect}} में से {{total}} सही चाहिए।","submit": "जमा करें","submitError": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।","pass": "बधाई हो! आप उत्तीर्ण हुए।","fail": "अभी नहीं। उत्तीर्ण होने के लिए कम से कम {{minCorrect}} में से {{total}} सही चाहिए।","retry": "पुनः प्रयास करें","answerAll": "कृपया सभी प्रश्नों के उत्तर दें","correct": "सही","incorrect": "गलत","scoreSummary": "{{score}}% - {{correct}}/{{total}} सही","questionProgress": "{{current}} में से {{total}} उत्तर दिया","questionOf": "प्रश्न {{current}} में से {{total}}","submitConfirmTitle": "उत्तर जमा करें?","submitConfirmMessage": "जमा करने के बाद आप उत्तर नहीं बदल सकते।","cancel": "रद्द करें","leaveConfirmTitle": "परीक्षा छोड़ें?","leaveConfirmMessage": "आपकी प्रगति सहेजी गई है।","attemptNumber": "प्रयास {{number}}","continue": "जारी रखें","backToModule": "मॉड्यूल पर वापस जाएं","modules":{"1":{"questions":{"1":{"question":"विश्वास क्या है?","a":"जिसकी हम आशा करते हैं उस पर विश्वास","b":"एक भावना","c":"एक धर्म","d":"एक भावना"},"2":{"question":"विश्वास आता है:","a":"हमारे माता-पिता से","b":"परमेश्वर के वचन सुनने से","c":"शिक्षा से","d":"अनुभव से"},"3":{"question":"विश्वास के बिना असंभव है:","a":"काम करना","b":"आराम करना","c":"परमेश्वर को प्रसन्न करना","d":"खाना"}}}}},
+  "bibleschoolContent": {
+    "loadError": "नवीनतम सामग्री लोड नहीं हो सकी। सहेजा या ऑफ़लाइन डेटा दिखाया जा रहा है।",
+    "retry": "फिर से कोशिश करें"
+  },
   "exam": {"takeExam": "परीक्षा दें","unlockHint": "अनलॉक करने के लिए सभी पाठ पूर्ण करें","readyHint": "सभी पाठ पूर्ण","passed": "परीक्षा उत्तीर्ण","passedHint": "आपने इस मॉड्यूल की परीक्षा पूरी कर ली","failedScore": "{{score}}% - {{correct}}/{{total}} सही","retryHint": "पुनः प्रयास करने के लिए टैप करें","retryHintWithAttempt": "प्रयास {{count}} - पुनः प्रयास करने के लिए टैप करें","alreadyPassed": "आप इस परीक्षा को पहले ही उत्तीर्ण कर चुके हैं"}
 }

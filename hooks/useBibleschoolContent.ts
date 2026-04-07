@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { SupportedLocale } from '@/i18n';
 import { bibleschoolService } from '@/services/storyblok/bibleschoolService';
 import { queryKeys } from '@/services/queryKeys';
+import type { BibleschoolCategory } from '@/types/bibleschool';
 import {
   getFallbackCategory,
   selectLesson,
@@ -15,23 +16,39 @@ const baseOptions = {
   retry: 1,
 };
 
+export function getBibleschoolCategoryQueryOptions(
+  locale: SupportedLocale,
+  t: (key: string) => string,
+) {
+  return {
+    queryKey: queryKeys.bibleschool.category(locale),
+    queryFn: async (): Promise<BibleschoolCategory> => {
+      try {
+        return await bibleschoolService.getBibleschoolCategory(locale);
+      } catch (err) {
+        console.error('[Storyblok] bibleschool category fetch failed', {
+          locale,
+          error: err,
+        });
+        throw err;
+      }
+    },
+    ...baseOptions,
+    placeholderData: (): BibleschoolCategory => getFallbackCategory(t),
+  };
+}
+
+export function useBibleschoolCategoryQuery(locale: SupportedLocale) {
+  const { t } = useTranslation();
+  return useQuery(getBibleschoolCategoryQueryOptions(locale, t));
+}
+
 export function useModules(locale: SupportedLocale) {
   const { t } = useTranslation();
 
   return useQuery({
-    queryKey: queryKeys.bibleschool.category(locale),
-    queryFn: async () => {
-      try {
-        return await bibleschoolService.getBibleschoolCategory(locale);
-      } catch (err) {
-        if (__DEV__)
-          console.error('[useModules] Storyblok failed, using fallback:', err);
-        return getFallbackCategory(t);
-      }
-    },
-    ...baseOptions,
-    placeholderData: () => getFallbackCategory(t),
-    select: (data) => data.modules,
+    ...getBibleschoolCategoryQueryOptions(locale, t),
+    select: (data: BibleschoolCategory) => data.modules,
   });
 }
 
@@ -39,22 +56,8 @@ export function useIntroductionVimeoId(locale: SupportedLocale) {
   const { t } = useTranslation();
 
   return useQuery({
-    queryKey: queryKeys.bibleschool.category(locale),
-    queryFn: async () => {
-      try {
-        return await bibleschoolService.getBibleschoolCategory(locale);
-      } catch (err) {
-        if (__DEV__)
-          console.error(
-            '[useIntroductionVimeoId] Storyblok failed, using fallback:',
-            err,
-          );
-        return getFallbackCategory(t);
-      }
-    },
-    ...baseOptions,
-    placeholderData: () => getFallbackCategory(t),
-    select: (data) => data.introductionVimeoId,
+    ...getBibleschoolCategoryQueryOptions(locale, t),
+    select: (data: BibleschoolCategory) => data.introductionVimeoId,
   });
 }
 
@@ -62,20 +65,10 @@ export function useModule(moduleId: string | undefined, locale: SupportedLocale)
   const { t } = useTranslation();
 
   return useQuery({
-    queryKey: queryKeys.bibleschool.category(locale),
-    queryFn: async () => {
-      try {
-        return await bibleschoolService.getBibleschoolCategory(locale);
-      } catch (err) {
-        if (__DEV__)
-          console.error('[useModule] Storyblok failed, using fallback:', err);
-        return getFallbackCategory(t);
-      }
-    },
-    ...baseOptions,
+    ...getBibleschoolCategoryQueryOptions(locale, t),
     enabled: !!moduleId,
-    placeholderData: () => getFallbackCategory(t),
-    select: (data) => (moduleId ? selectModule(data, moduleId) : null),
+    select: (data: BibleschoolCategory) =>
+      moduleId ? selectModule(data, moduleId) : null,
   });
 }
 
@@ -87,20 +80,9 @@ export function useLesson(
   const { t } = useTranslation();
 
   return useQuery({
-    queryKey: queryKeys.bibleschool.category(locale),
-    queryFn: async () => {
-      try {
-        return await bibleschoolService.getBibleschoolCategory(locale);
-      } catch (err) {
-        if (__DEV__)
-          console.error('[useLesson] Storyblok failed, using fallback:', err);
-        return getFallbackCategory(t);
-      }
-    },
-    ...baseOptions,
+    ...getBibleschoolCategoryQueryOptions(locale, t),
     enabled: !!moduleId && !!lessonId,
-    placeholderData: () => getFallbackCategory(t),
-    select: (data) =>
+    select: (data: BibleschoolCategory) =>
       moduleId && lessonId
         ? selectLesson(data, moduleId, lessonId)
         : null,

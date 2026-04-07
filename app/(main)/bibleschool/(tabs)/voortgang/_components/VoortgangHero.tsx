@@ -1,7 +1,6 @@
 import { Text } from '@/components/ui/text';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from '@/hooks/useTranslation';
-import { TOTAL_LESSONS, MODULES } from '@/constants/modules';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 
@@ -10,6 +9,8 @@ interface VoortgangHeroProps {
   completedCount: number;
   passedModuleCount: number;
   streakDays: number;
+  totalLessons: number;
+  totalModules: number;
 }
 
 interface StatChipProps {
@@ -45,6 +46,8 @@ export function VoortgangHero({
   completedCount,
   passedModuleCount,
   streakDays,
+  totalLessons,
+  totalModules,
 }: VoortgangHeroProps) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -78,7 +81,7 @@ export function VoortgangHero({
       >
         {t('overview.progressCount', {
           completed: completedCount,
-          total: TOTAL_LESSONS,
+          total: totalLessons,
         })}
       </Text>
 
@@ -111,13 +114,13 @@ export function VoortgangHero({
       >
         <StatChip
           icon="book-outline"
-          value={`${completedCount}/${TOTAL_LESSONS}`}
+          value={`${completedCount}/${totalLessons}`}
           label={t('voortgang.lessons')}
         />
         <View style={{ width: 1, backgroundColor: theme.cardBorder }} />
         <StatChip
           icon="ribbon-outline"
-          value={`${passedModuleCount}/${MODULES.length}`}
+          value={`${passedModuleCount}/${totalModules}`}
           label={t('voortgang.modules')}
         />
         <View style={{ width: 1, backgroundColor: theme.cardBorder }} />

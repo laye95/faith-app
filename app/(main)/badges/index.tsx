@@ -18,12 +18,8 @@ import type { Badge as BadgeType, BadgeCategory } from '@/types/badge';
 import { bzzt } from '@/utils/haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  InteractionManager,
-  ScrollView,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
+import { runDeferredTask } from '@/utils/runDeferredTask';
 import { useStreak } from '@/hooks/useStreak';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -347,7 +343,7 @@ export default function BadgesScreen() {
         earned={selectedBadge?.earned ?? false}
         progress={selectedBadge?.progress}
         onClose={() => {
-          InteractionManager.runAfterInteractions(() => {
+          runDeferredTask(() => {
             setSelectedBadge(null);
           });
         }}

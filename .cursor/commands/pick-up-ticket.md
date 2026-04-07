@@ -1,55 +1,22 @@
-# Pick Up Linear Ticket
+# Pick up Linear ticket
 
-When I say "pick up [ticket name or ID]", follow this exact workflow — no shortcuts.
+**Always invoke the skill `picking-up-linear-ticket`.** Full procedure: `.cursor/skills/picking-up-linear-ticket/SKILL.md` in this repo if it exists, else `~/.cursor/skills/picking-up-linear-ticket/SKILL.md`. This command file is only a reminder.
 
-## Workflow
+## Defaults (Faith Generation app)
 
-### 1. Find the Ticket
-- If I gave a ticket ID (e.g. `FAI-23`): call `plugin-linear-linear / get_issue` with that ID
-- If I gave a title or description: call `plugin-linear-linear / list_issues` with search keywords, then confirm the right one with me
+| Setting | Value |
+|--------|--------|
+| Linear team | `Faith Generation` |
+| `list_issues` | pass `team` (and `project` when filtering) |
+| MCP server | `plugin-linear-linear` |
 
-Read the full ticket: title, description, checklist items, and acceptance criteria.
+## Non‑negotiables
 
-### 2. Research the Codebase
-Read every file the ticket mentions or touches. Use Read, Grep, Glob, and SemanticSearch. Do not write a single line of code until you understand the full scope.
+- **`get_issue`** with **`includeRelations: true`** for ticket ID.
+- **Clarify** unclear scope **before** `In Progress` (max 3 questions).
+- **In Progress → implement → verify → completion comment → Done** on **this** issue only; **never** auto-close parent epics when finishing a child.
+- **Comments** on the ticket: **Dutch** (Gestart / Afgerond templates in skill).
 
-### 3. Ask Clarifying Questions (if needed)
-If anything is ambiguous — design decisions, scope, approach — ask me now, before starting. Max 3 focused questions with clear options. Do NOT start if the answer would significantly change the implementation.
+## Pairing
 
-### 4. Set Ticket to In Progress
-```
-save_issue: id = "FAI-XX", state = "In Progress"
-```
-Then immediately post a start comment on the ticket (in Dutch) with:
-- Your plan (bullet per change)
-- Which files you'll touch
-- Your approach (1-2 sentences if non-obvious)
-
-### 5. Implement
-Follow all project rules:
-- Read every file before editing it
-- No TypeScript errors, no unused imports
-- All user-facing strings in **all 5 locale files** (en, nl, bg, hi, id)
-- `useTheme()` for all colors — no hardcoded hex values
-- `t()` for all strings — no hardcoded Dutch or English
-- Max ~250 lines per component
-
-Work through the ticket checklist items one by one.
-
-### 6. Post a Completion Comment
-Post a comment on the ticket (in Dutch) with:
-- What was done (bullet per change)
-- Which files were modified and what changed
-- Any decisions made or follow-ups needed
-
-### 7. Set Ticket to Done
-```
-save_issue: id = "FAI-XX", state = "Done"
-```
-
-## Rules
-- Never skip the In Progress status update
-- Never skip the completion comment
-- Never skip setting Done
-- Always ask before starting if scope is unclear
-- Always fix TypeScript/lint errors before moving to the next file
+Backlog created from research → skill **`linear-backlog-from-research`** / command **`research-then-linear`**.

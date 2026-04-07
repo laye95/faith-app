@@ -14,6 +14,12 @@ import { TouchableOpacity } from 'react-native';
 import { bzzt } from '@/utils/haptics';
 import { OverviewCard } from './OverviewCard';
 
+/** CMS often uses 1-based titles ("Module 1") while `order` is 0-based — avoid "Module 0 Module 1". */
+function moduleTitleStartsWithNumberedLabel(title: string): boolean {
+  const trimmed = title.trim();
+  return /^(Module|Модул|मॉड्यूल)\s*\d+/i.test(trimmed);
+}
+
 export function ContinueLearningCard() {
   const theme = useTheme();
   const { t, locale } = useTranslation();
@@ -25,24 +31,28 @@ export function ContinueLearningCard() {
 
   const { moduleLabel, lessonName } = useMemo(() => {
     const baseModuleLabel = (order: number, title: string) => {
-      const redundant = title && new RegExp(`^Module\\s*${order}\\s*$`, 'i').test(title.trim());
+      const trimmed = title.trim();
+      if (trimmed && moduleTitleStartsWithNumberedLabel(trimmed)) {
+        return trimmed;
+      }
+      const redundant =
+        trimmed && new RegExp(`^Module\\s*${order}\\s*$`, 'i').test(trimmed);
       return redundant
         ? t('overview.moduleWithNumber', { number: order })
-        : t('overview.moduleWithNumber', { number: order }) + (title ? ` ${title}` : '');
+        : t('overview.moduleWithNumber', { number: order }) + (trimmed ? ` ${trimmed}` : '');
     };
     if (!target || !modules?.length) {
-      const modTitle = target ? t(target.module.titleKey as never) : '';
+      const modTitle = target ? target.module.title : '';
       return {
         moduleLabel: target ? baseModuleLabel(target.module.order, modTitle) : '',
-        lessonName: target?.type === 'lesson' ? t(target.lesson.titleKey as never) : '',
+        lessonName: target?.type === 'lesson' ? target.lesson.title : '',
       };
     }
     const mod = modules.find((m) => m.id === target.module.id);
-    const modTitle = mod?.title ?? t(target.module.titleKey as never);
+    const modTitle = mod?.title ?? target.module.title;
     const lesTitle =
       target.type === 'lesson'
-        ? (mod?.lessons.find((l) => l.id === target.lesson.id)?.title ??
-          t(target.lesson.titleKey as never))
+        ? (mod?.lessons.find((l) => l.id === target.lesson.id)?.title ?? target.lesson.title)
         : '';
     return {
       moduleLabel: baseModuleLabel(target.module.order, modTitle),

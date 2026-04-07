@@ -1,4 +1,3 @@
-import { MODULES } from '@/constants/modules';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useModule } from '@/hooks/useBibleschoolContent';

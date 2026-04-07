@@ -61,6 +61,14 @@
     "confirmPasswordRequired": "Confirm your password",
     "passwordsDoNotMatch": "Passwords do not match",
     "registrationFailed": "Registration failed. Please try again.",
+    "profileSetupNotReady": "Account setup is taking longer than expected. Please try again in a moment.",
+    "verifyEmailToContinue": "Check your email to confirm your account, then log in.",
+    "verifyEmailTitle": "Confirm your email",
+    "verifyEmailBody": "We sent a link to {{email}}. Open it to activate your account, then log in.",
+    "resendConfirmationEmail": "Resend confirmation email",
+    "resendConfirmationSending": "Sending...",
+    "resendConfirmationSent": "Confirmation email sent.",
+    "resendConfirmationFailed": "Could not resend the email. Please try again later.",
     "invalidCredentials": "Invalid email or password. Check your details or create an account.",
     "loginFailed": "Login failed. Please try again.",
     "next": "Next",
@@ -78,7 +86,21 @@
     "countryPlaceholder": "Optional",
     "countrySearchPlaceholder": "Search countries",
     "city": "City",
-    "cityPlaceholder": "Optional"
+    "cityPlaceholder": "Optional",
+    "a11y": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "formHasErrorHint": "Check the error message below the form.",
+      "opensDatePicker": "Opens the date picker.",
+      "opensCountryPicker": "Opens the country list.",
+      "dismissSheet": "Tap outside to close.",
+      "countryList": "Countries",
+      "cycleTheme": "Double tap to cycle between light, dark, and system appearance.",
+      "goToRegister": "Register",
+      "goToRegisterHint": "Go to create an account",
+      "goToLogin": "Log in",
+      "goToLoginHint": "Go to sign in"
+    }
   },
   "streak": {
     "days": "{{count}} days"
@@ -425,5 +447,9 @@
   "lessonsPage": {"title": "Lessons", "empty": "No lessons in this module", "lessonsCount": "{{count}} lessons", "currentLesson": "Current lesson", "otherLessons": "Lessons", "remaining": "{{count}} min left"},
   "handouts": {"title": "Handouts","lesson": "Lesson handout","module": "Module handout"},
   "quiz": {"title": "Module Exam","examTopBarTitle": "Exam","loading": "Loading exam...","intro": "Answer all questions. You need at least {{minCorrect}} of {{total}} correct to pass.","submit": "Submit","submitError": "Something went wrong. Please try again.","pass": "Congratulations! You passed.","fail": "Not quite. You need at least {{minCorrect}} of {{total}} correct to pass.","retry": "Try again","answerAll": "Please answer all questions","correct": "Correct","incorrect": "Incorrect","scoreSummary": "{{score}}% - {{correct}}/{{total}} correct","questionProgress": "{{current}} of {{total}} answered","questionOf": "Question {{current}} of {{total}}","submitConfirmTitle": "Submit answers?","submitConfirmMessage": "You cannot change your answers after submitting.","cancel": "Cancel","leaveConfirmTitle": "Leave exam?","leaveConfirmMessage": "Your progress is saved.","attemptNumber": "Attempt {{number}}","continue": "Continue","backToModule": "Back to module","modules":{"1":{"questions":{"1":{"question":"What is faith?","a":"Confidence in what we hope for","b":"A feeling","c":"A religion","d":"An emotion"},"2":{"question":"Faith comes from:","a":"Our parents","b":"Hearing the Word of God","c":"Education","d":"Experience"},"3":{"question":"Without faith it is impossible to:","a":"Work","b":"Rest","c":"Please God","d":"Eat"}}}}},
+  "bibleschoolContent": {
+    "loadError": "Could not load the latest content. Showing saved or offline data.",
+    "retry": "Try again"
+  },
   "exam": {"takeExam": "Take exam","unlockHint": "Complete all lessons to unlock","readyHint": "All lessons completed","passed": "Exam passed","passedHint": "You've completed this module's exam","failedScore": "{{score}}% - {{correct}}/{{total}} correct","retryHint": "Tap to try again","retryHintWithAttempt": "Attempt {{count}} - Tap to try again","alreadyPassed": "You have already passed this exam"}
 }

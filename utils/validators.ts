@@ -8,6 +8,14 @@ export function validateEmail(
   return '';
 }
 
+export function validatePasswordForLogin(
+  value: string,
+  t: (key: string) => string,
+): string {
+  if (!value.trim()) return t('auth.passwordRequired');
+  return '';
+}
+
 export function validatePassword(
   value: string,
   t: (key: string) => string,

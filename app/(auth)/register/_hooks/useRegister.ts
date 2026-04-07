@@ -1,18 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 
-import { routes } from '@/constants/routes';
 import { REGISTRATION_ONBOARDING_SECTIONS } from '@/constants/onboarding';
-import { getErrorMessage } from '@/utils/errors';
-import { getCurrentLanguage, isSupportedLocale } from '@/i18n';
-import { useTranslation } from '@/hooks/useTranslation';
+import { routes } from '@/constants/routes';
 import { THEME_STORAGE_KEY } from '@/contexts/ThemeContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { getCurrentLanguage, isSupportedLocale } from '@/i18n';
 import { authService } from '@/services/api/authService';
-import { userService } from '@/services/api/userService';
+import { isUserProfileNotFoundError, userService } from '@/services/api/userService';
 import { userSettingsService } from '@/services/api/userSettingsService';
+import { queryKeys } from '@/services/queryKeys';
+import { getErrorMessage } from '@/utils/errors';
+import {
+  resolveSessionAfterSignUp,
+  updateUserProfileAfterSignUp,
+  waitForUserProfileRow,
+} from '@/utils/postSignupBootstrap';
 
 export interface RegisterData {
   name: string;
@@ -33,6 +39,7 @@ interface UseRegisterReturn {
 
 export function useRegister(): UseRegisterReturn {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
   const registerMutation = useMutation({
@@ -43,33 +50,42 @@ export function useRegister(): UseRegisterReturn {
         password: data.password,
         fullName: data.name,
       });
-      if (authData?.user?.id) {
-        await userService.updateUser(authData.user.id, {
-          full_name: data.name,
-          phone: data.phone?.trim() || undefined,
-          birthdate: data.birthdate || undefined,
-          country: data.country?.trim() || undefined,
-          city: data.city?.trim() || undefined,
-        });
+      if (!authData?.user?.id) {
+        throw new Error(t('auth.registrationFailed'));
       }
-      return authData;
+      const userId = authData.user.id;
+      await waitForUserProfileRow(userId);
+      await updateUserProfileAfterSignUp(userId, {
+        full_name: data.name,
+        phone: data.phone?.trim() || undefined,
+        birthdate: data.birthdate || undefined,
+        country: data.country?.trim() || undefined,
+        city: data.city?.trim() || undefined,
+      });
+      return {
+        authData,
+        contactEmail: data.email.trim().toLowerCase(),
+      };
     },
-    onSuccess: async (authData) => {
-      if (authData?.user?.id) {
-        const userId = authData.user.id;
-        try {
-          const currentLanguage = getCurrentLanguage();
-          if (isSupportedLocale(currentLanguage)) {
-            await userSettingsService.setSetting(
-              userId,
-              'language',
-              currentLanguage,
-            );
-          }
-        } catch {
-          //
-        }
-        try {
+    onSuccess: async ({ authData, contactEmail }) => {
+      const userId = authData.user?.id;
+      if (!userId) {
+        return;
+      }
+
+      const bestEffort: Promise<unknown>[] = [];
+
+      const currentLanguage = getCurrentLanguage();
+      if (isSupportedLocale(currentLanguage)) {
+        bestEffort.push(
+          userSettingsService
+            .setSetting(userId, 'language', currentLanguage)
+            .catch(() => undefined),
+        );
+      }
+
+      bestEffort.push(
+        (async () => {
           const storedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
           if (
             storedTheme &&
@@ -83,26 +99,59 @@ export function useRegister(): UseRegisterReturn {
               storedTheme,
             );
           }
-        } catch {
-          //
-        }
-        for (const section of REGISTRATION_ONBOARDING_SECTIONS) {
-          try {
-            await userSettingsService.setSetting(
+        })().catch(() => undefined),
+      );
+
+      for (const section of REGISTRATION_ONBOARDING_SECTIONS) {
+        bestEffort.push(
+          userSettingsService
+            .setSetting(
               userId,
               `onboarding_${section}_completed`,
               false,
-            );
-          } catch {
-            //
-          }
-        }
+            )
+            .catch(() => undefined),
+        );
       }
+
+      await Promise.allSettled(bestEffort);
+
+      try {
+        for (const section of REGISTRATION_ONBOARDING_SECTIONS) {
+          await queryClient.invalidateQueries({
+            queryKey: queryKeys.userSettings.onboardingSection(userId, section),
+          });
+        }
+      } catch {
+        //
+      }
+
+      try {
+        await queryClient.prefetchQuery({
+          queryKey: queryKeys.users.detail(userId),
+          queryFn: () => userService.getById(userId),
+        });
+      } catch {
+        //
+      }
+
+      const session = await resolveSessionAfterSignUp(authData.session);
+
+      if (!session) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        router.replace(routes.authVerifyEmail(contactEmail));
+        return;
+      }
+
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/onboarding?section=home' as never);
     },
     onError: async (err: unknown) => {
-      setError(getErrorMessage(err, t('auth.registrationFailed')));
+      if (isUserProfileNotFoundError(err)) {
+        setError(t('auth.profileSetupNotReady'));
+      } else {
+        setError(getErrorMessage(err, t('auth.registrationFailed')));
+      }
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });

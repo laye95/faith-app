@@ -19,46 +19,52 @@ export function useOnboardingSection(section: string): {
   markCompleted: () => Promise<void>;
   isLoading: boolean;
 } {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const queryClient = useQueryClient();
-  const userId = user?.id ?? '';
+  const userId = user?.id ?? session?.user?.id ?? '';
   const settingKey = `onboarding_${section}_completed`;
 
   const { data: onboardingCompleted = null, isPending } = useQuery({
     queryKey: queryKeys.userSettings.onboardingSection(userId, section),
     queryFn: async () => {
-      const row = await userSettingsService.getUserSettings(user!.id);
-      if (!row) return null;
-      const raw = row.settings[settingKey];
+      const raw = await userSettingsService.getSetting<unknown>(
+        userId,
+        settingKey,
+      );
       if (raw === true) return true;
       if (raw === false) return false;
       return null;
     },
-    enabled: !!user?.id,
+    enabled: !!userId,
     staleTime: 60 * 60 * 1000,
     gcTime: 7 * 24 * 60 * 60 * 1000,
   });
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      await userSettingsService.setSetting(user!.id, settingKey, true);
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(
-        queryKeys.userSettings.onboardingSection(userId, section),
-        true,
-      );
-    },
-  });
+  const { mutateAsync: persistCompleted, isPending: isMutationPending } =
+    useMutation({
+      mutationFn: async () => {
+        await userSettingsService.setSetting(userId, settingKey, true);
+      },
+      onSuccess: () => {
+        queryClient.setQueryData(
+          queryKeys.userSettings.onboardingSection(userId, section),
+          true,
+        );
+      },
+    });
 
   const markCompleted = useCallback(async () => {
-    if (!user?.id) return;
-    await mutation.mutateAsync();
-  }, [user?.id, mutation.mutateAsync]);
+    if (!userId) return;
+    await persistCompleted();
+  }, [userId, persistCompleted]);
+
+  const waitingForUserId = !userId;
+  const waitingForSettings = !!userId && isPending;
 
   return {
     onboardingCompleted,
     markCompleted,
-    isLoading: isPending || mutation.isPending,
+    isLoading:
+      waitingForUserId || waitingForSettings || isMutationPending,
   };
 }
